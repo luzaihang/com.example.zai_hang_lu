@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
@@ -10,6 +11,7 @@ import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 
 import '../provider/other_data_provider.dart';
+import '../show_custom_dialog.dart';
 
 class TencentUpLoadAndDownload {
   ///上传
@@ -18,7 +20,8 @@ class TencentUpLoadAndDownload {
     String filename = src.split('/').last; //拿到文件名
 
     ///下方是参数官网提供、推荐，上方是自定义逻辑
-    String cosPath = "${TencentCloudAcquiesceData.contentPrefix}${TencentCloudAcquiesceData.contentName}/$filename"; //对象在存储桶中的位置标识符，即称对象键
+    String cosPath =
+        "${TencentCloudAcquiesceData.contentPrefix}${TencentCloudAcquiesceData.contentName}/$filename"; //对象在存储桶中的位置标识符，即称对象键
     // String cosPath = Uri.encodeFull(string);
     String srcPath = src; //本地文件的绝对路径
 
@@ -59,9 +62,10 @@ class TencentUpLoadAndDownload {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  ///下载,对比账号信息
-  Future<int> download(String spliceAccount) async {
-    /// 状态码 0已注册 1未注册 2其他
+  ///下载,对比账号信息 spliceAccount对比账号信息， isLogin是否是登录页面
+  Future<int> download(
+      String spliceAccount, bool isLogin) async {
+    /// 状态码 0请求登录； 1注册成功，请求登录； 2其他
     int status = 2;
     Completer<int> completer = Completer<int>();
 
@@ -75,13 +79,27 @@ class TencentUpLoadAndDownload {
       }
 
       String fileContent = await file.readAsString();
-      if (fileContent.contains(text)) {
-        status = 0;
+      if (isLogin) {
+        ///如果是登录页面
+        if (fileContent.contains(text)) {
+          status = 0;
+          file.delete();
+        } else {
+          Logger().d("未注册，请先注册");
+          file.delete(); //删除
+        }
       } else {
-        //未注册添加
-        await file.writeAsString(spliceAccount, mode: FileMode.append);
-        status = await upLoading(filePath);
-        file.delete(); //删除
+        ///如果是注册页面
+        if (fileContent.contains(text)) {
+          // status = 0;
+          Logger().d("已有账号，可直接登录");
+          file.delete();
+        } else {
+          //未注册添加
+          await file.writeAsString(spliceAccount, mode: FileMode.append);
+          status = await upLoading(filePath);
+          file.delete(); //删除
+        }
       }
     }
 

@@ -23,7 +23,7 @@ class CreateFolder {
       }
     }
 
-    Uint8List byteArray = Uint8List.fromList("001".codeUnits);
+    Uint8List byteArray = Uint8List.fromList("新创建".codeUnits);
 
     Logger().d(cosPath());
 

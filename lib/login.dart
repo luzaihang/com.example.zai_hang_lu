@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/provider/app_share_data_provider.dart';
 import 'package:zai_hang_lu/create_folder.dart';
+import 'package:zai_hang_lu/show_custom_dialog.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_init.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_list_data.dart';
@@ -110,60 +111,57 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void getText() {
-    Loading().show(context);
-
-    // 检查字段是否为空
-    bool areFieldsNotEmpty(bool isLogin) {
-      return isLogin
-          ? name.isNotEmpty && password.isNotEmpty && cityRegion.isNotEmpty
-          : name.isNotEmpty &&
-              password.isNotEmpty &&
-              notarizePassword.isNotEmpty &&
-              password == notarizePassword &&
-              cityRegion.isNotEmpty;
+  ///登录
+  void getLogin() {
+    if (name.isNotEmpty && password.isNotEmpty && cityRegion.isNotEmpty) {
+      Loading().show(context);
+      verify(true);
+    } else {
+      showCustomDialog(context, "填写未完成");
     }
+  }
 
-    // 更新状态
-    void updateState(bool isNext) {
-      setState(() {
-        next = isNext;
-      });
+  ///注册
+  void getEnroll() {
+    if (name.isNotEmpty &&
+        password.isNotEmpty &&
+        notarizePassword.isNotEmpty &&
+        password == notarizePassword &&
+        cityRegion.isNotEmpty) {
+      Loading().show(context);
+      verify(false);
+    } else {
+      showCustomDialog(context, "填写未完成");
     }
+  }
 
-    bool isNext = areFieldsNotEmpty(isLogin);
+  ///验证信息
+  void verify(bool login) {
+    splice = "name=$name,password=$password|";
+    TencentCloudAcquiesceData.bucket = bucket;
+    TencentCloudAcquiesceData.region = cityRegion;
+    TencentCloudAcquiesceData.contentName = name;
+    tenCentCloudInit.cosXmlServiceConfig();
+    userInfo.writeUserInfo("$name,$password");
 
-    if (isNext) {
-      splice = "name=$name,password=$password|";
-      TencentCloudAcquiesceData.bucket = bucket;
-      TencentCloudAcquiesceData.region = cityRegion;
-      TencentCloudAcquiesceData.contentName = name;
-      tenCentCloudInit.cosXmlServiceConfig();
-      userInfo.writeUserInfo("$name,$password");
-
-      Future.delayed(const Duration(seconds: 1), () async {
-        /// 状态码 0已注册 1未注册 2其他
-        int success = await TencentUpLoadAndDownload().download(splice);
-        if (mounted) {
-          if (success == 0) {
-            Loading().hide();
-            //登录
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (success == 1) {
-            Loading().hide();
-            //注册
-            Logger().i("请检查账号密码，或暂未注册");
-            CreateFolder.getCreateFolder(name, context);
+    Future.delayed(const Duration(seconds: 1), () async {
+      /// 状态码 0请求登录； 1注册成功，请求登录； 2其他
+      int success = await TencentUpLoadAndDownload().download(splice, login);
+      if (mounted) {
+        Loading().hide();
+        if (success == 0) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else if (success == 1) {
+          CreateFolder.getCreateFolder(name, context);
+        } else {
+          if (login) {
+            showCustomDialog(context, "暂未有此账号，请先注册");
           } else {
-            Loading().hide();
-            Logger().e("请检查账号密码，或暂未注册");
-            return;
+            showCustomDialog(context, "已有账号，无需注册");
           }
         }
-      });
-    }
-
-    updateState(isNext);
+      }
+    });
   }
 
   void _showSelectionDrawer(BuildContext context) async {
@@ -206,173 +204,184 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(top: 80),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: '昵称',
-                      counterText: '',
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                            color: Colors.blueGrey,
-                            width: 2.0), // 设置获取焦点时的边框颜色和宽度
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: Container(
+          color: Colors.transparent,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                margin: const EdgeInsets.only(top: 80),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: '昵称',
+                        counterText: '',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                              color: Colors.blueGrey,
+                              width: 2.0), // 设置获取焦点时的边框颜色和宽度
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                              color: Colors.grey, width: 1.0), // 设置默认边框颜色和宽度
+                        ),
+                        floatingLabelStyle: const TextStyle(
+                          color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
+                        ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                            color: Colors.grey, width: 1.0), // 设置默认边框颜色和宽度
-                      ),
-                      floatingLabelStyle: const TextStyle(
-                        color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
-                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\u4e00-\u9fa5]')),
+                      ],
+                      maxLength: 8,
+                      onChanged: (str) {
+                        name = str;
+                      },
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'[a-zA-Z\u4e00-\u9fa5]')),
-                    ],
-                    maxLength: 8,
-                    onChanged: (str) {
-                      name = str;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      labelText: '密码',
-                      counterText: '',
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                            color: Colors.blueGrey,
-                            width: 2.0), // 设置获取焦点时的边框颜色和宽度
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        labelText: '密码',
+                        counterText: '',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                              color: Colors.blueGrey,
+                              width: 2.0), // 设置获取焦点时的边框颜色和宽度
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                              color: Colors.grey, width: 1.0), // 设置默认边框颜色和宽度
+                        ),
+                        floatingLabelStyle: const TextStyle(
+                          color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
+                        ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(
-                            color: Colors.grey, width: 1.0), // 设置默认边框颜色和宽度
-                      ),
-                      floatingLabelStyle: const TextStyle(
-                        color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
-                      ),
+                      maxLength: 15,
+                      obscureText: true,
+                      onChanged: (str) {
+                        password = str;
+                        Logger().d(password);
+                      },
                     ),
-                    maxLength: 15,
-                    obscureText: true,
-                    onChanged: (str) {
-                      password = str;
-                      Logger().d(password);
-                    },
-                  ),
-                  !isLogin
-                      ? Container(
-                          margin: const EdgeInsets.only(top: 20),
-                          child: TextField(
-                            controller: notarizePasswordController,
-                            decoration: InputDecoration(
-                              labelText: '确认密码',
-                              counterText: '',
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                    color: Colors.blueGrey,
-                                    width: 2.0), // 设置获取焦点时的边框颜色和宽度
+                    !isLogin
+                        ? Container(
+                            margin: const EdgeInsets.only(top: 20),
+                            child: TextField(
+                              controller: notarizePasswordController,
+                              decoration: InputDecoration(
+                                labelText: '确认密码',
+                                counterText: '',
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                      color: Colors.blueGrey,
+                                      width: 2.0), // 设置获取焦点时的边框颜色和宽度
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 1.0), // 设置默认边框颜色和宽度
+                                ),
+                                floatingLabelStyle: const TextStyle(
+                                  color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
+                                ),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                    color: Colors.grey,
-                                    width: 1.0), // 设置默认边框颜色和宽度
-                              ),
-                              floatingLabelStyle: const TextStyle(
-                                color: Colors.blueGrey, // 设置获取焦点时的labelText颜色
-                              ),
+                              maxLength: 15,
+                              obscureText: true,
+                              onChanged: (str) {
+                                notarizePassword = str;
+                              },
                             ),
-                            maxLength: 15,
-                            obscureText: true,
-                            onChanged: (str) {
-                              notarizePassword = str;
-                            },
-                          ),
-                        )
-                      : Container(),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () => _showSelectionDrawer(context),
-                    child: AbsorbPointer(
-                      child: TextField(
-                        controller: cityController,
-                        readOnly: true, // 确保文本框是只读的
-                        decoration: InputDecoration(
-                          hintText: '选择临近城市',
-                          suffixIcon: const Icon(Icons.arrow_drop_down),
-                          // 添加下拉箭头图标
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(12, 20, 12, 20),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                                color: Colors.grey, width: 1.0), // 设置默认边框颜色和宽度
+                          )
+                        : Container(),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () => _showSelectionDrawer(context),
+                      child: AbsorbPointer(
+                        child: TextField(
+                          controller: cityController,
+                          readOnly: true, // 确保文本框是只读的
+                          decoration: InputDecoration(
+                            hintText: '选择临近城市',
+                            suffixIcon: const Icon(Icons.arrow_drop_down),
+                            // 添加下拉箭头图标
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(12, 20, 12, 20),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                  color: Colors.grey,
+                                  width: 1.0), // 设置默认边框颜色和宽度
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+              // const SizedBox(height: 20),
+              Column(
+                children: [
+                  Consumer<AppShareDataProvider>(
+                    builder: (BuildContext context, provider, Widget? child) {
+                      return GestureDetector(
+                        onTap: () => isLogin ? getLogin() : getEnroll(),
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(horizontal: 45),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 11),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.blue.withOpacity(0.6),
+                          ),
+                          child: Text(
+                            isLogin ? '登录' : "注册",
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
+                  const SizedBox(height: 40),
+                  GestureDetector(
+                    onTap: () {
+                      switchoverLogin();
+                    },
+                    child: Text(
+                      isLogin ? '未有账号？注册' : "已有账号，登录",
+                      style: TextStyle(
+                        color: Colors.blue.withOpacity(0.6),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
-            ),
-            // const SizedBox(height: 20),
-            Column(
-              children: [
-                Consumer<AppShareDataProvider>(
-                  builder: (BuildContext context, provider, Widget? child) {
-                    return GestureDetector(
-                      onTap: () => getText(),
-                      child: Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.symmetric(horizontal: 45),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 11),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.blue.withOpacity(0.6),
-                        ),
-                        child: Text(
-                          isLogin ? '登录' : "注册",
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 40),
-                GestureDetector(
-                  onTap: () {
-                    switchoverLogin();
-                  },
-                  child: Text(
-                    isLogin ? '未有账号？注册' : "已有账号，登录",
-                    style: TextStyle(
-                      color: Colors.blue.withOpacity(0.6),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
