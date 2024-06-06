@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:zai_hang_lu/factory_list/home_list_data.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:http/http.dart' as http;
 
 ///获取列表
 class TencentCloudListData {
-  static Future<List<String>?> getContentsList() async {
+  static Future<List<UserPost>?> getContentsList() async {
+    List<UserPost> decodedMaps = [];
     try {
       BucketContents bucketContents = await Cos().getDefaultService().getBucket(
             TencentCloudAcquiesceData.postTextBucket,
@@ -20,7 +25,31 @@ class TencentCloudListData {
         return "https://${TencentCloudAcquiesceData.postTextBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${object?.key}";
       }).toList();
 
-      return objectUrls;
+      for (String element in objectUrls) {
+        try {
+          final response = await http.get(Uri.parse(element));
+
+          if (response.statusCode == 200) {
+            // 获取ResponseBody的字节列表
+            List<int> bytes = response.bodyBytes;
+
+            // 第一步：将 Uint8List 转换为 JSON 字符串
+            String decodedJsonString = utf8.decode(bytes);
+            if (decodedJsonString.trim().isNotEmpty) {
+              // 第二步：将 JSON 字符串解码为 Map
+              Map<String, dynamic> decodedMap = json.decode(decodedJsonString);
+              UserPost userPost = UserPost.fromJson(decodedMap);
+              decodedMaps.add(userPost);
+            }
+          } else {}
+        } catch (e) {
+          Logger().e("$e-----------txt异常");
+        }
+      }
+
+      Logger().d(decodedMaps);
+
+      return decodedMaps;
     } catch (e) {
       Logger().e("$e------------error");
     }

@@ -2,14 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:zai_hang_lu/permission_handler.dart';
-
-import 'image_saver.dart';
+import '../image_saver.dart';
 
 class GalleryPhotoView extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
 
+  ///查看大图
   const GalleryPhotoView(
       {super.key, required this.imageUrls, required this.initialIndex});
 
@@ -59,7 +58,10 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
   }
 }
 
-void getShowBottomSheet(BuildContext context, String url, ) {
+void getShowBottomSheet(
+  BuildContext context,
+  String url,
+) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {

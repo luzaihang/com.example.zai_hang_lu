@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zai_hang_lu/app_data/app_share_data_provider.dart';
-import 'package:zai_hang_lu/app_routes.dart';
 import 'package:zai_hang_lu/route_generator.dart';
-import 'login_page.dart';
+import 'routes_widgets/login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,9 +23,9 @@ class MyApp extends StatelessWidget {
         ),
         debugShowCheckedModeBanner: false,
         // initialRoute: AppRoutes.splash,
-        routes: AppRoutes.getRoutes(),
+        // routes: AppRoutes.getRoutes(),
         // 使用封装好的路由生成器
-        onGenerateRoute: RouteGenerator.generateRoute,
+        onGenerateRoute: generateRoute,
         builder: (context, child) {
           return ScrollConfiguration(
             behavior: NoWaveScrollBehavior(),

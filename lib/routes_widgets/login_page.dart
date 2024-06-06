@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_init.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
+
+import '../app_data/show_custom_snackBar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,7 +50,6 @@ class LoginScreenState extends State<LoginScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString("username", username);
     await prefs.setString("password", password);
-    Logger().d("Username saved in cache: $username");
   }
 
   @override
@@ -148,15 +150,15 @@ class LoginScreenState extends State<LoginScreen> {
     String user = "userName=$userName,password=$password";
 
     if (userName.isEmpty) {
-      _showMessage('账号不能为空');
+      showCustomSnackBar(context, "账号不能为空");
       return;
     }
     if (password.isEmpty) {
-      _showMessage('密码不能为空');
+      showCustomSnackBar(context, "密码不能为空");
       return;
     }
     if (!_isChecked) {
-      _showMessage('请同意用户协议和隐私政策');
+      showCustomSnackBar(context, "请同意用户协议和隐私政策");
       return;
     }
 
@@ -165,16 +167,12 @@ class LoginScreenState extends State<LoginScreen> {
       if (mounted) Navigator.pushNamed(context, "/home");
     } else {
       String upLoadText = "$info$user|";
-      if(mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+      if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
     }
+
+    UserInfoConfig.userName = userName;
 
     // 登录成功后保存账号和密码
     _saveLoginInfo(userName, password);
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
   }
 }

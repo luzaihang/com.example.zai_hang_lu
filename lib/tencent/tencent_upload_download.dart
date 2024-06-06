@@ -12,7 +12,7 @@ import 'package:http/http.dart' as http;
 
 class TencentUpLoadAndDownload {
   ///图片上传
-  static void imageUpLoad(String imagePath) async {
+  Future<bool> imageUpLoad(String imagePath, {PostContentData? postContentData}) async {
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
     String filename = imagePath.split('/').last; //拿到原始文件名
 
@@ -22,14 +22,23 @@ class TencentUpLoadAndDownload {
 
     String? uploadId; //若存在初始化分块上传的 UploadId，则赋值对应的 uploadId 值用于续传；否则，赋值 null
 
+    Completer<bool> completer = Completer<bool>();
+
     // 上传成功回调
     successCallBack(result) {
       Logger().i("todo 文件上传成功");
+      String path =
+          "https://${TencentCloudAcquiesceData.postImageBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/$cosPath";
+      postContentData?.addToPostImagePaths(path); //记录上传到哪个位置，已便其他bucket使用
+      Logger().d(path);
+      Logger().d("=================${postContentData?.uploadedImagePaths}");
+      completer.complete(true);
     }
 
     //上传失败回调
     failCallBack(clientException, serviceException) {
       Logger().e("todo 文件上传失败");
+      completer.complete(false);
     }
 
     //上传状态回调, 可以查看任务过程
@@ -53,6 +62,8 @@ class TencentUpLoadAndDownload {
       initMultipleUploadCallback: initMultipleUploadCallback,
     );
     transferTask.resume();
+
+    return completer.future;
   }
 
   ///帖子文本上传
@@ -71,12 +82,12 @@ class TencentUpLoadAndDownload {
 
     // 上传成功回调
     successCallBack(result) {
-      Logger().i("todo 文件上传成功");
+      Logger().i("txt 文件上传成功");
     }
 
     //上传失败回调
     failCallBack(clientException, serviceException) {
-      Logger().e("todo 文件上传失败");
+      Logger().e("txt 文件上传失败");
     }
 
     //上传状态回调, 可以查看任务过程

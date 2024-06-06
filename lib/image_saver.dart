@@ -6,9 +6,6 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
-
-import 'package:zai_hang_lu/permission_handler.dart';
 
 class ImageSaver {
   // 静态方法，可以从任何地方调用
