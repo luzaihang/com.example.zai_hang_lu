@@ -1,10 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
-import 'package:zai_hang_lu/gallery_photo_view.dart';
-import '../app_routes.dart';
-import '../provider/other_data_provider.dart';
-import '../pull_to_refresh_list_view.dart';
+import 'package:zai_hang_lu/app_data/other_data_provider.dart';
+import 'package:zai_hang_lu/routes_widgets/post_widget.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 import 'image_picker_photos.dart';
 
@@ -22,8 +18,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   int dex = 0;
 
-  ///图片 objectUrls
-  List<String>? objectUrls;
+  ///图片列表
+  List<String>? imageFiles;
+
+  ///文件夹列表
+  List<String>? directories;
 
   ///底部抽屉
   late AnimationController _controllerDrawer;
@@ -35,16 +34,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    obj();
+    _onRefresh();
     _drawerInit();
     _uploadInit();
     _uploadToggle();
     super.initState();
-  }
-
-  Future<void> obj() async {
-    objectUrls = await tencentCloudListData.getContentsList();
-    setState(() {});
   }
 
   void _uploadInit() {
@@ -105,7 +99,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _onRefresh() async {
-    objectUrls = await tencentCloudListData.getContentsList();
+    List<String>? result = await TencentCloudListData.getContentsList();
+    directories = result;
+
     setState(() {});
   }
 
@@ -134,7 +130,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 scale: _animationDrawer,
                 alignment: Alignment.center,
                 child: FloatingActionButton(
-                  onPressed: () async {},
+                  onPressed: () async {
+                    Navigator.pushNamed(context, "/editPostPage");
+                  },
                   child: const Icon(Icons.refresh_sharp),
                 ),
               ),
@@ -153,91 +151,78 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  final List<Map<String, dynamic>> posts = [
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message': '32了，有没有95前的？',
+      'images': [
+        'assets/directories_icon.png',
+        'assets/directories_icon.png',
+        'assets/directories_icon.png',
+        'assets/directories_icon.png',
+      ],
+    },
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message': '32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？',
+      'images': [
+        'assets/directories_icon.png',
+        'assets/directories_icon.png',
+        'assets/directories_icon.png',
+      ],
+    },
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message': '32了，有没有95前的？',
+      'images': ['assets/directories_icon.png', 'assets/directories_icon.png'],
+    },
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message': '32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？',
+      'images': ['assets/directories_icon.png', 'assets/directories_icon.png'],
+    },
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message': '32了，有没有95前的？',
+      'images': ['assets/directories_icon.png', 'assets/directories_icon.png'],
+    },
+    {
+      'username': '明知山有虎',
+      'postTime': '41秒以前推荐',
+      'location': '云南',
+      'message':
+          '32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？32了，有没有95前的？',
+      'images': ['assets/directories_icon.png'],
+    },
+    // Add more posts here
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: floatingAction(),
-      body: Stack(
-        children: [
-          objectUrls != null && objectUrls!.isNotEmpty
-              ? PullToRefreshListView(
-                  onRefresh: _onRefresh,
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3, // 每行展示3个图片
-                      // mainAxisSpacing: 12.0, // 主轴方向的间距
-                      crossAxisSpacing: 6.0, // 交叉轴方向的间距
-                      childAspectRatio: 1, // 宽高比1:1
-                    ),
-                    itemCount: objectUrls!.length,
-                    itemBuilder: (context, index) {
-                      bool isFirstRow = index < 3;
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.galleryPhotoView,
-                            arguments: GalleryPhotoViewArgs(
-                              objectUrls!,
-                              index,
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.only(top: isFirstRow ? 0 : 6.0),
-                          // 如果是第一行，top 间距为 0
-                          child: CachedNetworkImage(
-                            imageUrl: objectUrls![index],
-                            placeholder: (context, url) => Container(),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                )
-              : PullToRefreshListView(
-                  onRefresh: _onRefresh,
-                  child: ListView(
-                    children: [
-                      Container(
-                        color: Colors.transparent,
-                        height: MediaQuery.of(context).size.height,
-                        child: Center(
-                          child: Image.asset("assets/no_file.png",
-                          height: 80,),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-          SlideTransition(
-            position: _animationUpload,
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              margin: const EdgeInsets.only(top: 45.0),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.cloud_upload_rounded),
-                  const SizedBox(width: 16),
-                  Text(
-                    "正在上传$dex...",
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: ListView.builder(
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          final post = posts[index];
+          return PostWidget(
+            username: post['username'],
+            postTime: post['postTime'],
+            location: post['location'],
+            message: post['message'],
+            images: post['images'],
+          );
+        },
       ),
     );
   }

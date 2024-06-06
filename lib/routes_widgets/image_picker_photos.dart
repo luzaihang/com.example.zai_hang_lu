@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:zai_hang_lu/app_data/other_data_provider.dart';
 
-import '../provider/other_data_provider.dart';
 import '../tencent/tencent_cloud_acquiesce_data.dart';
 import '../tencent/tencent_upload_download.dart';
 
 class ImagePickerPhotos {
-  TencentUpLoadAndDownload tencentUpLoadAndDownload =
-      TencentUpLoadAndDownload();
+  // TencentUpLoadAndDownload tencentUpLoadAndDownload =
+  //     TencentUpLoadAndDownload();
 
   ///选择图片
   Future<void> loadAssets(
@@ -59,7 +59,7 @@ class ImagePickerPhotos {
         String path = await getImageFilePath(asset);
 
         ///上传至腾讯云cos
-        tencentUpLoadAndDownload.upLoad(path, otherDataProvider);
+        // tencentUpLoadAndDownload.upLoad(path, otherDataProvider);
       }
     } on Exception catch (e) {
       Logger().e("图片选择出错--------------$e");

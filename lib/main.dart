@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:zai_hang_lu/app_data/app_share_data_provider.dart';
 import 'package:zai_hang_lu/app_routes.dart';
-import 'package:zai_hang_lu/provider/app_share_data_provider.dart';
-import 'package:zai_hang_lu/provider/other_data_provider.dart';
-import 'package:zai_hang_lu/create_folder.dart';
 import 'package:zai_hang_lu/route_generator.dart';
-
-import 'gallery_photo_view.dart';
-import 'login.dart';
+import 'login_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +17,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppShareDataProvider()),
-        // ChangeNotifierProvider(create: (_) => OtherDataProvider())
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -38,7 +33,7 @@ class MyApp extends StatelessWidget {
             child: child!,
           );
         },
-        home: const LoginPage(),
+        home: const LoginScreen(),
       ),
     );
   }

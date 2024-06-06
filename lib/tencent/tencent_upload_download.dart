@@ -1,41 +1,34 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:math';
-
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
+import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
-
-import '../provider/other_data_provider.dart';
-import '../show_custom_dialog.dart';
+import 'package:http/http.dart' as http;
 
 class TencentUpLoadAndDownload {
-  ///上传
-  void upLoad(String src, OtherDataProvider otherDataProvider) async {
+  ///图片上传
+  static void imageUpLoad(String imagePath) async {
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
-    String filename = src.split('/').last; //拿到文件名
+    String filename = imagePath.split('/').last; //拿到原始文件名
 
-    ///下方是参数官网提供、推荐，上方是自定义逻辑
-    String cosPath =
-        "${TencentCloudAcquiesceData.contentPrefix}${TencentCloudAcquiesceData.contentName}/$filename"; //对象在存储桶中的位置标识符，即称对象键
-    // String cosPath = Uri.encodeFull(string);
-    String srcPath = src; //本地文件的绝对路径
+    //提交到bucket的路径,帖子ID为文件夹的昵称
+    String cosPath = "${PostContentData.postID}/$filename";
+    String srcPath = imagePath; //本地文件的绝对路径
 
     String? uploadId; //若存在初始化分块上传的 UploadId，则赋值对应的 uploadId 值用于续传；否则，赋值 null
 
     // 上传成功回调
     successCallBack(result) {
-      otherDataProvider.getUploadCount();
       Logger().i("todo 文件上传成功");
     }
 
     //上传失败回调
     failCallBack(clientException, serviceException) {
-      otherDataProvider.getUploadCount();
       Logger().e("todo 文件上传失败");
     }
 
@@ -50,59 +43,67 @@ class TencentUpLoadAndDownload {
 
     //开始上传
     TransferTask transferTask = await transferManager.upload(
-        TencentCloudAcquiesceData.bucket!, cosPath,
-        filePath: srcPath,
-        uploadId: uploadId,
-        resultListener: ResultListener(successCallBack, failCallBack),
-        stateCallback: stateCallback,
-        progressCallBack: progressCallBack,
-        initMultipleUploadCallback: initMultipleUploadCallback);
+      TencentCloudAcquiesceData.postImageBucket,
+      cosPath,
+      filePath: srcPath,
+      uploadId: uploadId,
+      resultListener: ResultListener(successCallBack, failCallBack),
+      stateCallback: stateCallback,
+      progressCallBack: progressCallBack,
+      initMultipleUploadCallback: initMultipleUploadCallback,
+    );
     transferTask.resume();
   }
 
-  //////////////////////////////////////////////////////////////////////////////
+  ///帖子文本上传
+  static void postTextUpLoad(Map map) async {
+    CosTransferManger transferManager = Cos().getDefaultTransferManger();
 
-  ///下载,对比账号信息 spliceAccount对比账号信息， isLogin是否是登录页面
-  Future<int> download(
-      String spliceAccount, bool isLogin) async {
-    /// 状态码 0请求登录； 1注册成功，请求登录； 2其他
-    int status = 2;
-    Completer<int> completer = Completer<int>();
+    //提交到bucket的路径
+    String cosPath = "${PostContentData.postID}.txt";
 
-    /// 读取、写入、删除文件
-    Future<void> readWriteAndDeleteFile(String filePath, String text) async {
-      // 读取文件
-      File file = File(filePath);
-      if (!await file.exists()) {
-        Logger().i("文件不存在-------------");
-        return;
-      }
+    // 将map转换为JSON字符串
+    String jsonString = json.encode(map);
+    // 将JSON字符串转换为Uint8List
+    Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
-      String fileContent = await file.readAsString();
-      if (isLogin) {
-        ///如果是登录页面
-        if (fileContent.contains(text)) {
-          status = 0;
-          file.delete();
-        } else {
-          Logger().d("未注册，请先注册");
-          file.delete(); //删除
-        }
-      } else {
-        ///如果是注册页面
-        if (fileContent.contains(text)) {
-          // status = 0;
-          Logger().d("已有账号，可直接登录");
-          file.delete();
-        } else {
-          //未注册添加
-          await file.writeAsString(spliceAccount, mode: FileMode.append);
-          status = await upLoading(filePath);
-          file.delete(); //删除
-        }
-      }
+    String? uploadId; //若存在初始化分块上传的 UploadId，则赋值对应的 uploadId 值用于续传；否则，赋值 null
+
+    // 上传成功回调
+    successCallBack(result) {
+      Logger().i("todo 文件上传成功");
     }
 
+    //上传失败回调
+    failCallBack(clientException, serviceException) {
+      Logger().e("todo 文件上传失败");
+    }
+
+    //上传状态回调, 可以查看任务过程
+    stateCallback(state) {}
+    //上传进度回调
+    progressCallBack(complete, target) {}
+    //初始化分块完成回调
+    initMultipleUploadCallback(String bucket, String cosKey, String uploadId) {
+      uploadId = uploadId;
+    }
+
+    //开始上传
+    TransferTask transferTask = await transferManager.upload(
+      TencentCloudAcquiesceData.postTextBucket,
+      cosPath,
+      byteArr: byte,
+      uploadId: uploadId,
+      resultListener: ResultListener(successCallBack, failCallBack),
+      stateCallback: stateCallback,
+      progressCallBack: progressCallBack,
+      initMultipleUploadCallback: initMultipleUploadCallback,
+    );
+    transferTask.resume();
+  }
+
+  ///下载,对比账号信息 spliceAccount对比账号信息
+  /*static void download(String spliceAccount) async {
     Future<String> getLocalPath() async {
       final directory = await getApplicationDocumentsDirectory();
       return directory.path;
@@ -110,22 +111,20 @@ class TencentUpLoadAndDownload {
 
     String localPath = await getLocalPath();
 
-    ///下方是参数官网提供、推荐，上方是自定义逻辑
+    //https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/user_info.txt
+
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
     String cosPath = "name_password.txt"; //对象在存储桶中的位置标识符，即称对象键
     String downloadPath = "$localPath/$cosPath"; //保存到本地文件的绝对路径
 
-    Logger().d(downloadPath);
     // 下载成功回调
     Future<void> successCallBack(result) async {
       Logger().i("下载成功-------------");
-      await readWriteAndDeleteFile(downloadPath, spliceAccount);
-      completer.complete(status);
     }
 
     //下载失败回调
     void failCallBack(clientException, serviceException) {
-      completer.complete(status);
+      Logger().i("下载失败-------------");
     }
 
     //下载状态回调, 可以查看任务过程
@@ -135,54 +134,75 @@ class TencentUpLoadAndDownload {
 
     //开始下载
     TransferTask transferTask = await transferManager.download(
-        TencentCloudAcquiesceData.bucket!, cosPath, downloadPath,
-        resultListener: ResultListener(successCallBack, failCallBack),
-        stateCallback: stateCallback,
-        progressCallBack: progressCallBack);
+      TencentCloudAcquiesceData.userInfoBucket,
+      cosPath,
+      downloadPath,
+      resultListener: ResultListener(successCallBack, failCallBack),
+      stateCallback: stateCallback,
+      progressCallBack: progressCallBack,
+    );
 
     transferTask.resume();
+  }*/
 
-    return completer.future;
+  ///这里上传的是保存新用户的信息
+  static void userUpLoad(BuildContext context, String userText) async {
+    CosTransferManger transferManager = Cos().getDefaultTransferManger();
+
+    String cosPath = "user_info.txt"; // 对象在存储桶中的位置标识符，即称对象键
+
+    // 将字符串转换
+    // Uint8List byte = Uint8List.fromList(utf8.encode(userText));
+    Uint8List byte = utf8.encode(userText) as Uint8List;
+
+    // 上传成功回调
+    successCallBack(result) {
+      Navigator.pushNamed(context, "/home");
+      Logger().i("todo 上传新用户成功");
+    }
+
+    // 上传失败回调
+    failCallBack(clientException, serviceException) {
+      Logger().e("todo 上传新用户失败");
+    }
+
+    //开始上传
+    TransferTask transferTask = await transferManager.upload(
+      TencentCloudAcquiesceData.userInfoBucket,
+      cosPath,
+      byteArr: byte,
+      resultListener: ResultListener(successCallBack, failCallBack),
+    );
+    transferTask.resume();
   }
-}
 
-////////////////////////////////////////////////////////////////////////////////
-///这里上传的是保存新用户的休息
-Future<int> upLoading(String src) async {
-  CosTransferManger transferManager = Cos().getDefaultTransferManger();
+  static Future<String> userInfoTxt() async {
+    const url =
+        'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/user_info.txt';
+    try {
+      final response = await http.get(Uri.parse(url));
 
-  ///下方是参数官网提供、推荐，上方是自定义逻辑
-  String cosPath = "name_password.txt"; // 对象在存储桶中的位置标识符，即称对象键
-  String srcPath = src; // 本地文件的绝对路径
+      if (response.statusCode == 200) {
+        // 获取ResponseBody的字节列表
+        List<int> bytes = response.bodyBytes;
+        // 解码字节列表为UTF-8字符串
+        String info = utf8.decode(bytes);
 
-  // 创建一个Completer，用于等待上传完成的结果
-  final Completer<int> completer = Completer<int>();
+        if (info.trim().isEmpty) {
+          return '';
+        }
 
-  // 上传成功回调
-  successCallBack(result) {
-    Logger().i("todo 上传新用户成功");
-    if (!completer.isCompleted) {
-      completer.complete(1); // 上传成功返回1
+        Logger().d(info);
+        return info;
+      } else {
+        // 请求失败
+        Logger().d("-----------txt异常");
+        return '';
+      }
+    } catch (e) {
+      // 异常处理
+      Logger().e("$e-----------txt异常");
+      return '';
     }
   }
-
-  // 上传失败回调
-  failCallBack(clientException, serviceException) {
-    Logger().e("todo 上传新用户失败");
-    if (!completer.isCompleted) {
-      completer.complete(2); // 上传失败返回0
-    }
-  }
-
-  //开始上传
-  TransferTask transferTask = await transferManager.upload(
-    TencentCloudAcquiesceData.bucket!,
-    cosPath,
-    filePath: srcPath,
-    resultListener: ResultListener(successCallBack, failCallBack),
-  );
-  transferTask.resume();
-
-  // 返回Completer的future，等待处理结果
-  return completer.future;
 }
