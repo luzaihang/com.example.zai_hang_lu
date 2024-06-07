@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 
 class RandomGenerator {
   static final Random _rnd = Random();
@@ -20,5 +23,25 @@ class RandomGenerator {
         List.generate(4, (_) => getRandomLetter());
     parts.shuffle(_rnd); // 打乱组合顺序
     return parts.join();
+  }
+
+  ///获取网络时间
+  static Future<String> fetchNetworkTime() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://worldtimeapi.org/api/timezone/Etc/UTC'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        String networkTime = data['utc_datetime'];
+        return networkTime;
+      } else {
+        return "";
+      }
+    } catch (e) {
+      Logger().e('Error: $e');
+      return "";
+    }
+    return "";
   }
 }

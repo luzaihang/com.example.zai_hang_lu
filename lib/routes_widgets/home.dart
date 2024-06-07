@@ -17,6 +17,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   ///文件列表
   List<UserPost> directories = [];
 
+  TencentCloudListData tencentCloudListData = TencentCloudListData();
+
   @override
   void initState() {
     _onRefresh();
@@ -25,16 +27,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _onRefresh() async {
     Logger().d(directories.length);
-    List<UserPost>? result = await TencentCloudListData.getContentsList();
+    List<UserPost>? result = await tencentCloudListData.getFirstContentsList();
     directories = result ?? [];
 
     setState(() {});
   }
 
   Future<void> _onLoadMore() async {
-    // List<UserPost>? result = await TencentCloudListData.getMoreContentsList();
-    // directories.addAll(result);
-    // setState(() {});
+    List<UserPost>? result = await tencentCloudListData.getNextContentsList();
+    directories.addAll(result ?? []);
+
+    setState(() {});
   }
 
   String formatDateTimeToMinutes(DateTime dateTime) {
@@ -64,7 +67,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Navigator.pushNamed(context, "/editPostPage");
         },
         mini: true,
-        child: const Icon(Icons.mail),
+        heroTag: 'homePageFloatingActionButton',
+        child: const Icon(Icons.edit_calendar_rounded),
       ),
       appBar: AppBar(
         backgroundColor: Colors.blueGrey,
@@ -72,11 +76,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         title: null, // 不显示标题
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              // 在这里处理个人中心按钮的点击事件
-              // print('个人中心按钮点击');
-            },
+            icon: const Icon(Icons.mail_outline_rounded),
+            onPressed: () {},
           ),
         ],
       ),

@@ -7,12 +7,14 @@ import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
 import 'package:zai_hang_lu/app_data/post_content_data.dart';
+import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:http/http.dart' as http;
 
 class TencentUpLoadAndDownload {
   ///图片上传
-  Future<bool> imageUpLoad(String imagePath, {PostContentData? postContentData}) async {
+  Future<bool> imageUpLoad(String imagePath,
+      {PostContentData? postContentData}) async {
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
     String filename = imagePath.split('/').last; //拿到原始文件名
 
@@ -67,7 +69,7 @@ class TencentUpLoadAndDownload {
   }
 
   ///帖子文本上传
-  static void postTextUpLoad(Map map) async {
+  static void postTextUpLoad(BuildContext context, Map map) async {
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
 
     //提交到bucket的路径
@@ -82,6 +84,8 @@ class TencentUpLoadAndDownload {
 
     // 上传成功回调
     successCallBack(result) {
+      Loading().hide();
+      if (context.mounted) Navigator.pop(context);
       Logger().i("txt 文件上传成功");
     }
 
@@ -168,6 +172,7 @@ class TencentUpLoadAndDownload {
 
     // 上传成功回调
     successCallBack(result) {
+      Loading().hide();
       Navigator.pushNamed(context, "/home");
       Logger().i("todo 上传新用户成功");
     }

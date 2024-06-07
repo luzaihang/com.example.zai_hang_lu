@@ -21,7 +21,7 @@ class PostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double bottom = 30.0;
+    double bottom = 20.0;
     List<String> displayImages =
         images.length > 2 ? images.sublist(0, 2) : images;
 
@@ -35,8 +35,21 @@ class PostWidget extends StatelessWidget {
           _buildMessage(),
           SizedBox(height: displayImages.isEmpty ? bottom : 12.0),
           _buildImages(displayImages, bottom),
+          _cutLine(),
         ],
       ),
+    );
+  }
+
+  Widget _cutLine() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+        width: 0.3,
+        color: Colors.blueGrey.withOpacity(0.2),
+      ))),
     );
   }
 

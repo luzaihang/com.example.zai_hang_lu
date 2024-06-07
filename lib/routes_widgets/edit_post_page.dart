@@ -1,12 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/show_custom_snackBar.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
+import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
 
 class EditPostPage extends StatefulWidget {
@@ -18,14 +17,12 @@ class EditPostPage extends StatefulWidget {
 
 class EditPostPageState extends State<EditPostPage> {
   final TextEditingController _textController = TextEditingController();
-
   final FocusNode _contentFocusNode = FocusNode();
-
-  PostContentData postContentData = PostContentData();
   final ImagePicker _picker = ImagePicker();
+  final PostContentData _postContentData = PostContentData();
 
   int _textLength = 0;
-  String postContent = "";
+  String _postContent = "";
 
   List<XFile>? _imageFiles;
   List<String> _imagePaths = [];
@@ -41,75 +38,72 @@ class EditPostPageState extends State<EditPostPage> {
         _imagePaths = images.map((image) => image.path).toList();
       });
     } catch (e) {
-      Logger().e(e);
+      if (mounted) showCustomSnackBar(context, "图片选择失败");
     }
   }
 
-  Future<void> uploadImages() async {
-    List<Future<bool>> uploadFutures = [];
-
-    for (String imagePath in _imagePaths) {
-      uploadFutures.add(
-        TencentUpLoadAndDownload()
-            .imageUpLoad(imagePath, postContentData: postContentData),
-      );
-    }
+  Future<void> _uploadImages() async {
+    List<Future<bool>> uploadFutures = _imagePaths.map((imagePath) {
+      return TencentUpLoadAndDownload()
+          .imageUpLoad(imagePath, postContentData: _postContentData);
+    }).toList();
 
     List<bool> results = await Future.wait(uploadFutures);
 
-    bool allSuccess = results.every((result) => result);
-
-    if (allSuccess) {
-      PostDetails postDetails = PostDetails(
-        userName: UserInfoConfig.userName,
-        userAvatar: postContentData.uploadedImagePaths[0],
-        location: '云南',
-        postContent: postContent,
-        postImages: postContentData.uploadedImagePaths,
-        postCreationTime: DateTime.now().toIso8601String(),
-      );
-      Map getPostText = postDetails.toMap();
-      TencentUpLoadAndDownload.postTextUpLoad(getPostText);
-
-      if (mounted) Navigator.pop(context);
+    if (results.every((result) => result)) {
+      PostDetails postDetails = _createPostDetails();
+      if (mounted) {
+        TencentUpLoadAndDownload.postTextUpLoad(context, postDetails.toMap());
+      }
     } else {
-      Logger().e("部分图片上传失败");
+      if (mounted) showCustomSnackBar(context, "部分图片上传失败");
     }
   }
 
-  void _publish() async {
-    postContent = _textController.text;
+  PostDetails _createPostDetails() {
+    return PostDetails(
+      userName: UserInfoConfig.userName,
+      userAvatar: _postContentData.uploadedImagePaths.isNotEmpty
+          ? _postContentData.uploadedImagePaths[0]
+          : "",
+      location: '云南',
+      postContent: _postContent,
+      postImages: _postContentData.uploadedImagePaths,
+      postCreationTime: DateTime.now().toIso8601String(),
+    );
+  }
 
-    if (postContent.isEmpty) {
+  void _publish() async {
+    _postContent = _textController.text;
+
+    if (_postContent.isEmpty) {
       showCustomSnackBar(context, "请输入内容");
       return;
     }
 
-    if (postContent.length > 520) {
+    if (_postContent.length > 520) {
       showCustomSnackBar(context, "帖子内容不得超过520字");
       return;
     }
 
-    //随机生成帖子ID
-    PostContentData.postID = RandomGenerator.getRandomCombination();
+    Loading().show(context);
 
-    if (_imagePaths.isNotEmpty) {
-      postContentData.prepareForNewPost();
+    String networkTime = await RandomGenerator.fetchNetworkTime();
 
-      uploadImages();
+    if (networkTime.isNotEmpty) {
+      PostContentData.postID = networkTime;
+
+      if (_imagePaths.isNotEmpty) {
+        _postContentData.prepareForNewPost();
+        await _uploadImages();
+      } else {
+        PostDetails postDetails = _createPostDetails();
+        if (mounted) {
+          TencentUpLoadAndDownload.postTextUpLoad(context, postDetails.toMap());
+        }
+      }
     } else {
-      PostDetails postDetails = PostDetails(
-        userName: UserInfoConfig.userName,
-        userAvatar: "",
-        location: '云南',
-        postContent: postContent,
-        postImages: [],
-        postCreationTime: DateTime.now().toIso8601String(),
-      );
-      Map getPostText = postDetails.toMap();
-      TencentUpLoadAndDownload.postTextUpLoad(getPostText);
-
-      if (mounted) Navigator.pop(context);
+      if (mounted) showCustomSnackBar(context, "网络出错，请稍后再试");
     }
   }
 
@@ -117,30 +111,74 @@ class EditPostPageState extends State<EditPostPage> {
       {required String labelText, required FocusNode focusNode}) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: TextStyle(
-        color: focusNode.hasFocus ? Colors.blueGrey : Colors.grey,
-      ),
+      labelStyle:
+          TextStyle(color: focusNode.hasFocus ? Colors.blueGrey : Colors.grey),
       hintStyle: const TextStyle(color: Colors.grey),
-      // 设置默认提示词颜色
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
       filled: true,
-      fillColor: focusNode.hasFocus ? Colors.blueGrey[50] : Colors.grey[520],
-      // 设置输入框颜色
+      fillColor: focusNode.hasFocus ? Colors.blueGrey[50] : Colors.grey[50],
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(
-          color: Colors.blueGrey,
-        ),
+        borderSide: const BorderSide(color: Colors.blueGrey),
         borderRadius: BorderRadius.circular(10.0),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.grey[300]!,
-        ),
+        borderSide: BorderSide(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
+  }
+
+  Widget _buildImageGrid() {
+    return _imageFiles != null
+        ? GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _imageFiles!.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 6.0,
+              crossAxisSpacing: 6.0,
+            ),
+            itemBuilder: (context, index) {
+              return Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6.0),
+                    child: Image.file(
+                      File(_imageFiles![index].path),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8.0,
+                    left: 8.0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _imageFiles?.removeAt(index);
+                          _imagePaths.removeAt(index);
+                        });
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.blueGrey,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          )
+        : Container();
   }
 
   @override
@@ -150,9 +188,7 @@ class EditPostPageState extends State<EditPostPage> {
         backgroundColor: Colors.blueGrey,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const ImageIcon(
-            AssetImage("assets/back_icon.png"),
-          ),
+          icon: const ImageIcon(AssetImage("assets/back_icon.png")),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -179,27 +215,21 @@ class EditPostPageState extends State<EditPostPage> {
                   decoration: _getInputDecoration(
                       labelText: '输入帖子内容', focusNode: _contentFocusNode),
                   maxLines: null,
-                  // 允许输入多行
                   cursorColor: Colors.blueGrey,
                   style: const TextStyle(color: Colors.blueGrey),
-                  strutStyle: const StrutStyle(
-                    fontSize: 16.0,
-                    height: 1.5, // 设置字间距
-                  ),
+                  strutStyle: const StrutStyle(fontSize: 16.0, height: 1.5),
+                  cursorWidth: 2,
+                  cursorRadius: const Radius.circular(5),
                   onChanged: (text) {
                     setState(() {
                       _textLength = text.length;
                       if (text.length > 520) {
                         _textController.text = text.substring(0, 520);
                         _textController.selection = TextSelection.fromPosition(
-                          const TextPosition(offset: 520),
-                        );
+                            const TextPosition(offset: 520));
                         showCustomSnackBar(context, "帖子内容不可超过520字");
                       }
                     });
-                  },
-                  onTap: () {
-                    setState(() {});
                   },
                 ),
                 Positioned(
@@ -215,57 +245,7 @@ class EditPostPageState extends State<EditPostPage> {
               ],
             ),
             const SizedBox(height: 8.0),
-            _imageFiles != null
-                ? GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _imageFiles!.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 6.0,
-                      crossAxisSpacing: 6.0,
-                    ),
-                    itemBuilder: (context, index) {
-                      return Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6.0),
-                            child: Image.file(
-                              File(_imageFiles![index].path),
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          ),
-                          Positioned(
-                            top: 8.0,
-                            left: 8.0,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _imageFiles?.removeAt(index);
-                                  _imagePaths.removeAt(index);
-                                });
-                              },
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.blueGrey,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 16.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  )
-                : Container(),
+            _buildImageGrid(),
           ],
         ),
       ),
@@ -273,7 +253,8 @@ class EditPostPageState extends State<EditPostPage> {
         onPressed: _publish,
         mini: true,
         backgroundColor: Colors.blueGrey,
-        child: const Icon(Icons.publish),
+        heroTag: 'editPostFloatingActionButton',
+        child: const Icon(Icons.publish_rounded),
       ),
     );
   }
