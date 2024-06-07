@@ -19,7 +19,7 @@ class TencentCloudListData {
             TencentCloudAcquiesceData.postTextBucket,
             prefix: "", // 前缀匹配，用来规定返回的对象前缀地址
             marker: marker,
-            maxKeys: 6, // 单次返回最大的条目数量，默认1000
+            maxKeys: 10, // 单次返回最大的条目数量，默认1000
           );
 
       isTruncated = bucketContents.isTruncated;

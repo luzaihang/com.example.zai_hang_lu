@@ -88,22 +88,16 @@ class EditPostPageState extends State<EditPostPage> {
 
     Loading().show(context);
 
-    String networkTime = await RandomGenerator.fetchNetworkTime();
+    PostContentData.postID = RandomGenerator.getRandomCombination();
 
-    if (networkTime.isNotEmpty) {
-      PostContentData.postID = networkTime;
-
-      if (_imagePaths.isNotEmpty) {
-        _postContentData.prepareForNewPost();
-        await _uploadImages();
-      } else {
-        PostDetails postDetails = _createPostDetails();
-        if (mounted) {
-          TencentUpLoadAndDownload.postTextUpLoad(context, postDetails.toMap());
-        }
-      }
+    if (_imagePaths.isNotEmpty) {
+      _postContentData.prepareForNewPost();
+      await _uploadImages();
     } else {
-      if (mounted) showCustomSnackBar(context, "网络出错，请稍后再试");
+      PostDetails postDetails = _createPostDetails();
+      if (mounted) {
+        TencentUpLoadAndDownload.postTextUpLoad(context, postDetails.toMap());
+      }
     }
   }
 
