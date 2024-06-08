@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/factory_list/home_list_data.dart';
 import 'package:zai_hang_lu/pull_to_refresh_list_view.dart';
-import 'package:zai_hang_lu/routes_widgets/post_widget.dart';
+import 'package:zai_hang_lu/widget_element/home_post_item.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           actions: [
             IconButton(
               icon: const Icon(Icons.mail_outline_rounded),
-              onPressed: () {},
+              onPressed: ()=> Navigator.pushNamed(context, '/chatListPage'),
             ),
           ],
         ),
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             return Container(
               margin:
                   EdgeInsets.only(top: directories.indexOf(post) == 0 ? 12 : 0),
-              child: PostWidget(
+              child: HomePostItem(
                 username: post.userName,
                 userID: post.userID ?? '',
                 userAvatar: post.userAvatar,

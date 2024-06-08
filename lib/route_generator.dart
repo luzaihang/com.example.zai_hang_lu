@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:zai_hang_lu/routes_widgets/chat_detail_page.dart';
+import 'package:zai_hang_lu/routes_widgets/chat_list_page.dart';
 import 'package:zai_hang_lu/routes_widgets/edit_post_page.dart';
 import 'package:zai_hang_lu/routes_widgets/gallery_photo_view.dart';
 import 'package:zai_hang_lu/routes_widgets/home.dart';
@@ -26,6 +28,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
             return const Scaffold(
               body: Center(
                 child: Text('No arguments provided for GalleryPhotoView'),
+              ),
+            );
+          }
+        case "/chatListPage":
+          return const ChatListPage();
+        case "/chatDetailPage":
+          if (arguments != null && arguments is ChatDetailPageArguments) {
+            return ChatDetailPage(
+              taUserName: arguments.taUserName,
+              taUserID: arguments.taUserID,
+              taUserAvatar: arguments.taUserAvatar,
+            );
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: Text('No arguments provided for ChatDetailPage'),
               ),
             );
           }
@@ -59,4 +77,16 @@ class GalleryPhotoViewArguments {
 
   GalleryPhotoViewArguments(
       {required this.imageUrls, required this.initialIndex});
+}
+
+class ChatDetailPageArguments {
+  final String taUserName;
+  final String taUserAvatar;
+  final String taUserID;
+
+  ChatDetailPageArguments({
+    required this.taUserName,
+    required this.taUserAvatar,
+    required this.taUserID,
+  });
 }

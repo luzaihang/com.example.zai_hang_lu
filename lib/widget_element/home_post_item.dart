@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/route_generator.dart';
 
-class PostWidget extends StatelessWidget {
+class HomePostItem extends StatelessWidget {
   final String username;
   final String userID;
   final String userAvatar;
@@ -13,7 +12,8 @@ class PostWidget extends StatelessWidget {
   final String message;
   final List<String> images;
 
-  const PostWidget({
+  ///首页帖子列表项
+  const HomePostItem({
     super.key,
     required this.username,
     required this.userID,
@@ -35,7 +35,7 @@ class PostWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const SizedBox(height: 12),
           _buildMessage(),
           SizedBox(height: displayImages.isEmpty ? bottom : 12.0),
@@ -58,7 +58,7 @@ class PostWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,11 +70,11 @@ class PostWidget extends StatelessWidget {
               userAvatar.isNotEmpty
                   ? CircleAvatar(
                       backgroundImage: CachedNetworkImageProvider(userAvatar),
-                      radius: 24.0,
+                      radius: 22.0,
                     )
                   : const CircleAvatar(
                       backgroundColor: Colors.blueGrey,
-                      radius: 24.0,
+                      radius: 22.0,
                       child: Icon(Icons.person),
                     ),
               const SizedBox(width: 8.0),
@@ -111,19 +111,32 @@ class PostWidget extends StatelessWidget {
           ),
         ),
         userID != UserInfoConfig.userID
-            ? Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue, width: 0.7),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: const Text(
-                  '联系TA',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 11,
-                    // fontWeight: FontWeight.bold,
+            ? GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/chatDetailPage',
+                    arguments: ChatDetailPageArguments(
+                      taUserName: username,
+                      taUserID: userID,
+                      taUserAvatar: userAvatar,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue, width: 0.7),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: const Text(
+                    '联系TA',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 11,
+                      // fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               )
