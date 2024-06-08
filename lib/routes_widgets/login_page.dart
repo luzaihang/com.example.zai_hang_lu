@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_init.dart';
@@ -178,11 +179,8 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _validateAndLogin(BuildContext context) async {
-    String userName = _usernameController.text;
-    String password = _passwordController.text;
-
-    //拼接
-    String user = "userName=$userName,password=$password";
+    String userName = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
 
     if (userName.isEmpty) {
       showCustomSnackBar(context, "账号不能为空");
@@ -198,19 +196,109 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     Loading().show(context);
+    try {
+      LoginGetUserID loginGetUserID = LoginGetUserID();
+      String info = await TencentUpLoadAndDownload.userInfoTxt();
 
-    String info = await TencentUpLoadAndDownload.userInfoTxt();
-    if (info.contains(user)) {
-      Loading().hide();
-      if (mounted) Navigator.pushNamed(context, "/home");
-    } else {
-      String upLoadText = "$info$user|";
-      if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+      String userPattern = "userName=$userName,password=$password";
+
+      List<LoginUser> users = loginGetUserID.parseUsers(info);
+      String? userID = loginGetUserID.getUserID(users, userName, password);
+      if (userID != null) {
+        Logger().i('匹配的UserID是: $userID');
+      } else {
+        Logger().e('没有匹配的用户');
+      }
+
+      if (info.contains(userPattern)) {
+        Loading().hide(); // 隐藏加载动画
+        UserInfoConfig.userID = userID ?? "";
+        if (mounted) Navigator.pushReplacementNamed(context, "/home");
+      } else {
+        // 随机生成 userID 并上传，该用户以后唯一的 ID
+        String userID = RandomGenerator.getRandomCombination();
+        //info必须要，注册是添加到文档上，在info的基础上添加
+        String upLoadText = "$info$userPattern,userID=$userID|";
+
+        UserInfoConfig.userID = userID;
+
+        if (mounted) {
+          TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+        }
+      }
+
+      UserInfoConfig.userName = userName;
+
+      // 登录成功后保存账号和密码
+      await _saveLoginInfo(userName, password);
+    } catch (e) {
+      Loading().hide(); // 确保在异常情况下隐藏加载动画
+      if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");
+    }
+  }
+}
+
+String? findUserID(String data, String condition) {
+  // 转义正则表达式中的特殊字符
+  String escapedCondition = RegExp.escape(condition);
+
+  // 构造用于查找的正则表达式
+  RegExp userIdExp = RegExp('$escapedCondition,userID=([^|]+)');
+
+  // 查找匹配的子字符串
+  var match = userIdExp.firstMatch(data);
+
+  // 返回匹配到的userID
+  return match?.group(1);
+}
+
+class LoginUser {
+  String userName;
+  String password;
+  String userID;
+
+  LoginUser(
+      {required this.userName, required this.password, required this.userID});
+}
+
+class LoginGetUserID {
+  // 将数据字符串转换为User对象列表
+  List<LoginUser> parseUsers(String dataString) {
+    List<LoginUser> users = [];
+    List<String> userStrings = dataString.split('|');
+
+    for (String userString in userStrings) {
+      if (userString.isNotEmpty) {
+        Map<String, String> userData = {};
+
+        List<String> attributes = userString.split(',');
+
+        for (String attribute in attributes) {
+          List<String> keyValue = attribute.split('=');
+          if (keyValue.length == 2) {
+            userData[keyValue[0]] = keyValue[1];
+          }
+        }
+
+        users.add(LoginUser(
+          userName: userData['userName'] ?? '',
+          password: userData['password'] ?? '',
+          userID: userData['userID'] ?? '',
+        ));
+      }
     }
 
-    UserInfoConfig.userName = userName;
+    return users;
+  }
 
-    // 登录成功后保存账号和密码
-    _saveLoginInfo(userName, password);
+  // 根据用户名和密码匹配userID
+  String? getUserID(List<LoginUser> users, String name, String password) {
+    for (LoginUser user in users) {
+      if (user.userName == name && user.password == password) {
+        return user.userID;
+      }
+    }
+
+    return null; // 没有匹配的用户
   }
 }

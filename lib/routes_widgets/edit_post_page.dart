@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/show_custom_snackBar.dart';
@@ -29,10 +30,7 @@ class EditPostPageState extends State<EditPostPage> {
 
   Future<void> _pickImages() async {
     try {
-      final List<XFile> images = await _picker.pickMultiImage(
-        maxWidth: 800,
-        imageQuality: 80,
-      );
+      final List<XFile> images = await _picker.pickMultiImage();
       setState(() {
         _imageFiles = images;
         _imagePaths = images.map((image) => image.path).toList();
@@ -63,6 +61,7 @@ class EditPostPageState extends State<EditPostPage> {
   PostDetails _createPostDetails() {
     return PostDetails(
       userName: UserInfoConfig.userName,
+      userID: UserInfoConfig.userID,
       userAvatar: _postContentData.uploadedImagePaths.isNotEmpty
           ? _postContentData.uploadedImagePaths[0]
           : "",

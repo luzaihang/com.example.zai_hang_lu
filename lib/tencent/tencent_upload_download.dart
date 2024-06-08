@@ -173,13 +173,13 @@ class TencentUpLoadAndDownload {
     // 上传成功回调
     successCallBack(result) {
       Loading().hide();
-      Navigator.pushNamed(context, "/home");
-      Logger().i("todo 上传新用户成功");
+      Navigator.pushReplacementNamed(context, "/home");
+      Logger().i("txt 上传新用户成功");
     }
 
     // 上传失败回调
     failCallBack(clientException, serviceException) {
-      Logger().e("todo 上传新用户失败");
+      Logger().e("txt 上传新用户失败");
     }
 
     //开始上传
@@ -208,16 +208,15 @@ class TencentUpLoadAndDownload {
           return '';
         }
 
-        Logger().d(info);
         return info;
       } else {
         // 请求失败
-        Logger().d("-----------txt异常");
+        Logger().e("-----------无txt文件，即将创建");
         return '';
       }
     } catch (e) {
       // 异常处理
-      Logger().e("$e-----------txt异常");
+      Logger().e("$e-----------txt异常2");
       return '';
     }
   }

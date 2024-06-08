@@ -18,6 +18,7 @@ class PostContentData {
 ///这是要上传到服务端的帖子内容
 class PostDetails {
   String userName;
+  String userID;
   String userAvatar;
   String location;
   String postContent;
@@ -27,6 +28,7 @@ class PostDetails {
   // 构造函数
   PostDetails({
     required this.userName,
+    required this.userID,
     required this.userAvatar,
     required this.location,
     required this.postContent,
@@ -37,6 +39,7 @@ class PostDetails {
   // 从传入的Map中初始化值
   void fromMap(Map<String, dynamic> map) {
     userName = map['userName'];
+    userID = map['userID'];
     userAvatar = map['userAvatar'];
     location = map['location'];
     postContent = map['postContent'];
@@ -48,6 +51,7 @@ class PostDetails {
   Map<String, dynamic> toMap() {
     return {
       'userName': userName,
+      'userID': userID,
       'userAvatar': userAvatar,
       'location': location,
       'postContent': postContent,

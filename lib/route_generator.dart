@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:zai_hang_lu/routes_widgets/edit_post_page.dart';
+import 'package:zai_hang_lu/routes_widgets/gallery_photo_view.dart';
 import 'package:zai_hang_lu/routes_widgets/home.dart';
 import 'package:zai_hang_lu/routes_widgets/login_page.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
+  var arguments = settings.arguments;
   return PageRouteBuilder(
     settings: settings,
     pageBuilder: (context, animation, secondaryAnimation) {
@@ -15,6 +17,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           return const EditPostPage();
         case '/loginScreen':
           return const LoginScreen();
+        case "/galleryPhotoView":
+          if (arguments != null && arguments is GalleryPhotoViewArguments) {
+            return GalleryPhotoView(
+                imageUrls: arguments.imageUrls,
+                initialIndex: arguments.initialIndex);
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: Text('No arguments provided for GalleryPhotoView'),
+              ),
+            );
+          }
         default:
           return Scaffold(
             body: Center(
@@ -37,4 +51,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
     },
   );
+}
+
+class GalleryPhotoViewArguments {
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  GalleryPhotoViewArguments(
+      {required this.imageUrls, required this.initialIndex});
 }
