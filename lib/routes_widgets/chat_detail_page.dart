@@ -1,7 +1,14 @@
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
+
+import '../tencent/tencent_upload_download.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String taUserName;
@@ -23,13 +30,72 @@ class ChatDetailPage extends StatefulWidget {
 class ChatDetailPageState extends State<ChatDetailPage> {
   final List<MessageBubble> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  List<ChatDetailSender> chatDetailsList = [];
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChatList();
+    _startPeriodicRequest();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startPeriodicRequest() {
+    _timer = Timer.periodic(const Duration(seconds: 10), (Timer timer) {
+      _loadChatList();
+    });
+  }
+
+  Future<void> _loadChatList() async {
+    try {
+      var chatDetails = await TencentCloudTxtDownload.chatTxt(widget.taUserID);
+      setState(() {
+        chatDetailsList = chatDetails;
+        _messages.clear();
+        for (var chatDetail in chatDetailsList) {
+          bool isMe = chatDetail.senderID == UserInfoConfig.userID;
+          DateTime timestamp = DateTime.parse(chatDetail.time);
+
+          MessageBubble message = MessageBubble(
+            senderName: isMe ? UserInfoConfig.userName : chatDetail.senderName,
+            senderAvatar:
+                isMe ? UserInfoConfig.userAvatar : chatDetail.senderAvatar,
+            text: chatDetail.message,
+            isMe: isMe,
+            timestamp: timestamp,
+          );
+
+          _messages.insert(0, message);
+        }
+      });
+    } catch (e) {
+      // 这里可以增加错误处理逻辑，例如展示错误信息
+      Logger().e('Error loading chat list: $e');
+    }
+  }
 
   void _handleSubmitted(String text) {
+    if (text.isEmpty) return;
+
     _controller.clear();
+    DateTime now = DateTime.now();
+
+    // 创建新的消息气泡和消息对象
     MessageBubble message = MessageBubble(
+      senderName: UserInfoConfig.userName,
+      senderAvatar: UserInfoConfig.userAvatar,
       text: text,
       isMe: true,
-      timestamp: DateTime.now(), // 添加时间戳
+      timestamp: now,
     );
 
     ChatDetailSender chatDetailSender = ChatDetailSender(
@@ -37,41 +103,32 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       senderID: UserInfoConfig.userID,
       senderAvatar: UserInfoConfig.userAvatar,
       message: text,
-      time: '',
+      time: now.toIso8601String(),
     );
 
+    // 更新本地状态和上传消息
     setState(() {
       _messages.insert(0, message);
+      chatDetailsList.add(chatDetailSender);
     });
+
+    _uploadChatList();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _messages.addAll([
-      MessageBubble(
-          text: "Hello!",
-          isMe: false,
-          timestamp: DateTime.now().subtract(const Duration(minutes: 5))),
-      MessageBubble(
-          text: "Hi, how are you?",
-          isMe: true,
-          timestamp: DateTime.now().subtract(const Duration(minutes: 4))),
-      MessageBubble(
-          text: "I'm fine, thanks!",
-          isMe: false,
-          timestamp: DateTime.now().subtract(const Duration(minutes: 3))),
-    ]);
+  void _uploadChatList() {
+    List<Map<String, dynamic>> messagesList =
+        chatDetailsList.map((chatDetail) => chatDetail.toMap()).toList();
+    TencentUpLoadAndDownload.chatUpload(widget.taUserID, messagesList);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('Chat Detail'),
+        title: Text(widget.taUserName),
         centerTitle: true,
         backgroundColor: Colors.blueGrey,
-        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const ImageIcon(AssetImage("assets/back_icon.png")),
           onPressed: () {
@@ -125,12 +182,16 @@ class ChatDetailPageState extends State<ChatDetailPage> {
 }
 
 class MessageBubble extends StatelessWidget {
+  final String senderName;
+  final String senderAvatar;
   final String text;
   final bool isMe;
   final DateTime timestamp;
 
   const MessageBubble({
     super.key,
+    required this.senderName,
+    required this.senderAvatar,
     required this.text,
     required this.isMe,
     required this.timestamp,
@@ -151,7 +212,16 @@ class MessageBubble extends StatelessWidget {
             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: <Widget>[
           if (!isMe) ...[
-            const CircleAvatar(child: Text('')),
+            senderAvatar.isNotEmpty
+                ? CircleAvatar(
+                    backgroundImage: CachedNetworkImageProvider(senderAvatar),
+                    radius: 22.0,
+                  )
+                : const CircleAvatar(
+                    backgroundColor: Colors.blueGrey,
+                    radius: 22.0,
+                    child: Icon(Icons.person),
+                  ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +229,7 @@ class MessageBubble extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Other',
+                      Text(senderName,
                           style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(width: 8.0), // 添加一些间距
                       Text(
@@ -203,7 +273,7 @@ class MessageBubble extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8.0), // 添加一些间距
-                      Text('Me',
+                      Text(UserInfoConfig.userName,
                           style: Theme.of(context).textTheme.titleMedium),
                     ],
                   ),
@@ -223,7 +293,17 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10.0),
-            const CircleAvatar(child: Text('Me')),
+            UserInfoConfig.userAvatar.isNotEmpty
+                ? CircleAvatar(
+                    backgroundImage:
+                        CachedNetworkImageProvider(UserInfoConfig.userAvatar),
+                    radius: 22.0,
+                  )
+                : const CircleAvatar(
+                    backgroundColor: Colors.blueGrey,
+                    radius: 22.0,
+                    child: Icon(Icons.person),
+                  ),
           ],
         ],
       ),

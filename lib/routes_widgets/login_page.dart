@@ -5,6 +5,7 @@ import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_init.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
 
 import '../app_data/show_custom_snackBar.dart';
@@ -198,7 +199,7 @@ class LoginScreenState extends State<LoginScreen> {
     Loading().show(context);
     try {
       LoginGetUserID loginGetUserID = LoginGetUserID();
-      String info = await TencentUpLoadAndDownload.userInfoTxt();
+      String info = await TencentCloudTxtDownload.userInfoTxt();
 
       String userPattern = "userName=$userName,password=$password";
 

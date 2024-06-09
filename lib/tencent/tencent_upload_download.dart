@@ -7,9 +7,9 @@ import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
 import 'package:zai_hang_lu/app_data/post_content_data.dart';
+import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
-import 'package:http/http.dart' as http;
 
 class TencentUpLoadAndDownload {
   ///图片上传
@@ -117,49 +117,6 @@ class TencentUpLoadAndDownload {
     transferTask.resume();
   }
 
-  ///下载,对比账号信息 spliceAccount对比账号信息
-  /*static void download(String spliceAccount) async {
-    Future<String> getLocalPath() async {
-      final directory = await getApplicationDocumentsDirectory();
-      return directory.path;
-    }
-
-    String localPath = await getLocalPath();
-
-    //https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/user_info.txt
-
-    CosTransferManger transferManager = Cos().getDefaultTransferManger();
-    String cosPath = "name_password.txt"; //对象在存储桶中的位置标识符，即称对象键
-    String downloadPath = "$localPath/$cosPath"; //保存到本地文件的绝对路径
-
-    // 下载成功回调
-    Future<void> successCallBack(result) async {
-      Logger().i("下载成功-------------");
-    }
-
-    //下载失败回调
-    void failCallBack(clientException, serviceException) {
-      Logger().i("下载失败-------------");
-    }
-
-    //下载状态回调, 可以查看任务过程
-    void stateCallback(state) {}
-    //下载进度回调
-    void progressCallBack(complete, target) {}
-
-    //开始下载
-    TransferTask transferTask = await transferManager.download(
-      TencentCloudAcquiesceData.userInfoBucket,
-      cosPath,
-      downloadPath,
-      resultListener: ResultListener(successCallBack, failCallBack),
-      stateCallback: stateCallback,
-      progressCallBack: progressCallBack,
-    );
-
-    transferTask.resume();
-  }*/
-
   ///这里上传的是保存新用户的信息
   static void userUpLoad(BuildContext context, String userText) async {
     CosTransferManger transferManager = Cos().getDefaultTransferManger();
@@ -167,7 +124,6 @@ class TencentUpLoadAndDownload {
     String cosPath = "user_info.txt"; // 对象在存储桶中的位置标识符，即称对象键
 
     // 将字符串转换
-    // Uint8List byte = Uint8List.fromList(utf8.encode(userText));
     Uint8List byte = utf8.encode(userText) as Uint8List;
 
     // 上传成功回调
@@ -192,32 +148,44 @@ class TencentUpLoadAndDownload {
     transferTask.resume();
   }
 
-  static Future<String> userInfoTxt() async {
-    const url =
-        'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/user_info.txt';
-    try {
-      final response = await http.get(Uri.parse(url));
+  ///聊天发送 receivedByID接收人id
+  static void chatUpload(String receivedByID, List<Map<String, dynamic>> listMap) async {
+    CosTransferManger transferManager = Cos().getDefaultTransferManger();
 
-      if (response.statusCode == 200) {
-        // 获取ResponseBody的字节列表
-        List<int> bytes = response.bodyBytes;
-        // 解码字节列表为UTF-8字符串
-        String info = utf8.decode(bytes);
+    //两人都需同时获得聊天数据
+    String cosPath1 = "${UserInfoConfig.userID}/$receivedByID.txt";
+    String cosPath2 = "$receivedByID/${UserInfoConfig.userID}.txt";
 
-        if (info.trim().isEmpty) {
-          return '';
-        }
+    String jsonString = json.encode(listMap);
+    Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
-        return info;
-      } else {
-        // 请求失败
-        Logger().e("-----------无txt文件，即将创建");
-        return '';
-      }
-    } catch (e) {
-      // 异常处理
-      Logger().e("$e-----------txt异常2");
-      return '';
+    String? uploadId;
+
+    // 上传单个文件的函数
+    Future<void> uploadSingleFile(String cosPath) async {
+      TransferTask transferTask = await transferManager.upload(
+        TencentCloudAcquiesceData.chattingRecordsBucket,
+        cosPath,
+        byteArr: byte,
+        uploadId: uploadId,
+        resultListener: ResultListener((result) async {
+          Logger().i("$cosPath 文件上传成功");
+          if (cosPath == cosPath1) {
+            await uploadSingleFile(cosPath2);
+          }
+        }, (clientException, serviceException) {
+          Logger().e("$cosPath 文件上传失败");
+        }),
+        stateCallback: (state) {},
+        progressCallBack: (complete, target) {},
+        initMultipleUploadCallback: (bucket, cosKey, uploadId) {
+          uploadId = uploadId;
+        },
+      );
+      transferTask.resume();
     }
+
+    // 开始上传 cosPath1
+    await uploadSingleFile(cosPath1);
   }
 }
