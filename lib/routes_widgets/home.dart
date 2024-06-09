@@ -26,7 +26,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _onRefresh() async {
-    Logger().d(directories.length);
     List<UserPost>? result = await tencentCloudListData.getFirstContentsList();
     directories = result ?? [];
 
@@ -79,7 +78,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           actions: [
             IconButton(
               icon: const Icon(Icons.mail_outline_rounded),
-              onPressed: ()=> Navigator.pushNamed(context, '/chatListPage'),
+              onPressed: () => Navigator.pushNamed(context, '/chatListPage'),
             ),
           ],
         ),

@@ -288,6 +288,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  leancloud_official_plugin:
+    dependency: "direct main"
+    description:
+      name: leancloud_official_plugin
+      sha256: "0d046579c7feb782c8e40ed4b5a1936e6f1c09eeb977834e2d390d853a43a6ab"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   lints:
     dependency: transitive
     description:

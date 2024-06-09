@@ -33,17 +33,10 @@ class LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loadLoginInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? username = prefs.getString("username");
-    String? password = prefs.getString("password");
-
-    if (username != null && password != null) {
-      setState(() {
-        _usernameController.text = username;
-        _passwordController.text = password;
-      });
-    } else {
-      Logger().d("No cached username or password found");
-    }
+    setState(() {
+      _usernameController.text = prefs.getString("username") ?? '';
+      _passwordController.text = prefs.getString("password") ?? '';
+    });
   }
 
   Future<void> _saveLoginInfo(String username, String password) async {
@@ -57,9 +50,7 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueGrey,
-        onPressed: () async {
-          _validateAndLogin(context);
-        },
+        onPressed: () => _validateAndLogin(context),
         mini: true,
         heroTag: 'loginPageFloatingActionButton',
         child: const Icon(Icons.login_rounded),
@@ -79,103 +70,98 @@ class LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 100),
-            TextField(
+            _buildTextField(
               controller: _usernameController,
-              decoration: const InputDecoration(
-                hintText: '账号',
-                hintStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-                border: UnderlineInputBorder(),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueGrey),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueGrey, width: 0.2),
-                ),
-              ),
-              keyboardType: TextInputType.text,
-              cursorWidth: 2,
-              cursorRadius: const Radius.circular(5),
-              cursorColor: Colors.blueGrey,
-              style: const TextStyle(color: Colors.blueGrey), // 输入文本后的颜色
+              hintText: '账号',
+              isPassword: false,
             ),
             const SizedBox(height: 20),
-            TextField(
+            _buildTextField(
               controller: _passwordController,
-              decoration: InputDecoration(
-                hintText: '密码',
-                hintStyle: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-                border: const UnderlineInputBorder(),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueGrey),
-                ),
-                enabledBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueGrey, width: 0.2),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isPasswordVisible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.blueGrey,
-                    size: 17.0,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                ),
-              ),
-              obscureText: !_isPasswordVisible,
-              cursorColor: Colors.blueGrey,
-              cursorWidth: 2,
-              cursorRadius: const Radius.circular(5),
-              style: const TextStyle(color: Colors.blueGrey), // 输入文本的颜色
+              hintText: '密码',
+              isPassword: true,
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Checkbox(
-                  side: const BorderSide(width: 1.0, color: Colors.blueGrey),
-                  shape: const CircleBorder(),
-                  value: _isChecked,
-                  fillColor: MaterialStateProperty.resolveWith((states) {
-                    if (states.contains(MaterialState.selected)) {
-                      return Colors.blue.withOpacity(0.7);
-                    }
-                    return Colors.transparent;
-                  }),
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _isChecked = value ?? false;
-                    });
-                  },
-                ),
-                const Text(
-                  '我已知晓并同意',
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    '登录、注册协议',
-                    style: TextStyle(color: Colors.blue.withOpacity(0.7)),
-                  ),
-                ),
-              ],
-            ),
+            _buildAgreementSection(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required bool isPassword,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
+        ),
+        border: const UnderlineInputBorder(),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blueGrey),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blueGrey, width: 0.2),
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.blueGrey,
+                  size: 17.0,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              )
+            : null,
+      ),
+      obscureText: isPassword && !_isPasswordVisible,
+      cursorColor: Colors.blueGrey,
+      cursorWidth: 2,
+      cursorRadius: const Radius.circular(5),
+      style: const TextStyle(color: Colors.blueGrey),
+    );
+  }
+
+  Widget _buildAgreementSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Checkbox(
+          side: const BorderSide(width: 1.0, color: Colors.blueGrey),
+          shape: const CircleBorder(),
+          value: _isChecked,
+          fillColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) {
+              return Colors.blue.withOpacity(0.7);
+            }
+            return Colors.transparent;
+          }),
+          onChanged: (bool? value) {
+            setState(() {
+              _isChecked = value ?? false;
+            });
+          },
+        ),
+        const Text(
+          '我已知晓并同意',
+          style: TextStyle(color: Colors.blueGrey),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: Text('登录、注册协议',
+              style: TextStyle(color: Colors.blue.withOpacity(0.7))),
+        ),
+      ],
     );
   }
 
@@ -198,59 +184,36 @@ class LoginScreenState extends State<LoginScreen> {
 
     Loading().show(context);
     try {
-      LoginGetUserID loginGetUserID = LoginGetUserID();
       String info = await TencentCloudTxtDownload.userInfoTxt();
-
-      String userPattern = "userName=$userName,password=$password";
-
+      LoginGetUserID loginGetUserID = LoginGetUserID();
       List<LoginUser> users = loginGetUserID.parseUsers(info);
+
       String? userID = loginGetUserID.getUserID(users, userName, password);
       if (userID != null) {
         Logger().i('匹配的UserID是: $userID');
+        Loading().hide();
+        if (context.mounted) {
+          Navigator.pushReplacementNamed(context, "/home");
+        }
       } else {
         Logger().e('没有匹配的用户');
+        userID = RandomGenerator.getRandomCombination();
+        String upLoadText =
+            "${info}userName=$userName,password=$password,userID=$userID|";
+        if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
       }
 
-      if (info.contains(userPattern)) {
-        Loading().hide(); // 隐藏加载动画
-        UserInfoConfig.userID = userID ?? "";
-        if (mounted) Navigator.pushReplacementNamed(context, "/home");
-      } else {
-        // 随机生成 userID 并上传，该用户以后唯一的 ID
-        String userID = RandomGenerator.getRandomCombination();
-        //info必须要，注册是添加到文档上，在info的基础上添加
-        String upLoadText = "$info$userPattern,userID=$userID|";
-
-        UserInfoConfig.userID = userID;
-
-        if (mounted) {
-          TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
-        }
-      }
-
+      UserInfoConfig.userID = userID;
       UserInfoConfig.userName = userName;
 
-      // 登录成功后保存账号和密码
       await _saveLoginInfo(userName, password);
     } catch (e) {
-      Loading().hide(); // 确保在异常情况下隐藏加载动画
+      Logger().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");
+    } finally {
+      Loading().hide();
     }
   }
-}
-
-String? findUserID(String data, String condition) {
-  // 转义正则表达式中的特殊字符
-  String escapedCondition = RegExp.escape(condition);
-
-  // 构造用于查找的正则表达式
-  RegExp userIdExp = RegExp('$escapedCondition,userID=([^|]+)');
-
-  // 查找匹配的子字符串
-  var match = userIdExp.firstMatch(data);
-
-  // 返回匹配到的userID
-  return match?.group(1);
 }
 
 class LoginUser {
@@ -260,46 +223,39 @@ class LoginUser {
 
   LoginUser(
       {required this.userName, required this.password, required this.userID});
+
+  factory LoginUser.fromAttributes(List<String> attributes) {
+    final Map<String, String> userData = {};
+    for (String attribute in attributes) {
+      final keyValue = attribute.split('=');
+      if (keyValue.length == 2) {
+        userData[keyValue[0]] = keyValue[1];
+      }
+    }
+    return LoginUser(
+      userName: userData['userName'] ?? '',
+      password: userData['password'] ?? '',
+      userID: userData['userID'] ?? '',
+    );
+  }
 }
 
 class LoginGetUserID {
-  // 将数据字符串转换为User对象列表
   List<LoginUser> parseUsers(String dataString) {
-    List<LoginUser> users = [];
-    List<String> userStrings = dataString.split('|');
-
-    for (String userString in userStrings) {
-      if (userString.isNotEmpty) {
-        Map<String, String> userData = {};
-
-        List<String> attributes = userString.split(',');
-
-        for (String attribute in attributes) {
-          List<String> keyValue = attribute.split('=');
-          if (keyValue.length == 2) {
-            userData[keyValue[0]] = keyValue[1];
-          }
-        }
-
-        users.add(LoginUser(
-          userName: userData['userName'] ?? '',
-          password: userData['password'] ?? '',
-          userID: userData['userID'] ?? '',
-        ));
-      }
-    }
-
-    return users;
+    return dataString
+        .split('|')
+        .where((userString) => userString.isNotEmpty)
+        .map((userString) {
+      return LoginUser.fromAttributes(userString.split(','));
+    }).toList();
   }
 
-  // 根据用户名和密码匹配userID
   String? getUserID(List<LoginUser> users, String name, String password) {
     for (LoginUser user in users) {
       if (user.userName == name && user.password == password) {
         return user.userID;
       }
     }
-
-    return null; // 没有匹配的用户
+    return null;
   }
 }

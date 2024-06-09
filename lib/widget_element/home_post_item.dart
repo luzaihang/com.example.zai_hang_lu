@@ -12,9 +12,8 @@ class HomePostItem extends StatelessWidget {
   final String message;
   final List<String> images;
 
-  ///首页帖子列表项
   const HomePostItem({
-    super.key,
+    Key? key,
     required this.username,
     required this.userID,
     required this.postTime,
@@ -22,13 +21,12 @@ class HomePostItem extends StatelessWidget {
     required this.message,
     required this.images,
     required this.userAvatar,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double bottom = 20.0;
-    List<String> displayImages =
-        images.length > 2 ? images.sublist(0, 2) : images;
+    List<String> displayImages = images.take(2).toList(); // 简化处理子列表
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -50,11 +48,13 @@ class HomePostItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        width: 0.3,
-        color: Colors.blueGrey.withOpacity(0.2),
-      ))),
+        border: Border(
+          bottom: BorderSide(
+            width: 0.3,
+            color: Colors.blueGrey.withOpacity(0.2),
+          ),
+        ),
+      ),
     );
   }
 
@@ -67,16 +67,7 @@ class HomePostItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              userAvatar.isNotEmpty
-                  ? CircleAvatar(
-                      backgroundImage: CachedNetworkImageProvider(userAvatar),
-                      radius: 22.0,
-                    )
-                  : const CircleAvatar(
-                      backgroundColor: Colors.blueGrey,
-                      radius: 22.0,
-                      child: Icon(Icons.person),
-                    ),
+              _buildAvatar(),
               const SizedBox(width: 8.0),
               Expanded(
                 child: Column(
@@ -91,17 +82,9 @@ class HomePostItem extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Text(
-                          postTime,
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 12.0),
-                        ),
+                        _buildInfoText(postTime),
                         const SizedBox(width: 4.0),
-                        Text(
-                          location,
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 12.0),
-                        ),
+                        _buildInfoText(location),
                       ],
                     ),
                   ],
@@ -110,38 +93,57 @@ class HomePostItem extends StatelessWidget {
             ],
           ),
         ),
-        userID != UserInfoConfig.userID
-            ? GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/chatDetailPage',
-                    arguments: ChatDetailPageArguments(
-                      taUserName: username,
-                      taUserID: userID,
-                      taUserAvatar: userAvatar,
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue, width: 0.7),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: const Text(
-                    '联系TA',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontSize: 11,
-                      // fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              )
-            : Container(),
+        if (userID != UserInfoConfig.userID)
+          _buildContactButton(context),
       ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    return CircleAvatar(
+      backgroundImage: userAvatar.isNotEmpty
+          ? CachedNetworkImageProvider(userAvatar)
+          : null,
+      backgroundColor: userAvatar.isEmpty ? Colors.blueGrey : null,
+      radius: 22.0,
+      child: userAvatar.isEmpty ? const Icon(Icons.person) : null,
+    );
+  }
+
+  Widget _buildInfoText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(color: Colors.grey, fontSize: 12.0),
+    );
+  }
+
+  Widget _buildContactButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/chatDetailPage',
+          arguments: ChatDetailPageArguments(
+            taUserName: username,
+            taUserID: userID,
+            taUserAvatar: userAvatar,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue, width: 0.7),
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: const Text(
+          '联系TA',
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 11,
+          ),
+        ),
+      ),
     );
   }
 
@@ -153,11 +155,11 @@ class HomePostItem extends StatelessWidget {
     );
   }
 
-  Widget _buildImages(BuildContext context, List<String> displayImages,
-      double bottom, List<String> allImages) {
+  Widget _buildImages(
+      BuildContext context, List<String> displayImages, double bottom, List<String> allImages) {
     return Row(
       children: List.generate(2, (index) {
-        if (displayImages.length <= index || displayImages[index].isEmpty) {
+        if (index >= displayImages.length) {
           return const Expanded(child: SizedBox.shrink());
         }
         return Expanded(
@@ -173,21 +175,16 @@ class HomePostItem extends StatelessWidget {
               );
             },
             child: Container(
-              margin: EdgeInsets.only(
-                  right: index == 0 ? 8.0 : 0.0, bottom: bottom),
+              margin: EdgeInsets.only(right: index == 0 ? 8.0 : 0.0, bottom: bottom),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: userAvatar.isNotEmpty
-                    ? CachedNetworkImage(
-                        height: 220,
-                        imageUrl: displayImages[index],
-                        placeholder: (context, url) =>
-                            Container(color: Colors.grey[300]),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                        fit: BoxFit.cover,
-                      )
-                    : Container(),
+                child: CachedNetworkImage(
+                  height: 220,
+                  imageUrl: displayImages[index],
+                  placeholder: (context, url) => Container(color: Colors.grey[300]),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
