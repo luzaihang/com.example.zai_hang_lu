@@ -14,9 +14,9 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        LCIMOptions.getGlobalOptions().setUnreadNotificationEnabled(true);
+        LCIMOptions.getGlobalOptions().setUnreadNotificationEnabled(true)
         //开启调试日志
-        LeanCloud.setLogLevel(LCLogger.Level.DEBUG);
+        LeanCloud.setLogLevel(LCLogger.Level.DEBUG)
         // 提供 this、App ID、App Key、Server URL 作为参数
         // 请将 your_server_url 替换为你的应用绑定的 API 域名
         LeanCloud.initialize(
@@ -24,7 +24,7 @@ class MainActivity: FlutterActivity() {
             "4pAbS2RXdM9PLvHXGgFUrGe1-gzGzoHsz",
             "0MLmh4Q04UxZuXgGvaDV6mHx",
             "4pabs2rx.lc-cn-n1-shared.com"
-        );
+        )
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "getSystemVersion") {

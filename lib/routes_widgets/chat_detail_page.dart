@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
+import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
+import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
+import 'package:zai_hang_lu/widget_element/message_bubble_item.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String taUserName;
@@ -29,16 +31,48 @@ class ChatDetailPageState extends State<ChatDetailPage> {
 
   late Client client;
 
+  List<ChatDetailSender> newMessages = []; // 新增列表用于保存新消息
+
   @override
   void initState() {
     super.initState();
     _initializeLeanCloud();
+    _loadChattingRecords(); // 加载聊天记录
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _uploadChatDetails(); // 页面退出时合并并上传聊天记录
     super.dispose();
+  }
+
+  Future<void> _loadChattingRecords() async {
+    List<ChatDetailSender> list = await chattingRecords();
+    if (list.isNotEmpty) {
+      for (var detail in list) {
+        // 确保消息按顺序加载，避免冲突或覆盖
+        try {
+          await _addMessage(
+            senderName: detail.senderName,
+            senderAvatar: detail.senderAvatar,
+            text: detail.message,
+            isMe: detail.senderID == UserInfoConfig.userID,
+            timestamp: DateTime.parse(detail.time),
+          );
+        } catch (e, stackTrace) {
+          Logger().e("Error adding message: ${detail.message}",
+              stackTrace: stackTrace);
+        }
+      }
+    } else {
+      Logger().w("list is empty after loading.");
+    }
+  }
+
+  Future<List<ChatDetailSender>> chattingRecords() async {
+    var chatDetails = await TencentCloudTxtDownload.chatTxt(widget.taUserID);
+    return chatDetails;
   }
 
   Future<void> _initializeLeanCloud() async {
@@ -52,36 +86,63 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       required Client client,
       required Conversation conversation,
       required Message message,
-    }) {
+    }) async {
       String? text = message is TextMessage ? message.text : '消息内容为空';
-      _addMessage(
+      await _addMessage(
         senderName: widget.taUserName,
         senderAvatar: widget.taUserAvatar,
         text: text ?? "",
         isMe: false,
+        timestamp: DateTime.now(),
       );
-      Logger().d(message);
     };
   }
 
-  void _addMessage({
+  Future<void> _addMessage({
     required String senderName,
     required String senderAvatar,
     required String text,
     required bool isMe,
-  }) {
-    DateTime now = DateTime.now();
+    required DateTime timestamp,
+  }) async {
     MessageBubble messageBubble = MessageBubble(
       senderName: senderName,
       senderAvatar: senderAvatar,
       text: text,
       isMe: isMe,
-      timestamp: now,
+      timestamp: timestamp,
     );
-
     setState(() {
       _messages.insert(0, messageBubble);
+      // 增加新信息的详细日志，检查条件判断
+      bool messageExists = newMessages.any((item) =>
+          item.senderName == senderName &&
+          item.senderID == (isMe ? UserInfoConfig.userID : widget.taUserID) &&
+          item.senderAvatar == senderAvatar &&
+          item.message == text &&
+          item.time == timestamp.toIso8601String());
+
+      if (!messageExists) {
+        newMessages.add(
+          ChatDetailSender(
+            senderName: senderName,
+            senderID: isMe ? UserInfoConfig.userID : widget.taUserID,
+            senderAvatar: senderAvatar,
+            message: text,
+            time: timestamp.toIso8601String(),
+          ),
+        );
+      }
     });
+  }
+
+  Future<void> _uploadChatDetails() async {
+    List<Map<String, dynamic>> listMap =
+        newMessages.map((detail) => detail.toMap()).toList();
+
+    TencentUpLoadAndDownload.chatUpload(widget.taUserID, listMap);
+
+    Logger().i("上传聊天记录到云端: ${newMessages.length} 条消息");
   }
 
   Future<void> sendMessage(String text) async {
@@ -95,14 +156,15 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     await conversation.send(message: textMessage);
   }
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(String text) async {
     if (text.isEmpty) return;
     _controller.clear();
-    _addMessage(
+    await _addMessage(
       senderName: UserInfoConfig.userName,
       senderAvatar: UserInfoConfig.userAvatar,
       text: text,
       isMe: true,
+      timestamp: DateTime.now(),
     );
     sendMessage(text);
   }
@@ -166,91 +228,3 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   }
 }
 
-class MessageBubble extends StatelessWidget {
-  final String senderName;
-  final String senderAvatar;
-  final String text;
-  final bool isMe;
-  final DateTime timestamp;
-
-  const MessageBubble({
-    super.key,
-    required this.senderName,
-    required this.senderAvatar,
-    required this.text,
-    required this.isMe,
-    required this.timestamp,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bg =
-        isMe ? Colors.green.withOpacity(0.8) : Colors.blueGrey.withOpacity(0.2);
-    final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final timeFormat = DateFormat('h:mm a');
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-      child: Row(
-        crossAxisAlignment: align,
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: <Widget>[
-          if (!isMe) _buildAvatar(senderAvatar),
-          Expanded(child: _buildMessageContent(context, timeFormat)),
-          if (isMe) _buildAvatar(UserInfoConfig.userAvatar),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(String avatarUrl) {
-    return avatarUrl.isNotEmpty
-        ? CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(avatarUrl),
-            radius: 22.0,
-          )
-        : const CircleAvatar(
-            backgroundColor: Colors.blueGrey,
-            radius: 22.0,
-            child: Icon(Icons.person),
-          );
-  }
-
-  Widget _buildMessageContent(BuildContext context, DateFormat timeFormat) {
-    return Column(
-      crossAxisAlignment:
-          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              isMe ? UserInfoConfig.userName : senderName,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(width: 8.0),
-            Text(
-              timeFormat.format(timestamp),
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 10.0),
-            ),
-          ],
-        ),
-        const SizedBox(height: 5.0),
-        Container(
-          padding: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            color: isMe
-                ? Colors.green.withOpacity(0.8)
-                : Colors.blueGrey.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Text(
-            text,
-            style: TextStyle(color: isMe ? Colors.white : Colors.black),
-          ),
-        ),
-      ],
-    );
-  }
-}
