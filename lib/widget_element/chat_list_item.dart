@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:zai_hang_lu/route_generator.dart';
+import 'package:intl/intl.dart';
+import 'package:zai_hang_lu/app_data/format_date_time.dart';
+import 'package:zai_hang_lu/global_component/route_generator.dart';
 
 class ChatListItem extends StatelessWidget {
   final String senderAvatar;
@@ -53,18 +55,19 @@ class ChatListItem extends StatelessWidget {
     return senderAvatar.isNotEmpty
         ? CircleAvatar(
             backgroundImage: CachedNetworkImageProvider(senderAvatar),
-            radius: 22.0,
+            radius: 20.0,
           )
         : const CircleAvatar(
             backgroundColor: Colors.blueGrey,
-            radius: 22.0,
+            radius: 20.0,
             child: Icon(Icons.person),
           );
   }
 
   Widget _buildChatContent() {
+    DateTime getTime = DateTime.parse(time);
     return Container(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 5),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -82,7 +85,7 @@ class ChatListItem extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
-              time,
+              formatDateTimeToMinutes(getTime),
               style: const TextStyle(color: Colors.grey, fontSize: 11.0),
             ),
           ),
@@ -99,7 +102,7 @@ class ChatListItem extends StatelessWidget {
           senderName,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 14.0,
+            fontSize: 13.0,
             color: Colors.blueGrey,
           ),
         ),

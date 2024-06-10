@@ -88,6 +88,11 @@ flutter:
     - assets/no_file.png
     - assets/directories_icon.png
     - assets/back_icon.png
+    - assets/fonts/
+  fonts:
+    - family: SmileySans
+      fonts:
+        - asset: assets/fonts/SmileySans-Oblique.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

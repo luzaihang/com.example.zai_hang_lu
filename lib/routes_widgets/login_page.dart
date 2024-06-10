@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/loading_page.dart';
+import 'package:zai_hang_lu/global_component/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
@@ -65,7 +65,7 @@ class LoginScreenState extends State<LoginScreen> {
             const Text(
               'Second heartbeat',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: Colors.blueGrey,
               ),

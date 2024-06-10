@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/route_generator.dart';
+import 'package:zai_hang_lu/global_component/route_generator.dart';
 
 class HomePostItem extends StatelessWidget {
   final String username;
@@ -78,12 +78,14 @@ class HomePostItem extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blueGrey,
+                        fontSize: 13,
                       ),
                     ),
+                    const SizedBox(height: 2.0),
                     Row(
                       children: [
                         _buildInfoText(postTime),
-                        const SizedBox(width: 4.0),
+                        const SizedBox(width: 6.0),
                         _buildInfoText(location),
                       ],
                     ),
@@ -105,7 +107,7 @@ class HomePostItem extends StatelessWidget {
           ? CachedNetworkImageProvider(userAvatar)
           : null,
       backgroundColor: userAvatar.isEmpty ? Colors.blueGrey : null,
-      radius: 22.0,
+      radius: 20.0,
       child: userAvatar.isEmpty ? const Icon(Icons.person) : null,
     );
   }
@@ -113,7 +115,7 @@ class HomePostItem extends StatelessWidget {
   Widget _buildInfoText(String text) {
     return Text(
       text,
-      style: const TextStyle(color: Colors.grey, fontSize: 12.0),
+      style: const TextStyle(color: Colors.grey, fontSize: 11.0),
     );
   }
 
@@ -131,15 +133,15 @@ class HomePostItem extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.blue, width: 0.7),
-          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: Colors.blue.withOpacity(0.5), width: 0.5),
+          borderRadius: BorderRadius.circular(7.0),
         ),
-        child: const Text(
+        child:  Text(
           '联系TA',
           style: TextStyle(
-            color: Colors.blue,
+            color: Colors.blue.withOpacity(0.8),
             fontSize: 11,
           ),
         ),
@@ -150,7 +152,7 @@ class HomePostItem extends StatelessWidget {
   Widget _buildMessage() {
     return Text(
       message,
-      style: const TextStyle(fontSize: 16.0, color: Colors.blueGrey),
+      style: const TextStyle(fontSize: 14.0, color: Colors.blueGrey),
       textAlign: TextAlign.justify,
     );
   }

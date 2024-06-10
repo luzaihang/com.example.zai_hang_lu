@@ -7,6 +7,7 @@ import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
 import 'package:zai_hang_lu/widget_element/message_bubble_item.dart';
+import 'package:zai_hang_lu/widget_element/preferredSize_item.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String taUserName;
@@ -195,16 +196,21 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(widget.taUserName),
-      centerTitle: true,
-      backgroundColor: Colors.blueGrey,
-      leading: IconButton(
-        icon: const ImageIcon(AssetImage("assets/back_icon.png")),
-        onPressed: () {
-          Navigator.pop(context);
-        },
+  PreferredSize _buildAppBar() {
+    return preferredSizeWidget(
+      AppBar(
+        title: Text(
+          widget.taUserName,
+          style: const TextStyle(fontSize: 15),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blueGrey,
+        leading: IconButton(
+          icon: const ImageIcon(AssetImage("assets/back_icon.png")),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -227,4 +233,3 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 }
-

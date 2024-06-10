@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.zai_hang_lu">
+    package="com.example.cidong">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- 如果设备没有摄像头，声明不强制要求 -->

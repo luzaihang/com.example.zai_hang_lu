@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:zai_hang_lu/app_data/format_date_time.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -22,17 +23,17 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final timeFormat = DateFormat('h:mm a');
+    // final timeFormat = DateFormat('h:mm a');
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
       child: Row(
         crossAxisAlignment: align,
         mainAxisAlignment:
-        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: <Widget>[
           if (!isMe) _buildAvatar(senderAvatar),
-          Expanded(child: _buildMessageContent(context, timeFormat)),
+          Expanded(child: _buildMessageContent(context, timestamp)),
           if (isMe) _buildAvatar(UserInfoConfig.userAvatar),
         ],
       ),
@@ -42,47 +43,53 @@ class MessageBubble extends StatelessWidget {
   Widget _buildAvatar(String avatarUrl) {
     return avatarUrl.isNotEmpty
         ? CircleAvatar(
-      backgroundImage: CachedNetworkImageProvider(avatarUrl),
-      radius: 22.0,
-    )
+            backgroundImage: CachedNetworkImageProvider(avatarUrl),
+            radius: 22.0,
+          )
         : const CircleAvatar(
-      backgroundColor: Colors.blueGrey,
-      radius: 22.0,
-      child: Icon(Icons.person),
-    );
+            backgroundColor: Colors.blueGrey,
+            radius: 22.0,
+            child: Icon(Icons.person),
+          );
   }
 
-  Widget _buildMessageContent(BuildContext context, DateFormat timeFormat) {
+  Widget _buildMessageContent(BuildContext context, DateTime dateTime) {
     return Column(
       crossAxisAlignment:
-      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: <Widget>[
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               isMe ? UserInfoConfig.userName : senderName,
-              style: Theme.of(context).textTheme.titleMedium,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.blueGrey,
+              ),
             ),
             const SizedBox(width: 8.0),
-            Text(
-              timeFormat.format(timestamp),
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 10.0),
+            Padding(
+              padding: const EdgeInsets.only(top: 1.5),
+              child: Text(
+                formatDateTimeToMinutes(timestamp),
+                style: const TextStyle(color: Colors.blueGrey, fontSize: 10.0),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 5.0),
         Container(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(6.0),
           decoration: BoxDecoration(
             color: isMe
                 ? Colors.green.withOpacity(0.8)
                 : Colors.blueGrey.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(9.0),
           ),
           child: Text(
             text,
-            style: TextStyle(color: isMe ? Colors.white : Colors.black),
+            style: TextStyle(color: isMe ? Colors.white : Colors.black.withOpacity(0.7)),
           ),
         ),
       ],

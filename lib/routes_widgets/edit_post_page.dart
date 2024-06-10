@@ -6,8 +6,9 @@ import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/show_custom_snackBar.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/loading_page.dart';
+import 'package:zai_hang_lu/global_component/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
+import 'package:zai_hang_lu/widget_element/preferredSize_item.dart';
 
 class EditPostPage extends StatefulWidget {
   const EditPostPage({super.key});
@@ -177,21 +178,23 @@ class EditPostPageState extends State<EditPostPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blueGrey,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const ImageIcon(AssetImage("assets/back_icon.png")),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.photo_library),
-            onPressed: _pickImages,
+      appBar: preferredSizeWidget(
+        AppBar(
+          backgroundColor: Colors.blueGrey,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: const ImageIcon(AssetImage("assets/back_icon.png")),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-        ],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.photo_library),
+              onPressed: _pickImages,
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),

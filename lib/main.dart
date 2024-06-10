@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zai_hang_lu/app_data/app_share_data_provider.dart';
-import 'package:zai_hang_lu/route_generator.dart';
+import 'package:zai_hang_lu/global_component/route_generator.dart';
 import 'routes_widgets/login_page.dart';
 
 void main() {
@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         theme: ThemeData(
           brightness: Brightness.light,
+          // fontFamily: 'SmileySans',
         ),
         debugShowCheckedModeBanner: false,
         // initialRoute: AppRoutes.splash,

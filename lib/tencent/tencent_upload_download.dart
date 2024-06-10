@@ -8,7 +8,7 @@ import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
 import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/loading_page.dart';
+import 'package:zai_hang_lu/global_component/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 
