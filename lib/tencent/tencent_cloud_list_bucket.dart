@@ -1,12 +1,15 @@
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 
 class TencentCloudListBucket {
+  final Cos cos = CosService().cos;
+
   void cloudListBucket() async {
     try {
       ListAllMyBuckets listAllMyBuckets =
-          await Cos().getDefaultService().getService();
+          await cos.getDefaultService().getService();
       // 存储桶列表详情请查看 ListAllMyBuckets 类
 
       Logger().d(listAllMyBuckets.buckets);

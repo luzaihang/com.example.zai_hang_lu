@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zai_hang_lu/app_data/random_generator.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/loading_page.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_init.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
 import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
 
@@ -21,6 +21,8 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isChecked = false;
   bool _isPasswordVisible = false;
 
+  final CosService cosService = CosService();
+
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -28,7 +30,6 @@ class LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _loadLoginInfo();
-    TenCentCloudInit.initCloud();
   }
 
   Future<void> _loadLoginInfo() async {

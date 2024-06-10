@@ -6,16 +6,18 @@ import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:zai_hang_lu/factory_list/home_list_data.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:http/http.dart' as http;
+import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 
 ///获取列表
 class TencentCloudListData {
   bool isTruncated = false;
   String? nextMarker;
+  final Cos cos = CosService().cos;
 
   Future<List<UserPost>?> _fetchContentsList({String? marker}) async {
     List<UserPost> decodedMaps = [];
     try {
-      BucketContents bucketContents = await Cos().getDefaultService().getBucket(
+      BucketContents bucketContents = await cos.getDefaultService().getBucket(
             TencentCloudAcquiesceData.postTextBucket,
             prefix: "", // 前缀匹配，用来规定返回的对象前缀地址
             marker: marker,

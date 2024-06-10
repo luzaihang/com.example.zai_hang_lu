@@ -3,16 +3,27 @@ import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
 
-class TenCentCloudInit {
-  /// 初始化腾讯云cos
-  static void initCloud() {
-    _cloudInit();
+class CosService {
+  // 创建单例实例
+  static final CosService _instance = CosService._internal();
+
+  // Cos 实例
+  final Cos cos = Cos();
+
+  // 私有构造函数
+  CosService._internal() {
+    _initCloud();
     _configureCosXmlService();
   }
 
-  /// 使用永久密钥进行本地调试
-  static void _cloudInit() {
-    Cos().initWithPlainSecret(
+  // 提供一个公共访问点
+  factory CosService() {
+    return _instance;
+  }
+
+  /// 初始化腾讯云cos
+  void _initCloud() {
+    cos.initWithPlainSecret(
       TencentCloudAcquiesceData.secretId,
       TencentCloudAcquiesceData.secretKey,
     );
@@ -20,14 +31,14 @@ class TenCentCloudInit {
   }
 
   /// 注册 COS 服务
-  static void _configureCosXmlService() {
+  void _configureCosXmlService() {
     final CosXmlServiceConfig serviceConfig = CosXmlServiceConfig(
       region: TencentCloudAcquiesceData.region,
       isDebuggable: true,
       isHttps: true,
     );
 
-    Cos().registerDefaultService(serviceConfig);
+    cos.registerDefaultService(serviceConfig);
 
     final TransferConfig transferConfig = TransferConfig(
       forceSimpleUpload: false,
@@ -36,7 +47,7 @@ class TenCentCloudInit {
       sliceSizeForUpload: 2097152, // 设置默认分块大小为 2M
     );
 
-    Cos().registerDefaultTransferManger(serviceConfig, transferConfig);
+    cos.registerDefaultTransferManger(serviceConfig, transferConfig);
     Logger().i("注册腾讯云COS服务成功");
   }
 }

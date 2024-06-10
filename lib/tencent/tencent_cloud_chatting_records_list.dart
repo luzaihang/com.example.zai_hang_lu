@@ -6,13 +6,15 @@ import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 
 class ChattingRecordsList {
   static Future<List<ChatDetailSender>> recordsList() async {
+    final Cos cos = CosService().cos;
     List<ChatDetailSender> decodedMaps = [];
     try {
       // 获取桶内容
-      BucketContents bucketContents = await Cos().getDefaultService().getBucket(
+      BucketContents bucketContents = await cos.getDefaultService().getBucket(
             TencentCloudAcquiesceData.chattingRecordsBucket,
             prefix: "${UserInfoConfig.userID}/", // 前缀匹配，用来规定返回的对象前缀地址
             maxKeys: 200, //显示200个记录

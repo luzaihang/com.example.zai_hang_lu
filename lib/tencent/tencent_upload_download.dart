@@ -10,9 +10,16 @@ import 'package:zai_hang_lu/app_data/post_content_data.dart';
 import 'package:zai_hang_lu/app_data/user_info_config.dart';
 import 'package:zai_hang_lu/loading_page.dart';
 import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
 
 class TencentUpLoadAndDownload {
-  CosTransferManger transferManager = Cos().getDefaultTransferManger();
+  final Cos cos;
+  CosTransferManger transferManager;
+
+  // 构造函数
+  TencentUpLoadAndDownload()
+      : cos = CosService().cos,
+        transferManager = CosService().cos.getDefaultTransferManger();
 
   Future<bool> uploadFile(String bucket, String cosPath,
       {String? filePath,
