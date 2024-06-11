@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:logger/logger.dart';
-import 'package:zai_hang_lu/app_data/post_content_data.dart';
-import 'package:zai_hang_lu/app_data/random_generator.dart';
-import 'package:zai_hang_lu/app_data/show_custom_snackBar.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/global_component/loading_page.dart';
-import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
-import 'package:zai_hang_lu/widget_element/preferredSize_item.dart';
+import 'package:ci_dong/app_data/post_content_data.dart';
+import 'package:ci_dong/app_data/random_generator.dart';
+import 'package:ci_dong/app_data/show_custom_snackBar.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/global_component/loading_page.dart';
+import 'package:ci_dong/global_component/show_custom_dialog.dart';
+import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/widget_element/preferredSize_item.dart';
 
 class EditPostPage extends StatefulWidget {
   const EditPostPage({super.key});
@@ -30,6 +30,8 @@ class EditPostPageState extends State<EditPostPage> {
   List<String> _imagePaths = [];
 
   Future<void> _pickImages() async {
+    bool? res = await showCustomDialog(context, "是否同意进入到相册选择图片");
+    if (res != true) return;
     try {
       final List<XFile> images = await _picker.pickMultiImage();
       setState(() {
@@ -177,80 +179,84 @@ class EditPostPageState extends State<EditPostPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: preferredSizeWidget(
-        AppBar(
-          backgroundColor: Colors.blueGrey,
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: const ImageIcon(AssetImage("assets/back_icon.png")),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.photo_library),
-              onPressed: _pickImages,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Scaffold(
+        appBar: preferredSizeWidget(
+          AppBar(
+            backgroundColor: Colors.blueGrey,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: const ImageIcon(AssetImage("assets/back_icon.png")),
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
-          ],
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.photo_library),
+                onPressed: _pickImages,
+              ),
+            ],
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20.0),
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                TextField(
-                  controller: _textController,
-                  focusNode: _contentFocusNode,
-                  decoration: _getInputDecoration(
-                      labelText: '输入帖子内容', focusNode: _contentFocusNode),
-                  maxLines: null,
-                  cursorColor: Colors.blueGrey,
-                  style: const TextStyle(color: Colors.blueGrey),
-                  strutStyle: const StrutStyle(fontSize: 16.0, height: 1.5),
-                  cursorWidth: 2,
-                  cursorRadius: const Radius.circular(5),
-                  onChanged: (text) {
-                    setState(() {
-                      _textLength = text.length;
-                      if (text.length > 520) {
-                        _textController.text = text.substring(0, 520);
-                        _textController.selection = TextSelection.fromPosition(
-                            const TextPosition(offset: 520));
-                        showCustomSnackBar(context, "帖子内容不可超过520字");
-                      }
-                    });
-                  },
-                ),
-                Positioned(
-                  right: 10,
-                  bottom: 10,
-                  child: Text(
-                    '$_textLength/520',
-                    style: TextStyle(
-                      color: _textLength > 520 ? Colors.red : Colors.grey,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20.0),
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  TextField(
+                    controller: _textController,
+                    focusNode: _contentFocusNode,
+                    decoration: _getInputDecoration(
+                        labelText: '输入帖子内容', focusNode: _contentFocusNode),
+                    maxLines: null,
+                    cursorColor: Colors.blueGrey,
+                    style: const TextStyle(color: Colors.blueGrey),
+                    strutStyle: const StrutStyle(fontSize: 16.0, height: 1.5),
+                    cursorWidth: 2,
+                    cursorRadius: const Radius.circular(5),
+                    onChanged: (text) {
+                      setState(() {
+                        _textLength = text.length;
+                        if (text.length > 520) {
+                          _textController.text = text.substring(0, 520);
+                          _textController.selection =
+                              TextSelection.fromPosition(
+                                  const TextPosition(offset: 520));
+                          showCustomSnackBar(context, "帖子内容不可超过520字");
+                        }
+                      });
+                    },
+                  ),
+                  Positioned(
+                    right: 10,
+                    bottom: 10,
+                    child: Text(
+                      '$_textLength/520',
+                      style: TextStyle(
+                        color: _textLength > 520 ? Colors.red : Colors.grey,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8.0),
-            _buildImageGrid(),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8.0),
+              _buildImageGrid(),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _publish,
-        mini: true,
-        backgroundColor: Colors.blueGrey,
-        heroTag: 'editPostFloatingActionButton',
-        child: const Icon(Icons.publish_rounded),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _publish,
+          mini: true,
+          backgroundColor: Colors.blueGrey,
+          heroTag: 'editPostFloatingActionButton',
+          child: const Icon(Icons.publish_rounded),
+        ),
       ),
     );
   }

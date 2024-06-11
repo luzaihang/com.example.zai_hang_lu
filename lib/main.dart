@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:zai_hang_lu/app_data/app_share_data_provider.dart';
-import 'package:zai_hang_lu/global_component/route_generator.dart';
+import 'package:ci_dong/app_data/app_share_data_provider.dart';
+import 'package:ci_dong/global_component/route_generator.dart';
 import 'routes_widgets/login_page.dart';
 
 void main() {

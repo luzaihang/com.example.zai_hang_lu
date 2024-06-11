@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
-import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
-import 'package:zai_hang_lu/widget_element/message_bubble_item.dart';
-import 'package:zai_hang_lu/widget_element/preferredSize_item.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
+import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/widget_element/message_bubble_item.dart';
+import 'package:ci_dong/widget_element/preferredSize_item.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String taUserName;
@@ -172,26 +172,29 @@ class ChatDetailPageState extends State<ChatDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              reverse: true,
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _messages[index];
-              },
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: _buildAppBar(),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView.builder(
+                reverse: true,
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  return _messages[index];
+                },
+              ),
             ),
-          ),
-          const Divider(height: 1.0),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildTextComposer(),
-          ),
-        ],
+            const Divider(height: 1.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildTextComposer(),
+            ),
+          ],
+        ),
       ),
     );
   }

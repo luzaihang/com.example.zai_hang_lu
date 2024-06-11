@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
+import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 class TencentCloudListBucket {
   final Cos cos = CosService().cos;

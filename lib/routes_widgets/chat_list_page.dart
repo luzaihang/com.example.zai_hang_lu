@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_chatting_records_list.dart';
-import 'package:zai_hang_lu/widget_element/chat_list_item.dart';
-import 'package:zai_hang_lu/widget_element/preferredSize_item.dart';
+import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/tencent/tencent_cloud_chatting_records_list.dart';
+import 'package:ci_dong/widget_element/chat_list_item.dart';
+import 'package:ci_dong/widget_element/preferredSize_item.dart';
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});

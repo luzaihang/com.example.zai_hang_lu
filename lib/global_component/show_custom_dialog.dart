@@ -1,79 +1,83 @@
 import 'package:flutter/material.dart';
 
-///中间弹窗
-void showCustomDialog(BuildContext context, String content) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // 禁止点击外部关闭弹窗
-    barrierColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return _CustomDialog(content: content);
-    },
-  );
-}
+class CustomDialog extends StatelessWidget {
+  final String dynamicText;
 
-class _CustomDialog extends StatefulWidget {
-  final String content;
-
-  const _CustomDialog({required this.content});
-
-  @override
-  __CustomDialogState createState() => __CustomDialogState();
-}
-
-class __CustomDialogState extends State<_CustomDialog>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _scaleAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.fastOutSlowIn,
-    );
-
-    _animationController.forward();
-
-    // 3秒后自动开始反向动画，之后关闭弹窗
-    Future.delayed(const Duration(seconds: 2), () {
-      _animationController
-          .reverse()
-          .then((value) => Navigator.of(context).pop());
-    });
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+  const CustomDialog({
+    super.key,
+    required this.dynamicText,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
+    return WillPopScope(
+      onWillPop: () async => false, // 禁用返回键关闭对话框
       child: AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+        elevation: 10.0, // 设置对话框的阴影高度
+        shadowColor: Colors.blue.withOpacity(0.2), // 设置对话框阴影的颜色
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              widget.content,
+              dynamicText,
               style: const TextStyle(
+                fontSize: 13,
                 color: Colors.blueGrey,
               ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Divider(
+                color: Colors.blueGrey, // 分割线颜色
+                thickness: 0.1, // 分割线厚度
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context, false); // 返回false
+                  },
+                  child: const Text(
+                    '取消',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context, true); // 返回true
+                  },
+                  child: Text(
+                    '下一步',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue.withOpacity(0.8),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
   }
+}
+
+Future<bool?> showCustomDialog(BuildContext context, String dynamicText) {
+  return showDialog<bool?>(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.2),
+    barrierDismissible: false, // 设置为false，点击对话框外部不关闭
+    builder: (BuildContext context) {
+      return CustomDialog(dynamicText: dynamicText);
+    },
+  );
 }

@@ -81,6 +81,6 @@ Future<bool> isAtLeastAndroid13() async {
 }
 
 Future<int> getSystemVersion() async {
-  var version = await const MethodChannel('com.example.zai_hang_lu').invokeMethod('getSystemVersion');
+  var version = await const MethodChannel('com.example.ci_dong').invokeMethod('getSystemVersion');
   return version ?? 0;
 }

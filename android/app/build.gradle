@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.cidong"
+    namespace "com.example.ci_dong"
     compileSdk 34
     ndkVersion flutter.ndkVersion
 
@@ -41,8 +41,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.cidong"
-        minSdkVersion 21
+        applicationId "com.example.ci_dong"
+        minSdkVersion 23
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

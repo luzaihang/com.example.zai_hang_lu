@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:zai_hang_lu/app_data/format_date_time.dart';
-import 'package:zai_hang_lu/global_component/route_generator.dart';
+import 'package:ci_dong/app_data/format_date_time.dart';
+import 'package:ci_dong/global_component/route_generator.dart';
 
 class ChatListItem extends StatelessWidget {
   final String senderAvatar;

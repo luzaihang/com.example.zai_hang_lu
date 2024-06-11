@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:zai_hang_lu/app_data/format_date_time.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
+import 'package:ci_dong/app_data/format_date_time.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
 
 class MessageBubble extends StatelessWidget {
   final String senderName;

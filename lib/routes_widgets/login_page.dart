@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zai_hang_lu/app_data/random_generator.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/global_component/loading_page.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_txt_download.dart';
-import 'package:zai_hang_lu/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/app_data/random_generator.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/global_component/loading_page.dart';
+import 'package:ci_dong/global_component/show_custom_dialog.dart';
+import 'package:ci_dong/tencent/tencent_cloud_service.dart';
+import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
+import 'package:ci_dong/tencent/tencent_upload_download.dart';
 
 import '../app_data/show_custom_snackBar.dart';
 
@@ -48,43 +49,52 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blueGrey,
-        onPressed: () => _validateAndLogin(context),
-        mini: true,
-        heroTag: 'loginPageFloatingActionButton',
-        child: const Icon(Icons.login_rounded),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            const SizedBox(height: 100),
-            const Text(
-              'Second heartbeat',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.blueGrey,
+          onPressed: () async {
+            bool? res = await showCustomDialog(context, "登录即代表注册，请记住个人信息");
+            if (res != true) return;
+            if (mounted) _validateAndLogin(context);
+          },
+          mini: true,
+          heroTag: 'loginPageFloatingActionButton',
+          child: const Icon(Icons.login_rounded),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              const SizedBox(height: 100),
+              Image.asset("assets/logo.png", height: 70),
+              const SizedBox(height: 10),
+              const Text(
+                'Second heartbeat',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
               ),
-            ),
-            const SizedBox(height: 100),
-            _buildTextField(
-              controller: _usernameController,
-              hintText: '账号',
-              isPassword: false,
-            ),
-            const SizedBox(height: 20),
-            _buildTextField(
-              controller: _passwordController,
-              hintText: '密码',
-              isPassword: true,
-            ),
-            const SizedBox(height: 20),
-            _buildAgreementSection(),
-          ],
+              const SizedBox(height: 100),
+              _buildTextField(
+                controller: _usernameController,
+                hintText: '账号',
+                isPassword: false,
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(
+                controller: _passwordController,
+                hintText: '密码',
+                isPassword: true,
+              ),
+              const SizedBox(height: 20),
+              _buildAgreementSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -159,7 +169,7 @@ class LoginScreenState extends State<LoginScreen> {
         ),
         TextButton(
           onPressed: () {},
-          child: Text('登录、注册协议',
+          child: Text('《隐私政策和条款》',
               style: TextStyle(color: Colors.blue.withOpacity(0.7))),
         ),
       ],

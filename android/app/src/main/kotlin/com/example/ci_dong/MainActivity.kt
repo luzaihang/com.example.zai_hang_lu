@@ -1,4 +1,4 @@
-package com.example.cidong
+package com.example.ci_dong
 
 import android.os.Build
 import cn.leancloud.LCLogger

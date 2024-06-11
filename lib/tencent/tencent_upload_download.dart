@@ -6,11 +6,11 @@ import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
-import 'package:zai_hang_lu/app_data/post_content_data.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/global_component/loading_page.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_service.dart';
+import 'package:ci_dong/app_data/post_content_data.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/global_component/loading_page.dart';
+import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 class TencentUpLoadAndDownload {
   final Cos cos;
@@ -29,9 +29,12 @@ class TencentUpLoadAndDownload {
 
     void successCallBack(result) {
       Logger().i("文件上传成功");
-      String path =
-          "https://${TencentCloudAcquiesceData.postImageBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/$cosPath";
-      postContentData?.addToPostImagePaths(path);
+      if (filePath != null && filePath.isNotEmpty && postContentData != null) {
+        //只有 帖子上传到时候才需要这个操作
+        String path =
+            "https://${TencentCloudAcquiesceData.postImageBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/$cosPath";
+        postContentData.addToPostImagePaths(path);
+      }
       completer.complete(true);
     }
 
@@ -110,5 +113,15 @@ class TencentUpLoadAndDownload {
     await uploader.uploadFile(
         TencentCloudAcquiesceData.chattingRecordsBucket, cosPath2,
         byteArr: byte);
+  }
+
+  static Future<bool> avatarUpLoad(String imagePath) async {
+    TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
+    String cosPath = "${UserInfoConfig.userID}/userAvatar.png";
+    return uploader.uploadFile(
+      TencentCloudAcquiesceData.avatarAndPost,
+      cosPath,
+      filePath: imagePath,
+    );
   }
 }

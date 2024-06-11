@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.cidong">
+    package="com.example.ci_dong">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- 如果设备没有摄像头，声明不强制要求 -->
@@ -30,7 +30,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@drawable/logo"
-        android:label="仪图"
+        android:label="@string/app_name"
         android:requestLegacyExternalStorage="true">
         <!-- 即时通讯和推送 START -->
         <!-- 即时通讯和推送都需要 PushService -->

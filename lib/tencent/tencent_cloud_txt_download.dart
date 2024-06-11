@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:zai_hang_lu/app_data/user_info_config.dart';
-import 'package:zai_hang_lu/factory_list/chat_detail_factory.dart';
-import 'package:zai_hang_lu/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 
 class TencentCloudTxtDownload {
   static final Logger _logger = Logger();
