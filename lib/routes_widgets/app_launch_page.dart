@@ -71,7 +71,6 @@ class AppLaunchPageState extends State<AppLaunchPage>
       UserInfoConfig.userName  = await AuthManager.getUserName() ?? '';
       UserInfoConfig.userPassword = await AuthManager.getUserPassword() ?? '';
       UserInfoConfig.uniqueID  = await AuthManager.getUniqueId() ?? '';
-      UserInfoConfig.userAvatar = allAvatarUrl(UserInfoConfig.uniqueID);
 
       bool isLoggedIn = await AuthManager.checkLoginStatus();
       if (isLoggedIn) {

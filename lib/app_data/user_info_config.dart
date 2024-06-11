@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 
 class UserInfoConfig {
@@ -15,6 +17,35 @@ class UserInfoConfig {
 }
 
 ///固定链接，唯有id不同
-String allAvatarUrl(String id) {
-  return "https://${TencentCloudAcquiesceData.avatarAndPost}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/$id/userAvatar.png";
+Future<String> allAvatarUrl() async {
+  try {
+    String url =
+        "https://${TencentCloudAcquiesceData.avatarAndPost}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.uniqueID}/userAvatar.png";
+    bool res = await checkUrlExists(url);
+    if (!res) {
+      return "";
+    }
+
+    return url;
+  } catch (e) {
+    return "";
+  }
+}
+
+///验证链接是否存在
+Future<bool> checkUrlExists(String urlString) async {
+  final url = Uri.parse(urlString);
+  final httpClient = HttpClient()
+    ..connectionTimeout = const Duration(milliseconds: 1000); // 设置连接超时时间
+
+  try {
+    final request = await httpClient.headUrl(url);
+    request.followRedirects = false;
+    final response = await request.close();
+    return response.statusCode == HttpStatus.ok;
+  } catch (e) {
+    return false;
+  } finally {
+    httpClient.close();
+  }
 }

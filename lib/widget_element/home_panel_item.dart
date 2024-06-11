@@ -7,6 +7,7 @@ import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/show_custom_dialog.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:logger/logger.dart';
 
 import '../global_component/user_name_modified_dialog.dart';
 
@@ -42,10 +43,27 @@ class _PanelWidgetState extends State<PanelWidget> {
       if (!res) if (mounted) showCustomSnackBar(context, "头像更换失败，稍后再试");
       // 清除缓存
       CachedNetworkImage.evictFromCache(UserInfoConfig.userAvatar);
-      setState(() {});
+      checkAvatar();
     } catch (e) {
-      if (mounted) showCustomSnackBar(context, "图片选择失败");
+      if (mounted) showCustomSnackBar(context, "上传失败,请稍候再试");
     }
+  }
+
+  @override
+  void initState() {
+    checkAvatar();
+    super.initState();
+  }
+
+  Future<void> checkAvatar() async {
+    String url = await allAvatarUrl();
+    Logger().d(url.isNotEmpty);
+    if (url.isNotEmpty) {
+      UserInfoConfig.userAvatar = url;
+    } else {
+      UserInfoConfig.userAvatar = "";
+    }
+    setState(() {});
   }
 
   @override
@@ -74,6 +92,8 @@ class _PanelWidgetState extends State<PanelWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildAvatarSection(),
+
+                ///头像
                 const SizedBox(height: 20),
                 Container(
                   alignment: Alignment.center,

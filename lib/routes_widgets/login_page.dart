@@ -223,7 +223,6 @@ class LoginScreenState extends State<LoginScreen> {
       UserInfoConfig.uniqueID = userID;
       UserInfoConfig.userName = userName;
       UserInfoConfig.userPassword = password;
-      UserInfoConfig.userAvatar = allAvatarUrl(userID);
 
       await AuthManager.login(userName, password, userID);
     } catch (e) {
