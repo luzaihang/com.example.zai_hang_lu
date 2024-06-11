@@ -1,3 +1,4 @@
+import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ci_dong/app_data/app_share_data_provider.dart';
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppShareDataProvider()),
       ],
       child: MaterialApp(
+        title: "次动",
         theme: ThemeData(
           brightness: Brightness.light,
           // fontFamily: 'SmileySans',
@@ -33,7 +35,8 @@ class MyApp extends StatelessWidget {
             child: child!,
           );
         },
-        home: const LoginScreen(),
+        // home: const LoginScreen(),
+        home: const AppLaunchPage(),
       ),
     );
   }

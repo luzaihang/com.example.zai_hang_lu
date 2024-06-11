@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 onPressed: () => Navigator.pushNamed(context, '/chatListPage'),
               ),
               IconButton(
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.menu),
                 onPressed: () {
                   setState(() {
                     _isPanelVisible = !_isPanelVisible;

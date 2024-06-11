@@ -28,7 +28,7 @@ class TencentCloudTxtDownload {
 
   static Future<List<ChatDetailSender>> chatTxt(String id) async {
     final url =
-        'https://${TencentCloudAcquiesceData.chattingRecordsBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.userID}/$id.txt';
+        'https://${TencentCloudAcquiesceData.chattingRecordsBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.uniqueID}/$id.txt';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

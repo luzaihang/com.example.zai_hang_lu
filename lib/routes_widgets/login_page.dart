@@ -1,3 +1,4 @@
+import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,7 +6,6 @@ import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/global_component/show_custom_dialog.dart';
-import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 
@@ -22,8 +22,6 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isChecked = false;
   bool _isPasswordVisible = false;
 
-  final CosService cosService = CosService();
-
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -34,17 +32,15 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loadLoginInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _usernameController.text = prefs.getString("username") ?? '';
-      _passwordController.text = prefs.getString("password") ?? '';
-    });
-  }
+    String? userName = await AuthManager.getUserName();
+    String? userPassword = await AuthManager.getUserPassword();
+    String? userAvatar = await AuthManager.getUserAvatar();
+    String? uniqueID = await AuthManager.getUniqueId();
 
-  Future<void> _saveLoginInfo(String username, String password) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("username", username);
-    await prefs.setString("password", password);
+    setState(() {
+      _usernameController.text = userName ?? '';
+      _passwordController.text = userPassword ?? '';
+    });
   }
 
   @override
@@ -61,7 +57,13 @@ class LoginScreenState extends State<LoginScreen> {
           },
           mini: true,
           heroTag: 'loginPageFloatingActionButton',
-          child: const Icon(Icons.login_rounded),
+          child: const Text(
+            "登录",
+            style: TextStyle(
+              fontSize: 13,
+              color: Color(0xFFFAFAFA),
+            ),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -82,14 +84,16 @@ class LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 100),
               _buildTextField(
                 controller: _usernameController,
-                hintText: '账号',
+                hintText: '账号最多8位',
                 isPassword: false,
+                maxLength: 8,
               ),
               const SizedBox(height: 20),
               _buildTextField(
                 controller: _passwordController,
-                hintText: '密码',
+                hintText: '密码最多18位',
                 isPassword: true,
+                maxLength: 18,
               ),
               const SizedBox(height: 20),
               _buildAgreementSection(),
@@ -104,14 +108,16 @@ class LoginScreenState extends State<LoginScreen> {
     required TextEditingController controller,
     required String hintText,
     required bool isPassword,
+    required int maxLength,
   }) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
+        counterText: "",
         hintText: hintText,
         hintStyle: const TextStyle(
           color: Colors.grey,
-          fontSize: 14,
+          fontSize: 13,
         ),
         border: const UnderlineInputBorder(),
         focusedBorder: const UnderlineInputBorder(
@@ -140,6 +146,7 @@ class LoginScreenState extends State<LoginScreen> {
       cursorWidth: 2,
       cursorRadius: const Radius.circular(5),
       style: const TextStyle(color: Colors.blueGrey),
+      maxLength: maxLength,
     );
   }
 
@@ -214,10 +221,10 @@ class LoginScreenState extends State<LoginScreen> {
         if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
       }
 
-      UserInfoConfig.userID = userID;
+      UserInfoConfig.uniqueID = userID;
       UserInfoConfig.userName = userName;
 
-      await _saveLoginInfo(userName, password);
+      await AuthManager.login(userName, password, "头像URL", userID);
     } catch (e) {
       Logger().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");

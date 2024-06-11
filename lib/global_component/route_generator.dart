@@ -1,3 +1,4 @@
+import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
 import 'package:ci_dong/routes_widgets/chat_list_page.dart';
@@ -17,6 +18,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         return const EditPostPage();
       case '/loginScreen':
         return const LoginScreen();
+      case '/appLaunchPage':
+        return const AppLaunchPage();
       case "/galleryPhotoView":
         if (arguments is GalleryPhotoViewArguments) {
           return GalleryPhotoView(

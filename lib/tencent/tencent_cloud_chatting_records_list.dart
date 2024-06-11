@@ -16,7 +16,7 @@ class ChattingRecordsList {
       // 获取桶内容
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
             TencentCloudAcquiesceData.chattingRecordsBucket,
-            prefix: "${UserInfoConfig.userID}/", // 前缀匹配，用来规定返回的对象前缀地址
+            prefix: "${UserInfoConfig.uniqueID}/", // 前缀匹配，用来规定返回的对象前缀地址
             maxKeys: 200, //显示200个记录
           );
 
@@ -39,7 +39,7 @@ class ChattingRecordsList {
           if (decodedJsonString.trim().isNotEmpty) {
             List<dynamic> decodedMap = json.decode(decodedJsonString);
             for (var i in decodedMap) {
-              if (i['senderID'] != UserInfoConfig.userID) {
+              if (i['senderID'] != UserInfoConfig.uniqueID) {
                 ChatDetailSender userPost = ChatDetailSender.fromMap(i);
                 decodedMaps.add(userPost);
                 break; // 只添加第一个不匹配的记录

@@ -64,7 +64,7 @@ class EditPostPageState extends State<EditPostPage> {
   PostDetails _createPostDetails() {
     return PostDetails(
       userName: UserInfoConfig.userName,
-      userID: UserInfoConfig.userID,
+      userID: UserInfoConfig.uniqueID,
       userAvatar: _postContentData.uploadedImagePaths.isNotEmpty
           ? _postContentData.uploadedImagePaths[0]
           : "",

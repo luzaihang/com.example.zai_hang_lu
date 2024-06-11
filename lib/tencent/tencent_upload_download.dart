@@ -81,7 +81,11 @@ class TencentUpLoadAndDownload {
     }
   }
 
-  static Future<void> userUpLoad(BuildContext context, String userText) async {
+  static Future<bool?> userUpLoad(
+    BuildContext context,
+    String userText, {
+    String newName = "",
+  }) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "user_info.txt";
     Uint8List byte = Uint8List.fromList(utf8.encode(userText));
@@ -90,19 +94,24 @@ class TencentUpLoadAndDownload {
         TencentCloudAcquiesceData.userInfoBucket, cosPath,
         byteArr: byte);
     if (success) {
+      Logger().i("txt 上传新用户成功");
+      if (newName.isNotEmpty) {
+        UserInfoConfig.userName = newName;
+        return true; //如果是修改数据，则不做跳转
+      }
       Loading().hide();
       if (context.mounted) Navigator.pushReplacementNamed(context, "/home");
-      Logger().i("txt 上传新用户成功");
     } else {
       Logger().e("txt 上传新用户失败");
     }
+    return null;
   }
 
   static Future<void> chatUpload(
       String receivedByID, List<Map<String, dynamic>> listMap) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
-    String cosPath1 = "${UserInfoConfig.userID}/$receivedByID.txt";
-    String cosPath2 = "$receivedByID/${UserInfoConfig.userID}.txt";
+    String cosPath1 = "${UserInfoConfig.uniqueID}/$receivedByID.txt";
+    String cosPath2 = "$receivedByID/${UserInfoConfig.uniqueID}.txt";
 
     String jsonString = json.encode(listMap);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
@@ -117,7 +126,7 @@ class TencentUpLoadAndDownload {
 
   static Future<bool> avatarUpLoad(String imagePath) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
-    String cosPath = "${UserInfoConfig.userID}/userAvatar.png";
+    String cosPath = "${UserInfoConfig.uniqueID}/userAvatar.png";
     return uploader.uploadFile(
       TencentCloudAcquiesceData.avatarAndPost,
       cosPath,

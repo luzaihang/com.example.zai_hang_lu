@@ -58,7 +58,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
             senderName: detail.senderName,
             senderAvatar: detail.senderAvatar,
             text: detail.message,
-            isMe: detail.senderID == UserInfoConfig.userID,
+            isMe: detail.senderID == UserInfoConfig.uniqueID,
             timestamp: DateTime.parse(detail.time),
           );
         } catch (e, stackTrace) {
@@ -77,7 +77,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Future<void> _initializeLeanCloud() async {
-    client = Client(id: UserInfoConfig.userID);
+    client = Client(id: UserInfoConfig.uniqueID);
     await client.open();
     _setupClientMessageListener();
   }
@@ -118,7 +118,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       // 增加新信息的详细日志，检查条件判断
       bool messageExists = newMessages.any((item) =>
           item.senderName == senderName &&
-          item.senderID == (isMe ? UserInfoConfig.userID : widget.taUserID) &&
+          item.senderID == (isMe ? UserInfoConfig.uniqueID : widget.taUserID) &&
           item.senderAvatar == senderAvatar &&
           item.message == text &&
           item.time == timestamp.toIso8601String());
@@ -127,7 +127,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
         newMessages.add(
           ChatDetailSender(
             senderName: senderName,
-            senderID: isMe ? UserInfoConfig.userID : widget.taUserID,
+            senderID: isMe ? UserInfoConfig.uniqueID : widget.taUserID,
             senderAvatar: senderAvatar,
             message: text,
             time: timestamp.toIso8601String(),

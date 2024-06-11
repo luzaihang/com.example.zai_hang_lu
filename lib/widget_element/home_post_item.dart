@@ -95,7 +95,7 @@ class HomePostItem extends StatelessWidget {
             ],
           ),
         ),
-        if (userID != UserInfoConfig.userID)
+        if (userID != UserInfoConfig.uniqueID)
           _buildContactButton(context),
       ],
     );
