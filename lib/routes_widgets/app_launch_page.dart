@@ -1,8 +1,8 @@
 import 'dart:math' as math;
+import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // 生成波浪路径的函数
 Path wavePath(Size size, double animationValue) {
@@ -68,8 +68,12 @@ class AppLaunchPageState extends State<AppLaunchPage>
     )..repeat(); // 使动画循环播放
 
     Future.delayed(const Duration(seconds: 4), () async {
-      bool isLoggedIn = await AuthManager.checkLoginStatus();
+      UserInfoConfig.userName  = await AuthManager.getUserName() ?? '';
+      UserInfoConfig.userPassword = await AuthManager.getUserPassword() ?? '';
+      UserInfoConfig.uniqueID  = await AuthManager.getUniqueId() ?? '';
+      UserInfoConfig.userAvatar = allAvatarUrl(UserInfoConfig.uniqueID);
 
+      bool isLoggedIn = await AuthManager.checkLoginStatus();
       if (isLoggedIn) {
         // 跳转到主页
         if (mounted) Navigator.pushReplacementNamed(context, "/home");

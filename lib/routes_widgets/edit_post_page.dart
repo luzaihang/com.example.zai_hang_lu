@@ -65,10 +65,8 @@ class EditPostPageState extends State<EditPostPage> {
     return PostDetails(
       userName: UserInfoConfig.userName,
       userID: UserInfoConfig.uniqueID,
-      userAvatar: _postContentData.uploadedImagePaths.isNotEmpty
-          ? _postContentData.uploadedImagePaths[0]
-          : "",
-      location: '云南',
+      userAvatar: UserInfoConfig.userAvatar,
+      location: '', //暂未接入
       postContent: _postContent,
       postImages: _postContentData.uploadedImagePaths,
       postCreationTime: DateTime.now().toIso8601String(),

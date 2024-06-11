@@ -6,9 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/show_custom_dialog.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
-import 'package:logger/logger.dart';
 
 import '../global_component/user_name_modified_dialog.dart';
 
@@ -42,8 +40,8 @@ class _PanelWidgetState extends State<PanelWidget> {
       if (mounted) showCustomSnackBar(context, "正在上传 ，请稍候");
       bool res = await TencentUpLoadAndDownload.avatarUpLoad(getImage);
       if (!res) if (mounted) showCustomSnackBar(context, "头像更换失败，稍后再试");
-      UserInfoConfig.userAvatar =
-          "https://${TencentCloudAcquiesceData.avatarAndPost}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.uniqueID}/userAvatar.png";
+      // 清除缓存
+      CachedNetworkImage.evictFromCache(UserInfoConfig.userAvatar);
       setState(() {});
     } catch (e) {
       if (mounted) showCustomSnackBar(context, "图片选择失败");
@@ -102,7 +100,7 @@ class _PanelWidgetState extends State<PanelWidget> {
                     if (newName != null && newName.isNotEmpty) {
                       String result =
                           await TencentCloudTxtDownload.userInfoTxt();
-                      Logger().d(UserInfoConfig.userName);
+
                       String modifiedData = result.replaceAll(
                         'userName=${UserInfoConfig.userName}',
                         'userName=$newName',
@@ -112,9 +110,10 @@ class _PanelWidgetState extends State<PanelWidget> {
                         bool? res = await TencentUpLoadAndDownload.userUpLoad(
                           context,
                           modifiedData,
-                          newName: "新昵称",
+                          modified: true,
                         );
                         if (res == true) {
+                          UserInfoConfig.userName = newName;
                           await AuthManager.setUserName(newName);
                           setState(() {});
                         }

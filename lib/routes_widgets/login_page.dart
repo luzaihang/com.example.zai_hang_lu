@@ -1,7 +1,6 @@
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
@@ -34,8 +33,8 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> _loadLoginInfo() async {
     String? userName = await AuthManager.getUserName();
     String? userPassword = await AuthManager.getUserPassword();
-    String? userAvatar = await AuthManager.getUserAvatar();
-    String? uniqueID = await AuthManager.getUniqueId();
+    // String? userAvatar = await AuthManager.getUserAvatar();
+    // String? uniqueID = await AuthManager.getUniqueId();
 
     setState(() {
       _usernameController.text = userName ?? '';
@@ -223,8 +222,10 @@ class LoginScreenState extends State<LoginScreen> {
 
       UserInfoConfig.uniqueID = userID;
       UserInfoConfig.userName = userName;
+      UserInfoConfig.userPassword = password;
+      UserInfoConfig.userAvatar = allAvatarUrl(userID);
 
-      await AuthManager.login(userName, password, "头像URL", userID);
+      await AuthManager.login(userName, password, userID);
     } catch (e) {
       Logger().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");

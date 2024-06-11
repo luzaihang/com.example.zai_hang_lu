@@ -84,7 +84,7 @@ class TencentUpLoadAndDownload {
   static Future<bool?> userUpLoad(
     BuildContext context,
     String userText, {
-    String newName = "",
+    bool modified = false, //是否为更改名称
   }) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "user_info.txt";
@@ -95,8 +95,7 @@ class TencentUpLoadAndDownload {
         byteArr: byte);
     if (success) {
       Logger().i("txt 上传新用户成功");
-      if (newName.isNotEmpty) {
-        UserInfoConfig.userName = newName;
+      if (modified) {
         return true; //如果是修改数据，则不做跳转
       }
       Loading().hide();
