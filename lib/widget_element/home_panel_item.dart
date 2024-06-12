@@ -58,7 +58,6 @@ class _PanelWidgetState extends State<PanelWidget> {
 
   Future<void> checkAvatar() async {
     String url = await allAvatarUrl();
-    Logger().d(url.isNotEmpty);
     if (url.isNotEmpty) {
       UserInfoConfig.userAvatar = url;
     } else {

@@ -38,7 +38,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   @override
   void initState() {
     super.initState();
-    _initializeLeanCloud();
+    _setupClientMessageListener();
     _loadChattingRecords(); // 加载聊天记录
   }
 
@@ -75,11 +75,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   Future<List<ChatDetailSender>> chattingRecords() async {
     var chatDetails = await TencentCloudTxtDownload.chatTxt(widget.taUserID);
     return chatDetails;
-  }
-
-  Future<void> _initializeLeanCloud() async {
-    // await ClientManager().initialize();
-    _setupClientMessageListener();
   }
 
   void _setupClientMessageListener() {
@@ -253,8 +248,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
           GestureDetector(
             onTap: () => _handleSubmitted(_controller.text),
             child: Container(
-              // width: 40,
-              // height: 30,
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.8),

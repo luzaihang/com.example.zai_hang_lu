@@ -6,6 +6,8 @@ import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
 import 'package:ci_dong/widget_element/home_panel_item.dart';
 import 'package:ci_dong/widget_element/home_post_item.dart';
 import 'package:ci_dong/widget_element/preferredSize_item.dart';
+import 'package:leancloud_official_plugin/leancloud_plugin.dart';
+import 'package:logger/logger.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +17,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   ///文件列表
   List<UserPost> directories = [];
 
@@ -23,15 +26,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   TencentCloudListData tencentCloudListData = TencentCloudListData();
 
+  bool newMessage = false;
+  bool _isActive = true;
+
   @override
   void initState() {
+    super.initState();
     _onRefresh();
     _leanCloudInit();
-    super.initState();
+    WidgetsBinding.instance.addObserver(this); // 添加观察者
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 移除观察者
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isActive = state == AppLifecycleState.resumed;
   }
 
   void _leanCloudInit() async {
     await ClientManager().initialize();
+    newMe();
+  }
+
+  Future<void> newMe() async {
+    ClientManager().client.onMessage = ({
+      required Client client,
+      required Conversation conversation,
+      required Message message,
+    }) async {
+      String? text = message is TextMessage ? message.text : '';
+      if (text == null || text.isEmpty) return;
+
+      if (!mounted || !_isActive) return; // 检查是否挂载且处于活跃状态
+
+      setState(() {
+        newMessage = true;
+      });
+
+      Logger().d(newMessage);
+    };
   }
 
   Future<void> _onRefresh() async {
@@ -71,10 +109,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             automaticallyImplyLeading: false, // 不显示返回按钮
             title: null, // 不显示标题
             actions: [
-              IconButton(
-                icon: const Icon(Icons.mail_outline_rounded),
-                onPressed: () => Navigator.pushNamed(context, '/chatListPage'),
+              Stack(
+                children: <Widget>[
+                  IconButton(
+                      icon: const Icon(Icons.mail_outline_rounded),
+                      onPressed: () {
+                        setState(() {
+                          newMessage = false;
+                        });
+                        Navigator.pushNamed(context, '/chatListPage');
+                      }),
+                  newMessage
+                      ? Positioned(
+                          right: 12,
+                          top: 14,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 6,
+                              minHeight: 6,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ],
               ),
+              // IconButton(
+              //   icon: const Icon(Icons.mail_outline_rounded),
+              //   onPressed: () => Navigator.pushNamed(context, '/chatListPage'),
+              // ),
               IconButton(
                 icon: const Icon(Icons.menu),
                 onPressed: () {
