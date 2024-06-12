@@ -1,3 +1,4 @@
+import 'package:ci_dong/lean_cloud/client_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
@@ -25,7 +26,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     _onRefresh();
+    _leanCloudInit();
     super.initState();
+  }
+
+  void _leanCloudInit() async {
+    await ClientManager().initialize();
   }
 
   Future<void> _onRefresh() async {

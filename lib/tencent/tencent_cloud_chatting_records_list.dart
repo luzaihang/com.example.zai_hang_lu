@@ -17,7 +17,7 @@ class ChattingRecordsList {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
             TencentCloudAcquiesceData.chattingRecordsBucket,
             prefix: "${UserInfoConfig.uniqueID}/", // 前缀匹配，用来规定返回的对象前缀地址
-            maxKeys: 200, //显示200个记录
+            maxKeys: 200, //显示200个记录,联系的用户
           );
 
       List<Content?> contentsList = bucketContents.contentsList;
@@ -38,10 +38,29 @@ class ChattingRecordsList {
           String decodedJsonString = utf8.decode(response.bodyBytes);
           if (decodedJsonString.trim().isNotEmpty) {
             List<dynamic> decodedMap = json.decode(decodedJsonString);
-            for (var i in decodedMap) {
-              if (i['senderID'] != UserInfoConfig.uniqueID) {
-                ChatDetailSender userPost = ChatDetailSender.fromMap(i);
-                decodedMaps.add(userPost);
+            Logger().d(decodedMap);
+
+            Map<String, dynamic> data = {
+              "senderName": "",
+              "senderID": "",
+              "senderAvatar": "",
+              "message": "",
+              "time": "",
+            };
+
+            //消息内容、时间都是取最后一个
+            var lastMap = decodedMap.last;
+            data['message'] = lastMap['message'];
+            data['time'] = lastMap['time'];
+
+            for (var item in decodedMap) {
+              if (item['senderID'] != UserInfoConfig.uniqueID) {
+                //头像、名称、id都是取对方的
+                data["senderName"] = item['senderName'];
+                data['senderID'] = item['senderID'];
+                data['senderAvatar'] = item['senderAvatar'];
+                ChatDetailSender chatDetail = ChatDetailSender.fromMap(data);
+                decodedMaps.add(chatDetail);
                 break; // 只添加第一个不匹配的记录
               }
             }

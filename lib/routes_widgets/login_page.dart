@@ -1,3 +1,4 @@
+import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -202,8 +203,13 @@ class LoginScreenState extends State<LoginScreen> {
     Loading().show(context);
     try {
       String info = await TencentCloudTxtDownload.userInfoTxt();
+      String decryptInfo = "";
+      //解码
+      if (info.isNotEmpty) {
+        decryptInfo = EncryptionHelper.decrypt(info);
+      }
       LoginGetUserID loginGetUserID = LoginGetUserID();
-      List<LoginUser> users = loginGetUserID.parseUsers(info);
+      List<LoginUser> users = loginGetUserID.parseUsers(decryptInfo);
 
       String? userID = loginGetUserID.getUserID(users, userName, password);
       if (userID != null) {
@@ -215,8 +221,9 @@ class LoginScreenState extends State<LoginScreen> {
       } else {
         Logger().e('没有匹配的用户');
         userID = RandomGenerator.getRandomCombination();
+        Logger().d(decryptInfo);
         String upLoadText =
-            "${info}userName=$userName,password=$password,userID=$userID|";
+            "${decryptInfo}userName=$userName,password=$password,userID=$userID|";
         if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
       }
 

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:flutter/material.dart';
@@ -120,8 +121,10 @@ class _PanelWidgetState extends State<PanelWidget> {
                     if (newName != null && newName.isNotEmpty) {
                       String result =
                           await TencentCloudTxtDownload.userInfoTxt();
+                      //解密
+                      String decryptResult = EncryptionHelper.decrypt(result);
 
-                      String modifiedData = result.replaceAll(
+                      String modifiedData = decryptResult.replaceAll(
                         'userName=${UserInfoConfig.userName}',
                         'userName=$newName',
                       );

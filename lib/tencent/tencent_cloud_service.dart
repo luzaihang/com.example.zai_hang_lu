@@ -12,8 +12,8 @@ class CosService {
 
   // 私有构造函数
   CosService._internal() {
-    _initCloud();
-    _configureCosXmlService();
+    // _initCloud();
+    // _configureCosXmlService();
   }
 
   // 提供一个公共访问点
@@ -22,12 +22,10 @@ class CosService {
   }
 
   /// 初始化腾讯云cos
-  void _initCloud() {
-    cos.initWithPlainSecret(
-      TencentCloudAcquiesceData.secretId,
-      TencentCloudAcquiesceData.secretKey,
-    );
+  void initCloud(String secretId, String secretKey) {
+    cos.initWithPlainSecret(secretId, secretKey);
     Logger().i("腾讯云cos初始化成功");
+    _configureCosXmlService();
   }
 
   /// 注册 COS 服务

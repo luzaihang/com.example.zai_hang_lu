@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:math' as math;
+import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 // 生成波浪路径的函数
 Path wavePath(Size size, double animationValue) {
@@ -62,15 +65,36 @@ class AppLaunchPageState extends State<AppLaunchPage>
   @override
   void initState() {
     super.initState();
+
+    _loadJsonFile();
+    _animation();
+    _isLoggedIn();
+  }
+
+  Future<void> _loadJsonFile() async {
+    String content = await rootBundle.loadString('assets/tencentCloud.json');
+    Map<String, dynamic> parsedContent = json.decode(content);
+    String secretId = parsedContent['secretId'] ?? "";
+    String secretKey = parsedContent['secretKey'] ?? "";
+
+    String id = EncryptionHelper.decrypt(secretId);
+    String key = EncryptionHelper.decrypt(secretKey);
+
+    cosService.initCloud(id, key);
+  }
+
+  void _animation() {
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(); // 使动画循环播放
+  }
 
-    Future.delayed(const Duration(seconds: 4), () async {
-      UserInfoConfig.userName  = await AuthManager.getUserName() ?? '';
+  void _isLoggedIn() {
+    Future.delayed(const Duration(seconds: 3), () async {
+      UserInfoConfig.userName = await AuthManager.getUserName() ?? '';
       UserInfoConfig.userPassword = await AuthManager.getUserPassword() ?? '';
-      UserInfoConfig.uniqueID  = await AuthManager.getUniqueId() ?? '';
+      UserInfoConfig.uniqueID = await AuthManager.getUniqueId() ?? '';
 
       bool isLoggedIn = await AuthManager.checkLoginStatus();
       if (isLoggedIn) {

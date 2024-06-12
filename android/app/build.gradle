@@ -40,6 +40,21 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    signingConfigs {
+        debug {
+            storeFile file('/Users/hang/Documents/ci_dong_keys/ci_dong_debug')
+            storePassword '123456'
+            keyPassword '123456'
+            keyAlias 'ci_dong_debug'
+        }
+        release {
+            keyAlias 'ci_dong_release'
+            keyPassword '123456'
+            storeFile file('/Users/hang/Documents/ci_dong_keys/ci_dong_key')
+            storePassword '123456'
+        }
+    }
+
     defaultConfig {
         applicationId "com.example.ci_dong"
         minSdkVersion 21
@@ -49,8 +64,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 添加任何需要的配置
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-DEBUG"
+            // 其他debug配置信息
+            debuggable true
+        }
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+//            minifyEnabled true // 根据需要配置
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

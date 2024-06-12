@@ -23,7 +23,7 @@ class MainActivity: FlutterActivity() {
             this,
             "4pAbS2RXdM9PLvHXGgFUrGe1-gzGzoHsz",
             "0MLmh4Q04UxZuXgGvaDV6mHx",
-            "4pabs2rx.lc-cn-n1-shared.com"
+            "cidong.zouxingift.cn"
         )
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->

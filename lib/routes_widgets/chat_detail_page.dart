@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ci_dong/lean_cloud/client_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
@@ -30,7 +31,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Client client;
+  Client client = ClientManager().client;
 
   List<ChatDetailSender> newMessages = []; // 新增列表用于保存新消息
 
@@ -77,8 +78,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Future<void> _initializeLeanCloud() async {
-    client = Client(id: UserInfoConfig.uniqueID);
-    await client.open();
+    // await ClientManager().initialize();
     _setupClientMessageListener();
   }
 

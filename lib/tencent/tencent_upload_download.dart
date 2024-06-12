@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
@@ -88,7 +89,8 @@ class TencentUpLoadAndDownload {
   }) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "user_info.txt";
-    Uint8List byte = Uint8List.fromList(utf8.encode(userText));
+    String string = EncryptionHelper.encrypt(userText);
+    Uint8List byte = Uint8List.fromList(utf8.encode(string));
 
     bool success = await uploader.uploadFile(
         TencentCloudAcquiesceData.userInfoBucket, cosPath,
