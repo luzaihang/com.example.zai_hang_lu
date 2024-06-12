@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 
@@ -22,18 +21,15 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    // final timeFormat = DateFormat('h:mm a');
-
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+      margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       child: Row(
-        crossAxisAlignment: align,
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           if (!isMe) _buildAvatar(senderAvatar),
+          const SizedBox(width: 10),
           Expanded(child: _buildMessageContent(context, timestamp)),
+          const SizedBox(width: 10),
           if (isMe) _buildAvatar(UserInfoConfig.userAvatar),
         ],
       ),
@@ -42,18 +38,26 @@ class MessageBubble extends StatelessWidget {
 
   Widget _buildAvatar(String avatarUrl) {
     return avatarUrl.isNotEmpty
-        ? CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(avatarUrl),
-            radius: 22.0,
+        ? Container(
+            margin: const EdgeInsets.only(top: 3),
+            child: CircleAvatar(
+              backgroundImage: CachedNetworkImageProvider(avatarUrl),
+              radius: 20.0,
+            ),
           )
-        : const CircleAvatar(
-            backgroundColor: Colors.blueGrey,
-            radius: 22.0,
-            child: Icon(Icons.person),
+        : Container(
+            margin: const EdgeInsets.only(top: 3),
+            child: const CircleAvatar(
+              backgroundColor: Colors.blueGrey,
+              radius: 20.0,
+              child: Icon(Icons.person),
+            ),
           );
   }
 
   Widget _buildMessageContent(BuildContext context, DateTime dateTime) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       crossAxisAlignment:
           isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -80,16 +84,22 @@ class MessageBubble extends StatelessWidget {
         ),
         const SizedBox(height: 5.0),
         Container(
-          padding: const EdgeInsets.all(6.0),
+          padding: const EdgeInsets.all(8.0),
+          constraints: BoxConstraints(
+            maxWidth: screenWidth - 130.0,
+          ),
           decoration: BoxDecoration(
             color: isMe
                 ? Colors.green.withOpacity(0.8)
-                : Colors.blueGrey.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(9.0),
+                : Colors.blueGrey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6.0),
           ),
           child: Text(
             text,
-            style: TextStyle(color: isMe ? Colors.white : Colors.black.withOpacity(0.7)),
+            style: TextStyle(
+              color: isMe ? Colors.white : Colors.black.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.justify,
           ),
         ),
       ],

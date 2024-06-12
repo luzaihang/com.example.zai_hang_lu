@@ -219,20 +219,59 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Widget _buildTextComposer() {
-    return Row(
-      children: <Widget>[
-        Flexible(
-          child: TextField(
-            controller: _controller,
-            onSubmitted: _handleSubmitted,
-            decoration: const InputDecoration.collapsed(hintText: '请输入'),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      child: Row(
+        children: <Widget>[
+          Flexible(
+            child: TextField(
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                // 移除边框
+                isDense: true,
+                // 减少内边距
+                contentPadding: EdgeInsets.zero,
+                // 设置内边距为0
+                counterText: "",
+                hintText: "最多可输入520字",
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 13,
+                ),
+              ),
+              cursorColor: Colors.blueGrey,
+              cursorWidth: 2,
+              cursorRadius: const Radius.circular(5),
+              style: const TextStyle(color: Colors.blueGrey),
+              maxLength: 520,
+              controller: _controller,
+              onSubmitted: _handleSubmitted,
+              maxLines: 5,
+              minLines: 1,
+            ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.send, color: Colors.blue),
-          onPressed: () => _handleSubmitted(_controller.text),
-        ),
-      ],
+          GestureDetector(
+            onTap: () => _handleSubmitted(_controller.text),
+            child: Container(
+              // width: 40,
+              // height: 30,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                "发送",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
