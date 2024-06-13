@@ -50,11 +50,18 @@ class _HomePageState extends State<HomePage>
 
   void _leanCloudInit() async {
     await ClientManager().initialize();
-    newMe();
+
+    Client client = ClientManager().client;
+    client.onUnreadMessageCountUpdated = ({
+      required Client client,
+      required Conversation conversation,
+    }) {
+      Logger().i(conversation.id);
+    };
   }
 
   Future<void> newMe() async {
-    ClientManager().client.onMessage = ({
+    /* ClientManager().client.onMessage = ({
       required Client client,
       required Conversation conversation,
       required Message message,
@@ -69,7 +76,7 @@ class _HomePageState extends State<HomePage>
       });
 
       Logger().d(newMessage);
-    };
+    };*/
   }
 
   Future<void> _onRefresh() async {
@@ -114,9 +121,9 @@ class _HomePageState extends State<HomePage>
                   IconButton(
                       icon: const Icon(Icons.mail_outline_rounded),
                       onPressed: () {
-                        setState(() {
-                          newMessage = false;
-                        });
+                        // setState(() {
+                        //   newMessage = false;
+                        // });
                         Navigator.pushNamed(context, '/chatListPage');
                       }),
                   newMessage

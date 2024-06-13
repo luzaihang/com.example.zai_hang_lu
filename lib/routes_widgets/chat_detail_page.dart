@@ -45,7 +45,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   @override
   void dispose() {
     _controller.dispose();
-    _uploadChatDetails(); // 页面退出时合并并上传聊天记录
     super.dispose();
   }
 
@@ -91,6 +90,9 @@ class ChatDetailPageState extends State<ChatDetailPage> {
         isMe: false,
         timestamp: DateTime.now(),
       );
+
+      //接收到消息时，上传数据到云端
+      _uploadChatDetails();
     };
   }
 
@@ -150,6 +152,8 @@ class ChatDetailPageState extends State<ChatDetailPage> {
 
     TextMessage textMessage = TextMessage.from(text: text);
     await conversation.send(message: textMessage);
+    //发送消息时，上传数据到云端
+    _uploadChatDetails();
   }
 
   void _handleSubmitted(String text) async {

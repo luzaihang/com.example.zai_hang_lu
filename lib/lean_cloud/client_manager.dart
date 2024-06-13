@@ -1,4 +1,3 @@
-// client_manager.dart
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
