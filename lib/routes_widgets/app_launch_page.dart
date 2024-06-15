@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
@@ -8,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 // 生成波浪路径的函数
-Path wavePath(Size size, double animationValue) {
+/*Path wavePath(Size size, double animationValue) {
   final path = Path();
   final height = size.height;
   final width = size.width;
@@ -47,7 +46,7 @@ class WaveClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => true;
-}
+}*/
 
 class AppLaunchPage extends StatefulWidget {
   const AppLaunchPage({super.key});
@@ -58,7 +57,7 @@ class AppLaunchPage extends StatefulWidget {
 
 class AppLaunchPageState extends State<AppLaunchPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  // late AnimationController _controller;
 
   final CosService cosService = CosService();
 
@@ -67,7 +66,7 @@ class AppLaunchPageState extends State<AppLaunchPage>
     super.initState();
 
     _loadJsonFile();
-    _animation();
+    // _animation();
     _isLoggedIn();
   }
 
@@ -83,12 +82,12 @@ class AppLaunchPageState extends State<AppLaunchPage>
     cosService.initCloud(id, key);
   }
 
-  void _animation() {
+  /*void _animation() {
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(); // 使动画循环播放
-  }
+  }*/
 
   void _isLoggedIn() {
     Future.delayed(const Duration(seconds: 3), () async {
@@ -109,13 +108,14 @@ class AppLaunchPageState extends State<AppLaunchPage>
 
   @override
   void dispose() {
-    _controller.dispose();
+    // _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F3F5),
       body: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -125,7 +125,7 @@ class AppLaunchPageState extends State<AppLaunchPage>
               height: 120,
               width: 120,
             ),
-            Positioned.fill(
+            /*Positioned.fill(
               child: Align(
                 alignment: Alignment.topCenter,
                 child: AnimatedBuilder(
@@ -145,7 +145,7 @@ class AppLaunchPageState extends State<AppLaunchPage>
                   },
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ),

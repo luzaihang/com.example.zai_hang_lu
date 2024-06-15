@@ -1,11 +1,11 @@
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
-import 'package:ci_dong/global_component/show_custom_dialog.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 
@@ -18,9 +18,12 @@ class LoginScreen extends StatefulWidget {
   LoginScreenState createState() => LoginScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   bool _isChecked = false;
-  bool _isPasswordVisible = false;
+
+  late AnimationController _controller;
+  late Animation<Offset> _animation;
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -29,6 +32,53 @@ class LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _loadLoginInfo();
+
+    _anima();
+
+    _usernameController.addListener(_onConditionsChanged);
+    _passwordController.addListener(_onConditionsChanged);
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _anima() {
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: const Offset(0.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  void _onConditionsChanged() {
+    // 当两个输入框都有内容且复选框被选中时，触发动画；否则反向播放动画
+    if (_usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty &&
+        _passwordController.text.length > 5 &&
+        _isChecked) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  void _onCheckboxChanged(bool newValue) {
+    setState(() {
+      _isChecked = newValue;
+    });
+    _onConditionsChanged();
   }
 
   Future<void> _loadLoginInfo() async {
@@ -48,138 +98,194 @@ class LoginScreenState extends State<LoginScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.blueGrey,
-          onPressed: () async {
-            bool? res = await showCustomDialog(context, "登录即代表注册，请记住个人信息");
-            if (res != true) return;
-            if (mounted) _validateAndLogin(context);
-          },
-          mini: true,
-          heroTag: 'loginPageFloatingActionButton',
-          child: const Text(
-            "登录",
-            style: TextStyle(
-              fontSize: 13,
-              color: Color(0xFFFAFAFA),
-            ),
-          ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 100),
-              Image.asset("assets/logo.png", height: 70),
-              const SizedBox(height: 10),
-              const Text(
-                'Second heartbeat',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey,
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
+                height: double.infinity,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    const Text(
+                      "登录",
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontFamily: "JinBuTi",
+                      ),
+                    ),
+                    Positioned(
+                      top: 160,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(width: 0.1))),
+                        child: TextField(
+                          controller: _usernameController,
+                          decoration: const InputDecoration(
+                            hintText: '输入昵称',
+                            border: InputBorder.none,
+                            counterText: "",
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          cursorColor: Colors.black,
+                          // 设置光标颜色为黑色
+                          cursorRadius: const Radius.circular(5.0),
+                          // 设置光标的圆角半径
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                          ),
+                          maxLength: 8,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(
+                                  r'[\u4e00-\u9fa5a-zA-Z]'), // 允许输入的字符范围：中文字符和英文字母
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 220,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(width: 0.1))),
+                        child: TextField(
+                          controller: _passwordController,
+                          // obscureText: true, // 设置为密码输入模式
+                          keyboardType: TextInputType.number,
+                          // 设置为数字键盘
+                          decoration: const InputDecoration(
+                            hintText: '输入至少6位密码',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            // 去除内边距
+                            counterText: "",
+                            hintStyle: TextStyle(
+                              fontSize: 13,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          maxLength: 18,
+                          cursorColor: Colors.black,
+                          // 设置光标颜色为黑色
+                          cursorRadius: const Radius.circular(5.0),
+                          // 设置光标的圆角半径
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter(
+                              RegExp(r'[a-zA-Z0-9]'), // 允许的字符集
+                              allow: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              _onCheckboxChanged(!_isChecked);
+                            },
+                            child: Image.asset(
+                              "assets/ok_icon.png",
+                              height: 20,
+                              color: _isChecked
+                                  ? Colors.blue
+                                  : Colors.blueGrey.withOpacity(0.3),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "点亮",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Text(
+                            "确认并同意 ",
+                            style:
+                                TextStyle(color: Colors.blueGrey, fontSize: 13),
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: const Text(
+                              "《用户协议与隐私政策》",
+                              style:
+                                  TextStyle(color: Colors.blue, fontSize: 13),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Text(
+                        "登录即注册  请保管好个人信息",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.blueGrey.withOpacity(0.5),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 100),
-              _buildTextField(
-                controller: _usernameController,
-                hintText: '账号最多8位',
-                isPassword: false,
-                maxLength: 8,
+              Positioned(
+                right: 0,
+                bottom: 350,
+                child: SlideTransition(
+                  position: _animation,
+                  child: GestureDetector(
+                    onTap: () {
+                      _validateAndLogin(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.9),
+                        borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(50)),
+                      ),
+                      child: const Text(
+                        "进入",
+                        style: TextStyle(
+                          color: Color(0xFFFAFAFA),
+                          fontFamily: "JinBuTi",
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                controller: _passwordController,
-                hintText: '密码最多18位',
-                isPassword: true,
-                maxLength: 18,
-              ),
-              const SizedBox(height: 20),
-              _buildAgreementSection(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required bool isPassword,
-    required int maxLength,
-  }) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        counterText: "",
-        hintText: hintText,
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-          fontSize: 13,
-        ),
-        border: const UnderlineInputBorder(),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueGrey),
-        ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.blueGrey, width: 0.2),
-        ),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.blueGrey,
-                  size: 17.0,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
-                  });
-                },
-              )
-            : null,
-      ),
-      obscureText: isPassword && !_isPasswordVisible,
-      cursorColor: Colors.blueGrey,
-      cursorWidth: 2,
-      cursorRadius: const Radius.circular(5),
-      style: const TextStyle(color: Colors.blueGrey),
-      maxLength: maxLength,
-    );
-  }
-
-  Widget _buildAgreementSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Checkbox(
-          side: const BorderSide(width: 1.0, color: Colors.blueGrey),
-          shape: const CircleBorder(),
-          value: _isChecked,
-          fillColor: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
-              return Colors.blue.withOpacity(0.7);
-            }
-            return Colors.transparent;
-          }),
-          onChanged: (bool? value) {
-            setState(() {
-              _isChecked = value ?? false;
-            });
-          },
-        ),
-        const Text(
-          '我已知晓并同意',
-          style: TextStyle(color: Colors.blueGrey),
-        ),
-        TextButton(
-          onPressed: () {},
-          child: Text('《隐私政策和条款》',
-              style: TextStyle(color: Colors.blue.withOpacity(0.7))),
-        ),
-      ],
     );
   }
 
@@ -191,8 +297,8 @@ class LoginScreenState extends State<LoginScreen> {
       showCustomSnackBar(context, "账号不能为空");
       return;
     }
-    if (password.isEmpty) {
-      showCustomSnackBar(context, "密码不能为空");
+    if (password.isEmpty && password.length > 5) {
+      showCustomSnackBar(context, "密码不能为空、或不足6位");
       return;
     }
     if (!_isChecked) {

@@ -50,6 +50,8 @@ dependencies:
   permission_handler: ^10.2.0
   # 保存图片、视频
   image_gallery_saver: ^2.0.3
+  # 多图选择(自带限制数量)
+  multi_image_picker_plus: ^0.0.3
   # 元组包，同时return多个数组
   tuple: ^2.0.2
   # 缓存
@@ -62,6 +64,8 @@ dependencies:
   flutter_spinkit: ^5.2.1
   # AES（对称加密）,RSA（非对称加密）
   encrypt: ^5.0.3
+  #  轮播图
+  carousel_slider: ^4.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -92,12 +96,20 @@ flutter:
   assets:
     - assets/logo.png
     - assets/back_icon.png
+    - assets/ok_icon.png
+    - assets/me_icon.png
+    - assets/other_icon.png
+    - assets/post_icon.png
+    - assets/chat_icon.png
+    - assets/photo_album_icon.png
+    - assets/like_icon.png
+    - assets/image_more_icon.png
     - assets/tencentCloud.json
-#    - assets/fonts/
-#  fonts:
-#    - family: SmileySans
-#      fonts:
-#        - asset: assets/fonts/SmileySans-Oblique.ttf
+    - assets/fonts/
+  fonts:
+    - family: JinBuTi
+      fonts:
+        - asset: assets/fonts/DingTalk-JinBuTi.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

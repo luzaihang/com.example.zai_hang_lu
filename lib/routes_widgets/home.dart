@@ -1,4 +1,7 @@
 import 'package:ci_dong/lean_cloud/client_manager.dart';
+import 'package:ci_dong/my_page/my_main.dart';
+import 'package:ci_dong/post_page/post_main.dart';
+import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
@@ -6,8 +9,10 @@ import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
 import 'package:ci_dong/widget_element/home_panel_item.dart';
 import 'package:ci_dong/widget_element/home_post_item.dart';
 import 'package:ci_dong/widget_element/preferredSize_item.dart';
+import 'package:flutter/rendering.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   ///文件列表
   List<UserPost> directories = [];
 
@@ -29,23 +34,54 @@ class _HomePageState extends State<HomePage>
   bool newMessage = false;
   bool _isActive = true;
 
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+
   @override
   void initState() {
     super.initState();
     _onRefresh();
     _leanCloudInit();
-    WidgetsBinding.instance.addObserver(this); // 添加观察者
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: const Offset(0.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    // 初始状态设定
+    // 按需调用以下代码
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<VisibilityNotifier>().updateVisibility(true);
+      // 确保动画控制器初始即启动
+      _controller.forward();
+    });
+
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // 移除观察者
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _isActive = state == AppLifecycleState.resumed;
+  }
+
+  void _toggleBottomNavigationBar(bool isVisible) {
+    if (isVisible) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   void _leanCloudInit() async {
@@ -58,25 +94,6 @@ class _HomePageState extends State<HomePage>
     }) {
       Logger().i(conversation.id);
     };
-  }
-
-  Future<void> newMe() async {
-    /* ClientManager().client.onMessage = ({
-      required Client client,
-      required Conversation conversation,
-      required Message message,
-    }) async {
-      String? text = message is TextMessage ? message.text : '';
-      if (text == null || text.isEmpty) return;
-
-      if (!mounted || !_isActive) return; // 检查是否挂载且处于活跃状态
-
-      setState(() {
-        newMessage = true;
-      });
-
-      Logger().d(newMessage);
-    };*/
   }
 
   Future<void> _onRefresh() async {
@@ -93,14 +110,168 @@ class _HomePageState extends State<HomePage>
     setState(() {});
   }
 
+  int _currentIndex = 0;
+  final List<Widget> _children = [
+    const MyMain(),
+    const PostMain(),
+    ProfileScreen(),
+  ];
+
+  void onTappedBar(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  Widget _buildImageIcon(
+      double bot, String assetName, Color? color, double height) {
+    return Container(
+      margin: EdgeInsets.only(bottom: bot),
+      child: Image.asset(
+        assetName,
+        width: height,
+        height: height,
+        color: color,
+      ), // 根据需求调整尺寸
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double panelWidth = screenWidth / 2;
+
+    final visibilityNotifier = Provider.of<VisibilityNotifier>(context);
+
+    visibilityNotifier.addListener(() {
+      _toggleBottomNavigationBar(visibilityNotifier.isVisible);
+    });
 
     return WillPopScope(
       onWillPop: () => _showExitConfirmationDialog(context),
       child: Scaffold(
+        backgroundColor: const Color(0xFFF2F3F5),
+        body:
+        Stack(
+          children: [
+            IndexedStack(
+              index: _currentIndex,
+              children: _children,
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SlideTransition(
+                position: _offsetAnimation,
+                child: BottomNavigationBar(
+                  onTap: onTappedBar,
+                  currentIndex: _currentIndex,
+                  selectedItemColor: const Color(0xFF1E3A8A),
+                  unselectedItemColor: Colors.grey,
+                  selectedLabelStyle: const TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "JinBuTi",
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 12.0,
+                    fontFamily: "JinBuTi",
+                  ),
+                  type: BottomNavigationBarType.shifting,
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: _buildImageIcon(
+                          3, "assets/me_icon.png", Colors.blueGrey, 20),
+                      label: '我的',
+                      activeIcon:
+                          _buildImageIcon(3, "assets/me_icon.png", null, 20),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildImageIcon(
+                        0,
+                        "assets/post_icon.png",
+                        Colors.blueGrey,
+                        30,
+                      ),
+                      label: '动态',
+                      activeIcon: _buildImageIcon(
+                        0,
+                        "assets/post_icon.png",
+                        null,
+                        30,
+                      ),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildImageIcon(
+                        3,
+                        "assets/other_icon.png",
+                        Colors.blueGrey,
+                        20,
+                      ),
+                      label: '其它',
+                      activeIcon: _buildImageIcon(
+                        3,
+                        "assets/other_icon.png",
+                        null,
+                        20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            title: const Text(
+              '退出应用',
+              style: TextStyle(color: Colors.blueGrey),
+            ),
+            content: const Text(
+              '你确定要退出应用吗?',
+              style: TextStyle(color: Colors.blueGrey),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('取消'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: const Text('确定'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+}
+
+class SearchScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('动态'));
+  }
+}
+
+class ProfileScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('其它'));
+  }
+}
+
+
+/*child: Scaffold(
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.blueGrey,
           onPressed: () async {
@@ -193,37 +364,4 @@ class _HomePageState extends State<HomePage>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
-    return await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            title: const Text(
-              '退出应用',
-              style: TextStyle(color: Colors.blueGrey),
-            ),
-            content: const Text(
-              '你确定要退出应用吗?',
-              style: TextStyle(color: Colors.blueGrey),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('取消'),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              TextButton(
-                child: const Text('确定'),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
-}
+      ),*/
