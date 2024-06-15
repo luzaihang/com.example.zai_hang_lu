@@ -1,3 +1,4 @@
+import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppShareDataProvider()),
-        ChangeNotifierProvider(create: (_)=> VisibilityNotifier())
+        ChangeNotifierProvider(create: (_)=> VisibilityNotifier()),
+        ChangeNotifierProvider(create: (_)=> PostPageNotifier()),
       ],
       child: MaterialApp(
         title: "次动",

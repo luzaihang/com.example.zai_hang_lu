@@ -98,6 +98,7 @@ class LoginScreenState extends State<LoginScreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
+        backgroundColor: const Color(0xFFF2F3F5),
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Stack(

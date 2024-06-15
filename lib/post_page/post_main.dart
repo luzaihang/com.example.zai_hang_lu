@@ -1,6 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/post_page/all_post_list.dart';
 import 'package:ci_dong/post_page/new_edit_post_page.dart';
+import 'package:ci_dong/post_page/user_post_list.dart';
+import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,6 @@ class _PostMainState extends State<PostMain> {
     super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    _onRefresh();
   }
 
   @override
@@ -45,30 +46,29 @@ class _PostMainState extends State<PostMain> {
         ScrollDirection.forward) {
       visibilityNotifier.updateVisibility(true);
     }
+
+    final postPageNotifier = Provider.of<PostPageNotifier>(context, listen: false);
+    postPageNotifier.setIndexOff(_selectedIndex, _scrollController.offset);
   }
 
   void _onTabTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+
+    final postPageNotifier = Provider.of<PostPageNotifier>(context, listen: false);
+    switch (_selectedIndex) {
+      case 0:
+        _scrollController.jumpTo(postPageNotifier.index0);
+        break;
+      case 1:
+        _scrollController.jumpTo(postPageNotifier.index1);
+        break;
+      case 2:
+        _scrollController.jumpTo(postPageNotifier.index2);
+        break;
+    }
   }
-
-  Future<void> _onRefresh() async {
-    List<UserPost>? result = await tencentCloudListData.getFirstContentsList();
-    directories = result ?? [];
-
-    setState(() {});
-  }
-
-  Future<void> _onLoadMore() async {
-    List<UserPost>? result = await tencentCloudListData.getNextContentsList();
-    directories.addAll(result ?? []);
-
-    setState(() {});
-  }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -126,8 +126,6 @@ class _PostMainState extends State<PostMain> {
             ),
           ),
           _getSelectedContent(),
-          /*
-          ),*/
         ],
       ),
     );
@@ -172,158 +170,16 @@ class _PostMainState extends State<PostMain> {
   }
 
   Widget _getSelectedContent() {
-    return const ImagePickerWidget();
-    // return AllPostListWidget();
-    /*switch (_selectedIndex) {
+    switch (_selectedIndex) {
       case 0:
         return const AllPostListWidget();
       case 1:
-        return const Text("个人内容");
+        return const UserPostList();
       case 2:
-        return const Text("发帖内容");
+        return const NewEditPost();
       default:
         return const Text("未知内容");
-    }*/
-  }
-}
-
-class AllPostListWidget extends StatelessWidget {
-  const AllPostListWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    // int index = 0; //这里还没有设置
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(20, index == 0 ? 20 : 0, 20, 0),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      "assets/chat_icon.png",
-                      height: 36,
-                      width: 36,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '缘聚缘散缘如水',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Color(0xFF052D84),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 2,
-                          ),
-                          Text(
-                            '累计获赞: 10000次',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: const Color(0xFF052D84).withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Image.asset(
-                        "assets/like_icon.png",
-                        height: 28,
-                        width: 28,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(65, 10, 20, 0),
-                child: Text(
-                  '刚发现我车上被贴了这种东西贴在不显眼的位置好像是某种符有人知道这是啥吗?',
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.7,
-                    color: Color(0xFF052D84),
-                  ),
-                  textAlign: TextAlign.justify,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(65, 10, 0, 0),
-                child: Row(
-                  children: [
-                    Stack(
-                      // alignment: Alignment.center,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            width: screenWidth * (2 / 3),
-                            imageUrl:
-                                'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/241718341476_.pic.jpg',
-                          ),
-                        ),
-                        Positioned(
-                          right: 10,
-                          bottom: 10,
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                "assets/image_more_icon.png",
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(width: 4),
-                              const Text(
-                                "X6",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(65, 10, 10, 20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: screenWidth * (2 / 3),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '点击可直接和TA取得联系~',
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.7,
-                          color: const Color(0xFF052D84).withOpacity(0.4),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-        childCount: 5,
-      ),
-    );
+    }
   }
 }
 

@@ -104,6 +104,8 @@ flutter:
     - assets/photo_album_icon.png
     - assets/like_icon.png
     - assets/image_more_icon.png
+    - assets/image_add_icon.png
+    - assets/image_delete_icon.png
     - assets/tencentCloud.json
     - assets/fonts/
   fonts:

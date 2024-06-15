@@ -62,7 +62,6 @@ class _HomePageState extends State<HomePage>
       // 确保动画控制器初始即启动
       _controller.forward();
     });
-
   }
 
   @override
@@ -138,7 +137,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-
     final visibilityNotifier = Provider.of<VisibilityNotifier>(context);
 
     visibilityNotifier.addListener(() {
@@ -149,8 +147,8 @@ class _HomePageState extends State<HomePage>
       onWillPop: () => _showExitConfirmationDialog(context),
       child: Scaffold(
         backgroundColor: const Color(0xFFF2F3F5),
-        body:
-        Stack(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
           children: [
             IndexedStack(
               index: _currentIndex,
@@ -256,20 +254,14 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-class SearchScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('动态'));
-  }
-}
-
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const Center(child: Text('其它'));
   }
 }
-
 
 /*child: Scaffold(
         floatingActionButton: FloatingActionButton(
