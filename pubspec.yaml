@@ -113,10 +113,10 @@ flutter:
     - assets/third_party_icon.png
     - assets/tencentCloud.json
     - assets/fonts/
-  fonts:
-    - family: JinBuTi
-      fonts:
-        - asset: assets/fonts/DingTalk-JinBuTi.ttf
+#  fonts:
+#    - family: JinBuTi
+#      fonts:
+#        - asset: assets/fonts/DingTalk-JinBuTi.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

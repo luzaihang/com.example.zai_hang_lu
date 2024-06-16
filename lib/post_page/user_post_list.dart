@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:flutter/material.dart';
 
 class UserPostList extends StatefulWidget {
@@ -9,7 +10,6 @@ class UserPostList extends StatefulWidget {
 }
 
 class _UserPostListState extends State<UserPostList> {
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -87,8 +87,7 @@ class _UserPostListState extends State<UserPostList> {
                           borderRadius: BorderRadius.circular(8),
                           child: CachedNetworkImage(
                             width: screenWidth * (2 / 3),
-                            imageUrl:
-                                'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/241718341476_.pic.jpg',
+                            imageUrl: DefaultConfig.bannerImg,
                           ),
                         ),
                         Positioned(
@@ -143,7 +142,5 @@ class _UserPostListState extends State<UserPostList> {
         childCount: 5,
       ),
     );
-
-
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
@@ -33,7 +34,7 @@ class TencentUpLoadAndDownload {
       if (filePath != null && filePath.isNotEmpty && postContentData != null) {
         //只有 帖子上传到时候才需要这个操作
         String path =
-            "https://${TencentCloudAcquiesceData.postImageBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/$cosPath";
+            "https://${DefaultConfig.postImageBucket}.cos.${DefaultConfig.region}.myqcloud.com/$cosPath";
         postContentData.addToPostImagePaths(path);
       }
       completer.complete(true);
@@ -60,7 +61,7 @@ class TencentUpLoadAndDownload {
       {PostContentData? postContentData}) async {
     String filename = imagePath.split('/').last;
     String cosPath = "${PostContentData.postID}/$filename";
-    return uploadFile(TencentCloudAcquiesceData.postImageBucket, cosPath,
+    return uploadFile(DefaultConfig.postImageBucket, cosPath,
         filePath: imagePath, postContentData: postContentData);
   }
 
@@ -71,7 +72,7 @@ class TencentUpLoadAndDownload {
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
     bool success = await uploader.uploadFile(
-        TencentCloudAcquiesceData.postTextBucket, cosPath,
+        DefaultConfig.postTextBucket, cosPath,
         byteArr: byte);
     if (success) {
       Loading().hide();
@@ -93,7 +94,7 @@ class TencentUpLoadAndDownload {
     Uint8List byte = Uint8List.fromList(utf8.encode(string));
 
     bool success = await uploader.uploadFile(
-        TencentCloudAcquiesceData.userInfoBucket, cosPath,
+        DefaultConfig.userInfoBucket, cosPath,
         byteArr: byte);
     if (success) {
       Logger().i("txt 上传新用户成功");
@@ -118,10 +119,10 @@ class TencentUpLoadAndDownload {
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
     await uploader.uploadFile(
-        TencentCloudAcquiesceData.chattingRecordsBucket, cosPath1,
+        DefaultConfig.chattingRecordsBucket, cosPath1,
         byteArr: byte);
     await uploader.uploadFile(
-        TencentCloudAcquiesceData.chattingRecordsBucket, cosPath2,
+        DefaultConfig.chattingRecordsBucket, cosPath2,
         byteArr: byte);
   }
 
@@ -129,7 +130,7 @@ class TencentUpLoadAndDownload {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "${UserInfoConfig.uniqueID}/userAvatar.png";
     return uploader.uploadFile(
-      TencentCloudAcquiesceData.avatarAndPost,
+      DefaultConfig.avatarAndPostBucket,
       cosPath,
       filePath: imagePath,
     );

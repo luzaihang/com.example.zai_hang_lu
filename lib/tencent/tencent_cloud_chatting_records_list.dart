@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
@@ -15,7 +16,7 @@ class ChattingRecordsList {
     try {
       // 获取桶内容
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            TencentCloudAcquiesceData.chattingRecordsBucket,
+            DefaultConfig.chattingRecordsBucket,
             prefix: "${UserInfoConfig.uniqueID}/", // 前缀匹配，用来规定返回的对象前缀地址
             maxKeys: 200, //显示200个记录,联系的用户
           );
@@ -26,7 +27,7 @@ class ChattingRecordsList {
       List<String> objectUrls = contentsList
           .where((object) => object != null)
           .map((object) =>
-              "https://${TencentCloudAcquiesceData.chattingRecordsBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${object?.key}")
+              "https://${DefaultConfig.chattingRecordsBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}")
           .toList();
 
       // 并发获取请求

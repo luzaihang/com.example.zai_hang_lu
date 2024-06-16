@@ -177,7 +177,7 @@ class _SettingPageMainState extends State<SettingPageMain> {
             _buildSettingItem(
               iconPath: "assets/third_party_icon.png",
               title: "第三方信息说明",
-              subtitle: "APP 内部使用的第三方插件",
+              subtitle: "APP 内部使用的第三方服务",
               onTap: () {},
             ),
             const SizedBox(height: 20),

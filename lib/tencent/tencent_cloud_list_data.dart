@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
@@ -18,7 +18,7 @@ class TencentCloudListData {
     List<UserPost> decodedMaps = [];
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            TencentCloudAcquiesceData.postTextBucket,
+            DefaultConfig.postTextBucket,
             prefix: "", // 前缀匹配，用来规定返回的对象前缀地址
             marker: marker,
             maxKeys: 10, // 单次返回最大的条目数量，默认1000
@@ -31,7 +31,7 @@ class TencentCloudListData {
 
       List<String> objectUrls =
           contentsList.where((object) => object != null).map((object) {
-        return "https://${TencentCloudAcquiesceData.postTextBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${object?.key}";
+        return "https://${DefaultConfig.postTextBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
       }).toList();
 
       var responses =

@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/my_page/my_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class MyMain extends StatefulWidget {
@@ -12,11 +15,6 @@ class MyMain extends StatefulWidget {
 }
 
 class _MyMainState extends State<MyMain> {
-  final List<String> imgList = [
-    'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/241718341476_.pic.jpg',
-    'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/251718341477_.pic.jpg',
-  ];
-
   late ScrollController _scrollController;
   late VisibilityNotifier _visibilityNotifier;
 
@@ -47,19 +45,21 @@ class _MyMainState extends State<MyMain> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    return ListView.builder(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MyPageNotifier()),
+      ],
+      child: ListView.builder(
         controller: _scrollController,
         itemCount: 1,
         itemBuilder: (context, index) {
+          MyPageNotifier myPageNotifier = context.read<MyPageNotifier>();
+          myPageNotifier.bannerImgFun();
+
           return Column(
             children: [
               Container(
-                padding: const EdgeInsets.fromLTRB(
-                  24,
-                  45,
-                  0,
-                  20,
-                ),
+                padding: const EdgeInsets.fromLTRB(24, 45, 0, 20),
                 child: Container(
                   alignment: Alignment.centerLeft,
                   child: const Text(
@@ -72,98 +72,141 @@ class _MyMainState extends State<MyMain> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                height: 440,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: imgList.asMap().keys.map((e) {
-                    return Container(
-                      margin: EdgeInsets.only(right: 20, left: e == 0 ? 20 : 0),
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(14)),
-                        child: CachedNetworkImage(
-                          height: 440,
-                          width: screenWidth - 70,
-                          imageUrl: imgList[e],
-                          placeholder: (context, url) =>
-                              Container(color: Colors.grey[300]),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+              Consumer<MyPageNotifier>(
+                builder: (BuildContext context, provider, Widget? child) {
+                  // Logger().w(provider.bannerImgList);
+                  return /*provider.bannerImgList.isNotEmpty
+                      ? */
+                      SizedBox(
+                    width: double.infinity,
+                    height: 440,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: provider.bannerImgList.asMap().keys.map((e) {
+                        return Container(
+                          margin:
+                              EdgeInsets.only(right: 20, left: e == 0 ? 20 : 0),
+                          child: ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(14)),
+                            child: CachedNetworkImage(
+                              height: 440,
+                              width: screenWidth - 70,
+                              imageUrl: provider.bannerImgList[e],
+                              placeholder: (context, url) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white.withOpacity(0.7),
+                                    backgroundColor: const Color(0xFF052D84),
+                                    strokeWidth: 2.5,
+                                    strokeCap: StrokeCap.round,
+                                  ),
+                                );
+                              },
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                  /*: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(14)),
+                            child: CachedNetworkImage(
+                              height: 480,
+                              width: screenWidth - 70,
+                              imageUrl: DefaultConfig.bannerImg,
+                              placeholder: (context, url) =>
+                                  Container(color: Colors.grey[300]),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );*/
+                },
               ),
-              Container(
-                height: 80,
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16)),
-                child: Row(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center, // 确保子元素在Stack的中心
-                      children: [
-                        CircularProgressIndicator(
-                          value: (imgList.length / 5),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF052D84),
+              GestureDetector(
+                onTap: () {
+                  myPageNotifier.bannerImageFile(context);
+                },
+                child: Container(
+                  height: 80,
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    children: [
+                      Consumer<MyPageNotifier>(
+                        builder:
+                            (BuildContext context, provider, Widget? child) {
+                          return Stack(
+                            alignment: Alignment.center, // 确保子元素在Stack的中心
+                            children: [
+                              CircularProgressIndicator(
+                                value: (provider.bannerImgList.length / 5),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF052D84),
+                                ),
+                                backgroundColor:
+                                    const Color(0xFF052D84).withOpacity(0.2),
+                                strokeWidth: 4.0,
+                                strokeCap: StrokeCap.round,
+                              ),
+                              Text(
+                                "${provider.bannerImgList.length}/5",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF052D84),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "设置墙贴",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF052D84),
+                            ),
                           ),
-                          backgroundColor:
-                              const Color(0xFF052D84).withOpacity(0.2),
-                          strokeWidth: 4.0,
-                          strokeCap: StrokeCap.round,
-                        ),
-                        Text(
-                          "${imgList.length}/5",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF052D84),
+                          const SizedBox(
+                            height: 2,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "设置墙贴",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF052D84),
+                          Text(
+                            "图库选择靓照吧～",
+                            style: TextStyle(
+                              fontSize: 13,
+                              // fontWeight: FontWeight.bold,
+                              color: const Color(0xFF052D84).withOpacity(0.5),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 2,
-                        ),
-                        Text(
-                          "图库选择靓照吧～",
-                          style: TextStyle(
-                            fontSize: 13,
-                            // fontWeight: FontWeight.bold,
-                            color: const Color(0xFF052D84).withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -284,6 +327,8 @@ class _MyMainState extends State<MyMain> {
               const SizedBox(height: 35),
             ],
           );
-        });
+        },
+      ),
+    );
   }
 }

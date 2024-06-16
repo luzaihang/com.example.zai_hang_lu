@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:flutter/material.dart';
 
 class AllPostListWidget extends StatefulWidget {
@@ -87,8 +88,7 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
                           borderRadius: BorderRadius.circular(8),
                           child: CachedNetworkImage(
                             width: screenWidth * (2 / 3),
-                            imageUrl:
-                                'https://user-info-1322814250.cos.ap-shanghai.myqcloud.com/241718341476_.pic.jpg',
+                            imageUrl: DefaultConfig.bannerImg,
                           ),
                         ),
                         Positioned(

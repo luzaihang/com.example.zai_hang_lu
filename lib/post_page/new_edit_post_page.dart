@@ -17,15 +17,15 @@ class NewEditPostState extends State<NewEditPost> {
 
   static const int MAX_IMAGES = 9;
 
-  List<Asset> _images = <Asset>[];
+  List<Asset> _imageAssets = <Asset>[];
 
   Future<void> loadAssets() async {
     List<Asset> resultList = <Asset>[];
-    String error = '未正确选择图片';
+    _imageFiles.clear();
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        selectedAssets: _images,
+        selectedAssets: _imageAssets,
         materialOptions: const MaterialOptions(
           maxImages: 9,
           // startInAllView: true, //这个目前使用之后，没有返回数据
@@ -40,21 +40,19 @@ class NewEditPostState extends State<NewEditPost> {
         ),
       );
     } catch (e) {
-      error = e.toString();
       Logger().e(e);
     }
 
     if (!mounted) return;
 
-    _images = resultList;
+    _imageAssets = resultList;
 
-    Logger().i(_images);
-    for (var i in _images) {
+    for (var i in _imageAssets) {
       File file = await getImageFileFromAsset(i);
       _imageFiles.add(file);
+      Logger().w(_imageFiles);
     }
 
-    Logger().i(_imageFiles[0]?.path);
     setState(() {});
   }
 

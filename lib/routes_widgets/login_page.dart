@@ -114,7 +114,7 @@ class LoginScreenState extends State<LoginScreen>
                       style: TextStyle(
                         fontSize: 48,
                         color: Color(0xFF052D84),
-                        fontFamily: "JinBuTi",
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     Positioned(

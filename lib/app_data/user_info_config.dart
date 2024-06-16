@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 
 class UserInfoConfig {
@@ -20,7 +21,7 @@ class UserInfoConfig {
 Future<String> allAvatarUrl() async {
   try {
     String url =
-        "https://${TencentCloudAcquiesceData.avatarAndPost}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.uniqueID}/userAvatar.png";
+        "https://${DefaultConfig.avatarAndPostBucket}.cos.${DefaultConfig.region}.myqcloud.com/${UserInfoConfig.uniqueID}/userAvatar.png";
     bool res = await checkUrlExists(url);
     if (!res) {
       return "";

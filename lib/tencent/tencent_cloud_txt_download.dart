@@ -1,16 +1,15 @@
 import 'dart:convert';
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/chat_detail_factory.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 
 class TencentCloudTxtDownload {
   static final Logger _logger = Logger();
 
   static Future<String> userInfoTxt() async {
-    const url =
-        'https://${TencentCloudAcquiesceData.userInfoBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/user_info.txt';
+    const url = DefaultConfig.userNameUrl;
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -27,8 +26,7 @@ class TencentCloudTxtDownload {
   }
 
   static Future<List<ChatDetailSender>> chatTxt(String id) async {
-    final url =
-        'https://${TencentCloudAcquiesceData.chattingRecordsBucket}.cos.${TencentCloudAcquiesceData.region}.myqcloud.com/${UserInfoConfig.uniqueID}/$id.txt';
+    final url = '${DefaultConfig.chatText}/${UserInfoConfig.uniqueID}/$id.txt';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

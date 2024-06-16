@@ -1,3 +1,4 @@
+import 'package:ci_dong/default_config/default_config.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -31,7 +32,7 @@ class CosService {
   /// 注册 COS 服务
   void _configureCosXmlService() {
     final CosXmlServiceConfig serviceConfig = CosXmlServiceConfig(
-      region: TencentCloudAcquiesceData.region,
+      region: DefaultConfig.region,
       isDebuggable: true,
       isHttps: true,
     );
