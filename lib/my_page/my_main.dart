@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
@@ -20,11 +18,13 @@ class _MyMainState extends State<MyMain> {
   ];
 
   late ScrollController _scrollController;
+  late VisibilityNotifier _visibilityNotifier;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _visibilityNotifier = context.read<VisibilityNotifier>();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -35,15 +35,12 @@ class _MyMainState extends State<MyMain> {
   }
 
   void _scrollListener() {
-    final visibilityNotifier =
-        Provider.of<VisibilityNotifier>(context, listen: false);
-
     if (_scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {
-      visibilityNotifier.updateVisibility(false);
+      _visibilityNotifier.updateVisibility(false);
     } else if (_scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
-      visibilityNotifier.updateVisibility(true);
+      _visibilityNotifier.updateVisibility(true);
     }
   }
 

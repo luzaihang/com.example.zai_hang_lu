@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:ci_dong/post_page/all_post_list.dart';
 import 'package:ci_dong/post_page/new_edit_post_page.dart';
@@ -23,7 +22,8 @@ class _PostMainState extends State<PostMain>
   // 自定义阈值，设定一个小于这个值的滑动速度被忽略
   final double swipeThreshold = 400;
   Alignment _alignment = Alignment.centerLeft;
-  late VisibilityNotifier visibilityNotifier;
+  late VisibilityNotifier _visibilityNotifier;
+  late PostPageNotifier _postPageNotifier;
 
   late ScrollController _scrollController;
   final TencentCloudListData tencentCloudListData = TencentCloudListData();
@@ -31,8 +31,8 @@ class _PostMainState extends State<PostMain>
   @override
   void initState() {
     super.initState();
-    visibilityNotifier =
-        Provider.of<VisibilityNotifier>(context, listen: false);
+    _visibilityNotifier = context.read<VisibilityNotifier>();
+    _postPageNotifier = context.read<PostPageNotifier>();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
   }
@@ -40,6 +40,7 @@ class _PostMainState extends State<PostMain>
   @override
   void dispose() {
     _scrollController.dispose();
+    _postPageNotifier.removeListener(() {});
     super.dispose();
   }
 
@@ -49,15 +50,13 @@ class _PostMainState extends State<PostMain>
 
     if (_scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {
-      visibilityNotifier.updateVisibility(false);
+      _visibilityNotifier.updateVisibility(false);
     } else if (_scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
-      visibilityNotifier.updateVisibility(true);
+      _visibilityNotifier.updateVisibility(true);
     }
 
-    final postPageNotifier =
-        Provider.of<PostPageNotifier>(context, listen: false);
-    postPageNotifier.setIndexOff(_selectedIndex, _scrollController.offset);
+    _postPageNotifier.setIndexOffset(_selectedIndex, _scrollController.offset);
   }
 
   void _onTabTapped(int index) {
@@ -65,23 +64,21 @@ class _PostMainState extends State<PostMain>
       _selectedIndex = index;
     });
 
-    final postPageNotifier =
-        Provider.of<PostPageNotifier>(context, listen: false);
     switch (_selectedIndex) {
       case 0:
-        _scrollController.jumpTo(postPageNotifier.index0);
+        _scrollController.jumpTo(_postPageNotifier.index0);
         _alignment = Alignment.centerLeft;
-        visibilityNotifier.updateVisibility(true);
+        _visibilityNotifier.updateVisibility(true);
         break;
       case 1:
-        _scrollController.jumpTo(postPageNotifier.index1);
+        _scrollController.jumpTo(_postPageNotifier.index1);
         _alignment = Alignment.center;
-        visibilityNotifier.updateVisibility(true);
+        _visibilityNotifier.updateVisibility(true);
         break;
       case 2:
-        _scrollController.jumpTo(postPageNotifier.index2);
+        _scrollController.jumpTo(_postPageNotifier.index2);
         _alignment = Alignment.centerRight;
-        visibilityNotifier.updateVisibility(false);
+        _visibilityNotifier.updateVisibility(false);
         break;
     }
   }

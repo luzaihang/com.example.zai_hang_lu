@@ -25,25 +25,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  ///文件列表
+  /// 文件列表
   List<UserPost> directories = [];
-
-  bool _isPanelVisible = false;
-
   TencentCloudListData tencentCloudListData = TencentCloudListData();
 
   bool newMessage = false;
   bool _isActive = true;
-
+  late VisibilityNotifier _visibilityNotifier;
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
 
   @override
   void initState() {
     super.initState();
+    _initializeResources();
+    _initializeAnimations();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback(_initializeVisibilityNotifier);
+  }
+
+  void _initializeResources() {
     _onRefresh();
     _leanCloudInit();
+  }
 
+  void _initializeAnimations() {
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -55,19 +61,20 @@ class _HomePageState extends State<HomePage>
       parent: _controller,
       curve: Curves.easeInOut,
     ));
+  }
 
-    // 初始状态设定
-    // 按需调用以下代码
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VisibilityNotifier>().updateVisibility(true);
-      // 确保动画控制器初始即启动
-      _controller.forward();
-    });
+  void _initializeVisibilityNotifier(_) {
+    _visibilityNotifier = context.read<VisibilityNotifier>();
+    _visibilityNotifier.addListener(_toggleBottomNavigationBar);
+    _visibilityNotifier.updateVisibility(true);
+    _controller.forward();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _visibilityNotifier.removeListener(_toggleBottomNavigationBar);
     super.dispose();
   }
 
@@ -76,17 +83,14 @@ class _HomePageState extends State<HomePage>
     _isActive = state == AppLifecycleState.resumed;
   }
 
-  void _toggleBottomNavigationBar(bool isVisible) {
-    if (isVisible) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
+  void _toggleBottomNavigationBar() {
+    _visibilityNotifier.isVisible
+        ? _controller.forward()
+        : _controller.reverse();
   }
 
-  void _leanCloudInit() async {
+  Future<void> _leanCloudInit() async {
     await ClientManager().initialize();
-
     Client client = ClientManager().client;
     client.onUnreadMessageCountUpdated = ({
       required Client client,
@@ -97,17 +101,16 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _onRefresh() async {
-    List<UserPost>? result = await tencentCloudListData.getFirstContentsList();
-    directories = result ?? [];
-
+    directories = await tencentCloudListData.getFirstContentsList() ?? [];
     setState(() {});
   }
 
   Future<void> _onLoadMore() async {
     List<UserPost>? result = await tencentCloudListData.getNextContentsList();
-    directories.addAll(result ?? []);
-
-    setState(() {});
+    if (result != null) {
+      directories.addAll(result);
+      setState(() {});
+    }
   }
 
   int _currentIndex = 0;
@@ -132,23 +135,16 @@ class _HomePageState extends State<HomePage>
         width: height,
         height: height,
         color: color,
-      ), // 根据需求调整尺寸
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final visibilityNotifier = Provider.of<VisibilityNotifier>(context);
-
-    visibilityNotifier.addListener(() {
-      _toggleBottomNavigationBar(visibilityNotifier.isVisible);
-    });
-
     return WillPopScope(
       onWillPop: () => _showExitConfirmationDialog(context),
       child: Scaffold(
         backgroundColor: const Color(0xFFF2F3F5),
-        // resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             IndexedStack(
@@ -169,11 +165,9 @@ class _HomePageState extends State<HomePage>
                   selectedLabelStyle: const TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.bold,
-                    // fontFamily: "JinBuTi",
                   ),
                   unselectedLabelStyle: const TextStyle(
                     fontSize: 12.0,
-                    // fontFamily: "JinBuTi",
                   ),
                   type: BottomNavigationBarType.shifting,
                   items: [
@@ -186,33 +180,17 @@ class _HomePageState extends State<HomePage>
                     ),
                     BottomNavigationBarItem(
                       icon: _buildImageIcon(
-                        0,
-                        "assets/post_icon.png",
-                        Colors.blueGrey,
-                        30,
-                      ),
+                          0, "assets/post_icon.png", Colors.blueGrey, 30),
                       label: '动态',
-                      activeIcon: _buildImageIcon(
-                        0,
-                        "assets/post_icon.png",
-                        null,
-                        30,
-                      ),
+                      activeIcon:
+                          _buildImageIcon(0, "assets/post_icon.png", null, 30),
                     ),
                     BottomNavigationBarItem(
                       icon: _buildImageIcon(
-                        3,
-                        "assets/other_icon.png",
-                        Colors.blueGrey,
-                        20,
-                      ),
+                          3, "assets/other_icon.png", Colors.blueGrey, 20),
                       label: '设置',
-                      activeIcon: _buildImageIcon(
-                        3,
-                        "assets/other_icon.png",
-                        null,
-                        20,
-                      ),
+                      activeIcon:
+                          _buildImageIcon(3, "assets/other_icon.png", null, 20),
                     ),
                   ],
                 ),
@@ -254,107 +232,3 @@ class _HomePageState extends State<HomePage>
         false;
   }
 }
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('其它'));
-  }
-}
-
-/*child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.blueGrey,
-          onPressed: () async {
-            Navigator.pushNamed(context, "/editPostPage");
-          },
-          mini: true,
-          heroTag: 'homePageFloatingActionButton',
-          child: const Icon(Icons.edit_calendar_rounded),
-        ),
-        appBar: preferredSizeWidget(
-          AppBar(
-            backgroundColor: Colors.blueGrey,
-            automaticallyImplyLeading: false, // 不显示返回按钮
-            title: null, // 不显示标题
-            actions: [
-              Stack(
-                children: <Widget>[
-                  IconButton(
-                      icon: const Icon(Icons.mail_outline_rounded),
-                      onPressed: () {
-                        // setState(() {
-                        //   newMessage = false;
-                        // });
-                        Navigator.pushNamed(context, '/chatListPage');
-                      }),
-                  newMessage
-                      ? Positioned(
-                          right: 12,
-                          top: 14,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 6,
-                              minHeight: 6,
-                            ),
-                          ),
-                        )
-                      : const SizedBox(),
-                ],
-              ),
-              // IconButton(
-              //   icon: const Icon(Icons.mail_outline_rounded),
-              //   onPressed: () => Navigator.pushNamed(context, '/chatListPage'),
-              // ),
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  setState(() {
-                    _isPanelVisible = !_isPanelVisible;
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-        body: Stack(
-          children: [
-            PullToRefreshListView(
-              onRefresh: _onRefresh,
-              onLoadMore: _onLoadMore,
-              items: directories.map((post) {
-                // 使用你之前定义的 PostWidget 组件来渲染每个帖子
-                return Container(
-                  margin: EdgeInsets.only(
-                      top: directories.indexOf(post) == 0 ? 12 : 0),
-                  child: HomePostItem(
-                    username: post.userName,
-                    userID: post.userID ?? '',
-                    userAvatar: post.userAvatar,
-                    postTime: formatDateTimeToMinutes(post.postCreationTime),
-                    location: post.location,
-                    message: post.postContent,
-                    images: post.postImages,
-                  ),
-                );
-              }).toList(),
-            ),
-            PanelWidget(
-              isVisible: _isPanelVisible,
-              panelWidth: panelWidth,
-              onClose: () {
-                setState(() {
-                  _isPanelVisible = false;
-                });
-              },
-            ),
-          ],
-        ),
-      ),*/

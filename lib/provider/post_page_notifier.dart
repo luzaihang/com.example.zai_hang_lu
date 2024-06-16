@@ -7,7 +7,7 @@ class PostPageNotifier with ChangeNotifier {
 
   int index = 0;
 
-  void setIndexOff(int dex, double offset) {
+  void setIndexOffset(int dex, double offset) {
     index = dex;
 
     switch (dex) {
@@ -23,4 +23,10 @@ class PostPageNotifier with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  // void cleanOffset() {
+  //   index0 = 0.0;
+  //   index1 = 0.0;
+  //   index2 = 0.0;
+  // }
 }
