@@ -5,6 +5,7 @@ class VisibilityNotifier extends ChangeNotifier {
 
   bool get isVisible => _isVisible;
 
+  ///控制底部切换栏的显示、消失
   void updateVisibility(bool isVisible) {
     if (_isVisible != isVisible) {
       _isVisible = isVisible;

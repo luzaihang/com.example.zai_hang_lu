@@ -19,7 +19,7 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
           return Column(
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(20, index == 0 ? 20 : 0, 20, 0),
+                padding: EdgeInsets.fromLTRB(20, index == 0 ? 15 : 0, 20, 0),
                 child: Row(
                   children: [
                     Image.asset(

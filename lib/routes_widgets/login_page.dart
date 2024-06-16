@@ -113,6 +113,7 @@ class LoginScreenState extends State<LoginScreen>
                       "登录",
                       style: TextStyle(
                         fontSize: 48,
+                        color: Color(0xFF052D84),
                         fontFamily: "JinBuTi",
                       ),
                     ),
@@ -135,12 +136,13 @@ class LoginScreenState extends State<LoginScreen>
                               color: Colors.blueGrey,
                             ),
                           ),
-                          cursorColor: Colors.black,
-                          // 设置光标颜色为黑色
-                          cursorRadius: const Radius.circular(5.0),
+                          // 设置光标颜色
+                          cursorColor: const Color(0xFF052D84),
                           // 设置光标的圆角半径
+                          cursorRadius: const Radius.circular(5.0),
                           style: const TextStyle(
                             fontSize: 16.0,
+                            color: Color(0xFF052D84),
                           ),
                           maxLength: 8,
                           inputFormatters: [
@@ -177,12 +179,13 @@ class LoginScreenState extends State<LoginScreen>
                             ),
                           ),
                           maxLength: 18,
-                          cursorColor: Colors.black,
-                          // 设置光标颜色为黑色
-                          cursorRadius: const Radius.circular(5.0),
+                          // 设置光标颜色
+                          cursorColor: const Color(0xFF052D84),
                           // 设置光标的圆角半径
+                          cursorRadius: const Radius.circular(5.0),
                           style: const TextStyle(
                             fontSize: 16.0,
+                            color: Color(0xFF052D84),
                           ),
                           inputFormatters: [
                             FilteringTextInputFormatter(
@@ -266,9 +269,9 @@ class LoginScreenState extends State<LoginScreen>
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 15),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.9),
-                        borderRadius: const BorderRadius.horizontal(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF052D84),
+                        borderRadius: BorderRadius.horizontal(
                             left: Radius.circular(50)),
                       ),
                       child: const Text(

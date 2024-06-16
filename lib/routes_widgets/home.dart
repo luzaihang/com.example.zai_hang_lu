@@ -2,6 +2,7 @@ import 'package:ci_dong/lean_cloud/client_manager.dart';
 import 'package:ci_dong/my_page/my_main.dart';
 import 'package:ci_dong/post_page/post_main.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
+import 'package:ci_dong/setting_page/setting_main.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
@@ -113,7 +114,7 @@ class _HomePageState extends State<HomePage>
   final List<Widget> _children = [
     const MyMain(),
     const PostMain(),
-    ProfileScreen(),
+    const SettingPageMain(),
   ];
 
   void onTappedBar(int index) {
@@ -147,7 +148,7 @@ class _HomePageState extends State<HomePage>
       onWillPop: () => _showExitConfirmationDialog(context),
       child: Scaffold(
         backgroundColor: const Color(0xFFF2F3F5),
-        resizeToAvoidBottomInset: false,
+        // resizeToAvoidBottomInset: false,
         body: Stack(
           children: [
             IndexedStack(
@@ -168,11 +169,11 @@ class _HomePageState extends State<HomePage>
                   selectedLabelStyle: const TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.bold,
-                    fontFamily: "JinBuTi",
+                    // fontFamily: "JinBuTi",
                   ),
                   unselectedLabelStyle: const TextStyle(
                     fontSize: 12.0,
-                    fontFamily: "JinBuTi",
+                    // fontFamily: "JinBuTi",
                   ),
                   type: BottomNavigationBarType.shifting,
                   items: [
@@ -205,7 +206,7 @@ class _HomePageState extends State<HomePage>
                         Colors.blueGrey,
                         20,
                       ),
-                      label: '其它',
+                      label: '设置',
                       activeIcon: _buildImageIcon(
                         3,
                         "assets/other_icon.png",

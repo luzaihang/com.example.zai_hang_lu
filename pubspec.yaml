@@ -106,6 +106,9 @@ flutter:
     - assets/image_more_icon.png
     - assets/image_add_icon.png
     - assets/image_delete_icon.png
+    - assets/edit_icon.png
+    - assets/login_out_icon.png
+    - assets/privacy_policy_icon.png
     - assets/tencentCloud.json
     - assets/fonts/
   fonts:

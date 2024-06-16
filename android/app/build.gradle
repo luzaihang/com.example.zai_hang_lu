@@ -73,6 +73,8 @@ android {
         }
         release {
             signingConfig signingConfigs.release
+            shrinkResources false // 禁用资源收缩以测试
+            minifyEnabled false // 禁用代码混淆以测试
 //            minifyEnabled true // 根据需要配置
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

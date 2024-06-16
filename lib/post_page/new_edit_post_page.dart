@@ -23,10 +23,7 @@ class NewEditPostState extends State<NewEditPost> {
     List<Asset> resultList = <Asset>[];
     String error = '未正确选择图片';
 
-    Logger().i(error);
-
     try {
-      Logger().i(_images);
       resultList = await MultiImagePicker.pickImages(
         selectedAssets: _images,
         materialOptions: const MaterialOptions(
@@ -42,8 +39,6 @@ class NewEditPostState extends State<NewEditPost> {
           selectionLimitReachedText: "最多选择9张",
         ),
       );
-
-      print("Selected images: $resultList");
     } catch (e) {
       error = e.toString();
       Logger().e(e);
@@ -81,6 +76,7 @@ class NewEditPostState extends State<NewEditPost> {
             children: [
               _buildImageList(),
               _widget(),
+              const SizedBox(height: 30),
             ],
           );
         },
@@ -91,14 +87,10 @@ class NewEditPostState extends State<NewEditPost> {
 
   Widget _widget() {
     return Container(
-      height: 800,
-      margin: const EdgeInsets.only(top: 20, left: 16, right: 10),
+      margin: const EdgeInsets.only(top: 15, left: 16, right: 10),
       child: TextField(
         textAlign: TextAlign.justify,
         decoration: InputDecoration(
-          // labelText: labelText,
-          // labelStyle:
-          // TextStyle(color: focusNode.hasFocus ? Colors.blueGrey : Colors.grey),
           hintText: "把你所遇分享给陌生人吧～",
           hintStyle: TextStyle(color: const Color(0xFF052D84).withOpacity(0.3)),
           border: InputBorder.none,
@@ -107,7 +99,7 @@ class NewEditPostState extends State<NewEditPost> {
           fillColor: Colors.transparent,
         ),
         maxLines: null,
-        minLines: 1,
+        minLines: 10,
         cursorColor: const Color(0xFF052D84),
         style: const TextStyle(color: Color(0xFF052D84)),
         strutStyle: const StrutStyle(
@@ -209,6 +201,7 @@ class NewEditPostState extends State<NewEditPost> {
                 "assets/image_delete_icon.png",
                 width: 16,
                 height: 16,
+                color: Colors.red.withOpacity(0.7),
               ),
             ),
           ),

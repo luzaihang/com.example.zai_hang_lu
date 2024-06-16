@@ -15,9 +15,6 @@ class EncryptionHelper {
     return encrypted.base64;
   }
 
-  // secretId=v6JZ4PkE6ctTlCcuytYgV1CKnWndxWOU81/l/qh6LT4mdsA6WQRdR1+U3XmVK2ai
-  // secretKey=hIJf1IE3s8BjwghoxMo6aymdlkntgT++zWGv/bdbGjh5FZNgRRhBW0OIwWWJN3q+
-
   // 解密方法
   static String decrypt(String encryptedText) {
     final decrypted = _encrypter.decrypt64(encryptedText, iv: iv);
@@ -25,7 +22,3 @@ class EncryptionHelper {
     return decrypted;
   }
 }
-
-
-  // "secretId":"v6JZ4PkE6ctTlCcuytYgV1CKnWndxWOU81/l/qh6LT4mdsA6WQRdR1+U3XmVK2ai",
-  // "secretKey":"hIJf1IE3s8BjwghoxMo6aymdlkntgT++zWGv/bdbGjh5FZNgRRhBW0OIwWWJN3q+"
