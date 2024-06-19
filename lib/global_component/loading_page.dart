@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Loading {
   static final Loading _instance = Loading._internal();
@@ -22,15 +23,27 @@ class Loading {
     showDialog(
       context: context,
       barrierDismissible: false,
+      barrierColor: Colors.transparent,
       builder: (BuildContext context) {
         return WillPopScope(
           onWillPop: () async => false, // 禁止返回键关闭加载框
           child: Center(
-            child: CircularProgressIndicator(
-              color: Colors.white.withOpacity(0.7),
-              backgroundColor: Colors.blueGrey,
-              strokeWidth: 2.5,
-              strokeCap: StrokeCap.round,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFF052D84).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitThreeBounce(
+                    color: Colors.white,
+                    size: 20.0,
+                  ),
+                ],
+              ),
             ),
           ),
         );

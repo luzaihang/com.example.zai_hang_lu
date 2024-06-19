@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
@@ -10,28 +11,45 @@ import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 ///获取列表
 class TencentCloudListData {
-  bool isTruncated = false;
-  String? nextMarker;
+  bool allIsTruncated = false;
+  String? allNextMarker;
+
+  bool userIsTruncated = false;
+  String? userNextMarker;
+
   final Cos cos = CosService().cos;
 
-  Future<List<UserPost>?> _fetchContentsList({String? marker}) async {
+  Future<List<UserPost>?> _fetchContentsList(bool allTab,
+      {String? marker}) async {
     List<UserPost> decodedMaps = [];
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            DefaultConfig.postTextBucket,
-            prefix: "", // 前缀匹配，用来规定返回的对象前缀地址
+            allTab
+                ? DefaultConfig.postTextBucket
+                : DefaultConfig.avatarAndPostBucket,
+            // 前缀匹配，用来规定返回的对象前缀地址
+            prefix: allTab ? "" : "${UserInfoConfig.uniqueID}/post",
             marker: marker,
-            maxKeys: 10, // 单次返回最大的条目数量，默认1000
+            maxKeys: allTab ? 10 : 1000, // 单次返回最大的条目数量，默认1000
           );
 
-      isTruncated = bucketContents.isTruncated;
-      nextMarker = bucketContents.nextMarker;
+      if (allTab) {
+        allIsTruncated = bucketContents.isTruncated;
+        allNextMarker = bucketContents.nextMarker;
+      } else {
+        userIsTruncated = bucketContents.isTruncated;
+        userNextMarker = bucketContents.nextMarker;
+      }
 
       List<Content?> contentsList = bucketContents.contentsList;
 
       List<String> objectUrls =
           contentsList.where((object) => object != null).map((object) {
-        return "https://${DefaultConfig.postTextBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
+        if (allTab) {
+          return "https://${DefaultConfig.postTextBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
+        } else {
+          return "https://${DefaultConfig.avatarAndPostBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
+        }
       }).toList();
 
       var responses =
@@ -58,13 +76,25 @@ class TencentCloudListData {
     }
   }
 
-  Future<List<UserPost>?> getFirstContentsList() async {
-    return _fetchContentsList();
+  Future<List<UserPost>?> getAllFirstContentsList() async {
+    return _fetchContentsList(true);
   }
 
-  Future<List<UserPost>?> getNextContentsList() async {
-    if (isTruncated) {
-      return _fetchContentsList(marker: nextMarker);
+  Future<List<UserPost>?> getAllNextContentsList() async {
+    if (allIsTruncated) {
+      return _fetchContentsList(true, marker: allNextMarker);
+    } else {
+      return [];
+    }
+  }
+
+  Future<List<UserPost>?> getUserPostFirstContentsList() async {
+    return _fetchContentsList(false);
+  }
+
+  Future<List<UserPost>?> getUserPostNextContentsList() async {
+    if (allIsTruncated) {
+      return _fetchContentsList(false, marker: allNextMarker);
     } else {
       return [];
     }

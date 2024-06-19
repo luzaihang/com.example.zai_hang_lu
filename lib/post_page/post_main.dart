@@ -17,7 +17,6 @@ class _PostMainState extends State<PostMain>
     with SingleTickerProviderStateMixin {
   // 自定义阈值，设定一个小于这个值的滑动速度被忽略
   final double swipeThreshold = 400;
-  Alignment _alignment = Alignment.centerLeft;
   late VisibilityNotifier _visibilityNotifier;
   late PostPageNotifier _readNotifier;
   late PostPageNotifier _watchNotifier;
@@ -27,32 +26,12 @@ class _PostMainState extends State<PostMain>
     super.initState();
     _visibilityNotifier = context.read<VisibilityNotifier>();
     _readNotifier = context.read<PostPageNotifier>();
-    _readNotifier.onRefresh(); //全部tab的数据
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _watchNotifier = context.watch<PostPageNotifier>();
-  }
-
-  void _onTabTapped(int index) {
-    _readNotifier.indexPage(index);
-
-    switch (index) {
-      case 0:
-        _alignment = Alignment.centerLeft;
-        _visibilityNotifier.updateVisibility(true);
-        break;
-      case 1:
-        _alignment = Alignment.center;
-        _visibilityNotifier.updateVisibility(true);
-        break;
-      case 2:
-        _alignment = Alignment.centerRight;
-        _visibilityNotifier.updateVisibility(false);
-        break;
-    }
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -64,20 +43,20 @@ class _PostMainState extends State<PostMain>
         // 左滑 去到右边的tab
         switch (_watchNotifier.selectedIndex) {
           case 0:
-            _onTabTapped(1);
+            _watchNotifier.onTabTapped(_visibilityNotifier,1);
             break;
           case 1:
-            _onTabTapped(2);
+            _watchNotifier.onTabTapped(_visibilityNotifier,2);
             break;
         }
       } else if (details.primaryVelocity! > 0) {
         // 右滑 去到左边的tab
         switch (_watchNotifier.selectedIndex) {
           case 2:
-            _onTabTapped(1);
+            _watchNotifier.onTabTapped(_visibilityNotifier,1);
             break;
           case 1:
-            _onTabTapped(0);
+            _watchNotifier.onTabTapped(_visibilityNotifier,0);
             break;
         }
       }
@@ -132,7 +111,7 @@ class _PostMainState extends State<PostMain>
               height: 3,
               padding: const EdgeInsets.only(left: 23, right: 3),
               child: AnimatedAlign(
-                alignment: _alignment,
+                alignment: _watchNotifier.alignment,
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 child: Container(
@@ -159,7 +138,7 @@ class _PostMainState extends State<PostMain>
             right: 12,
             bottom: 3,
             child: GestureDetector(
-              onTap: () => _readNotifier.submitButton(),
+              onTap: () => _readNotifier.submitButton(context),
               child: Container(
                 decoration: BoxDecoration(
                     color: const Color(0xFF052D84),
@@ -182,7 +161,7 @@ class _PostMainState extends State<PostMain>
   Widget _buildTabItem(int index, String text) {
     final bool isSelected = _watchNotifier.selectedIndex == index;
     return GestureDetector(
-      onTap: () => _onTabTapped(index),
+      onTap: () => _watchNotifier.onTabTapped(_visibilityNotifier,index),
       child: Container(
         width: 70,
         alignment: Alignment.center,

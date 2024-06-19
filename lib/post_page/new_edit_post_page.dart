@@ -111,7 +111,7 @@ class NewEditPostState extends State<NewEditPost> {
     return Container(
       margin: const EdgeInsets.only(top: 15, left: 16, right: 10),
       child: TextField(
-        controller: _watchNotifier.controller,
+        controller: _watchNotifier.postUploadController,
         textAlign: TextAlign.justify,
         decoration: InputDecoration(
           hintText: "把你所遇分享给陌生人吧～",

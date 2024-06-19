@@ -66,13 +66,21 @@ class TencentUpLoadAndDownload {
 
   static Future<void> postTextUpLoad(Map map) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
-    String cosPath = "${PostContentData.postID}.txt";
     String jsonString = json.encode(map);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
+    //发送到全部列表
     bool success = await uploader.uploadFile(
-        DefaultConfig.postTextBucket, cosPath,
-        byteArr: byte);
+      DefaultConfig.postTextBucket,
+      "${PostContentData.postID}.txt",
+      byteArr: byte,
+    );
+    //发送到发帖人的列表
+    await uploader.uploadFile(
+      DefaultConfig.avatarAndPostBucket,
+      "${UserInfoConfig.uniqueID}/post/${PostContentData.postID}.txt",
+      byteArr: byte,
+    );
     if (success) {
       Loading().hide();
       Logger().i("txt 文件上传成功");
@@ -91,9 +99,8 @@ class TencentUpLoadAndDownload {
     String string = EncryptionHelper.encrypt(userText);
     Uint8List byte = Uint8List.fromList(utf8.encode(string));
 
-    bool success = await uploader.uploadFile(
-        DefaultConfig.userInfoBucket, cosPath,
-        byteArr: byte);
+    bool success = await uploader
+        .uploadFile(DefaultConfig.userInfoBucket, cosPath, byteArr: byte);
     if (success) {
       Logger().i("txt 上传新用户成功");
       if (modified) {
@@ -116,11 +123,9 @@ class TencentUpLoadAndDownload {
     String jsonString = json.encode(listMap);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
 
-    await uploader.uploadFile(
-        DefaultConfig.chattingRecordsBucket, cosPath1,
+    await uploader.uploadFile(DefaultConfig.chattingRecordsBucket, cosPath1,
         byteArr: byte);
-    await uploader.uploadFile(
-        DefaultConfig.chattingRecordsBucket, cosPath2,
+    await uploader.uploadFile(DefaultConfig.chattingRecordsBucket, cosPath2,
         byteArr: byte);
   }
 

@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/factory_list/home_list_data.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class AllPostListWidget extends StatefulWidget {
@@ -17,13 +19,17 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
   late ScrollController _scrollController;
   late VisibilityNotifier _visibilityNotifier;
   late PostPageNotifier _watchNotifier;
+  late PostPageNotifier _readNotifier;
 
   @override
   void initState() {
     super.initState();
+    _readNotifier = context.read<PostPageNotifier>();
     _visibilityNotifier = context.read<VisibilityNotifier>();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
+
+    _readNotifier.onAllRefresh();
   }
 
   @override
@@ -59,9 +65,9 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
       return ListView.builder(
           padding: EdgeInsets.zero,
           controller: _scrollController,
-          itemCount: provider.directories.length,
+          itemCount: provider.allTabList.length,
           itemBuilder: (BuildContext context, int index) {
-            final item = provider.directories[index];
+            UserPost item = provider.allTabList[index];
             return PostListItem(
               item: item,
               screenWidth: screenWidth,
@@ -73,7 +79,7 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
 }
 
 class PostListItem extends StatelessWidget {
-  final dynamic item;
+  final UserPost item;
   final double screenWidth;
   final int index;
 

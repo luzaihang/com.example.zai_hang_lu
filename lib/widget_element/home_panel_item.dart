@@ -3,7 +3,7 @@ import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/show_custom_dialog.dart';
@@ -29,7 +29,7 @@ class PanelWidget extends StatefulWidget {
 }
 
 class _PanelWidgetState extends State<PanelWidget> {
-  final ImagePicker _picker = ImagePicker();
+  /*final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImages() async {
     bool? res = await showCustomDialog(context, "是否同意进入到相册选择图片");
@@ -48,7 +48,7 @@ class _PanelWidgetState extends State<PanelWidget> {
     } catch (e) {
       if (mounted) showCustomSnackBar(context, "上传失败,请稍候再试");
     }
-  }
+  }*/
 
   @override
   void initState() {
@@ -222,7 +222,7 @@ class _PanelWidgetState extends State<PanelWidget> {
             bottom: 0,
             right: 0,
             child: GestureDetector(
-              onTap: () => _pickImages(),
+              // onTap: () => _pickImages(),
               child: const CircleAvatar(
                 backgroundColor: Colors.white,
                 radius: 15,

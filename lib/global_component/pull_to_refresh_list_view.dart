@@ -1,58 +1,38 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class PullToRefreshListView extends StatefulWidget {
+class RefreshListView extends StatefulWidget {
   final Future<void> Function() onRefresh;
-  final Future<void> Function() onLoadMore;
-  final List<Widget> items;
+  final Future<void> Function() onLoadingMore;
+  final List<Widget> children;
+  final ScrollController controller;
+  final bool isLoading;
 
-  ///刷新、加载控件
-  const PullToRefreshListView({
+  const RefreshListView({
     super.key,
     required this.onRefresh,
-    required this.onLoadMore,
-    required this.items,
+    required this.onLoadingMore,
+    required this.children,
+    required this.controller,
+    required this.isLoading,
   });
 
   @override
-  PullToRefreshListViewState createState() => PullToRefreshListViewState();
+  _RefreshListViewState createState() => _RefreshListViewState();
 }
 
-class PullToRefreshListViewState extends State<PullToRefreshListView> {
-  final ScrollController _scrollController = ScrollController();
-  bool _isLoadingMore = false;
-
+class _RefreshListViewState extends State<RefreshListView> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 30 &&
-        !_isLoadingMore) {
-      _loadMore();
-    }
-  }
-
-  Future<void> _loadMore() async {
-    setState(() {
-      _isLoadingMore = true;
-    });
-    await widget.onLoadMore();
-
-    await Future.delayed(const Duration(milliseconds: 500)); // 延迟处理，模拟缓慢加载
-
-    setState(() {
-      _isLoadingMore = false;
+    widget.controller.addListener(() async {
+      if (widget.isLoading) return;
+      if (widget.controller.position.pixels ==
+          widget.controller.position.maxScrollExtent) {
+        await widget.onLoadingMore();
+      }
     });
   }
 
@@ -60,31 +40,22 @@ class PullToRefreshListViewState extends State<PullToRefreshListView> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: widget.onRefresh,
-      backgroundColor: Colors.blueGrey,
-      color: Colors.white,
-      strokeWidth: 1.5,
       child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        controller: _scrollController,
-        itemCount: widget.items.length + (_isLoadingMore ? 1 : 0),
+        itemCount: widget.children.length + (widget.isLoading ? 1 : 0),
         itemBuilder: (context, index) {
-          if (index == widget.items.length) {
-            return Center(
-              child: Container(
-                height: 30,
-                alignment: Alignment.topCenter,
-                child: const Text(
-                  '正在加载...',
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 12.0,
-                  ),
+          if (index == widget.children.length && widget.isLoading) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(
+                child: SpinKitCircle(
+                  color: Colors.blue,
                 ),
               ),
             );
           }
-          return widget.items[index];
+          return widget.children[index];
         },
+        controller: widget.controller,
       ),
     );
   }

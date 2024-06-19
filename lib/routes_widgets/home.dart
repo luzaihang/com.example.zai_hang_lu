@@ -101,12 +101,12 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _onRefresh() async {
-    directories = await tencentCloudListData.getFirstContentsList() ?? [];
+    directories = await tencentCloudListData.getAllFirstContentsList() ?? [];
     setState(() {});
   }
 
   Future<void> _onLoadMore() async {
-    List<UserPost>? result = await tencentCloudListData.getNextContentsList();
+    List<UserPost>? result = await tencentCloudListData.getAllNextContentsList();
     if (result != null) {
       directories.addAll(result);
       setState(() {});
