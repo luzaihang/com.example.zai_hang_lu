@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:ci_dong/default_config/default_config.dart';
-import 'package:ci_dong/my_page/my_page_notifier.dart';
+import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class MyMain extends StatefulWidget {
@@ -74,61 +72,59 @@ class _MyMainState extends State<MyMain> {
               ),
               Consumer<MyPageNotifier>(
                 builder: (BuildContext context, provider, Widget? child) {
-                  // Logger().w(provider.bannerImgList);
-                  return /*provider.bannerImgList.isNotEmpty
-                      ? */
-                      SizedBox(
-                    width: double.infinity,
-                    height: 440,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: provider.bannerImgList.asMap().keys.map((e) {
-                        return Container(
-                          margin:
-                              EdgeInsets.only(right: 20, left: e == 0 ? 20 : 0),
-                          child: ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(14)),
-                            child: CachedNetworkImage(
-                              height: 440,
-                              width: screenWidth - 70,
-                              imageUrl: provider.bannerImgList[e],
-                              placeholder: (context, url) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white.withOpacity(0.7),
-                                    backgroundColor: const Color(0xFF052D84),
-                                    strokeWidth: 2.5,
-                                    strokeCap: StrokeCap.round,
+                  return provider.bannerImgList.isNotEmpty
+                      ? SizedBox(
+                          width: double.infinity,
+                          height: 440,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children:
+                                provider.bannerImgList.asMap().keys.map((e) {
+                              return Container(
+                                margin: EdgeInsets.only(
+                                    right: 20, left: e == 0 ? 20 : 0),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(14)),
+                                  child: CachedNetworkImage(
+                                    height: 440,
+                                    width: screenWidth - 70,
+                                    imageUrl: provider.bannerImgList[e],
+                                    placeholder: (context, url) {
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white.withOpacity(0.7),
+                                          backgroundColor:
+                                              const Color(0xFF052D84),
+                                          strokeWidth: 2.5,
+                                          strokeCap: StrokeCap.round,
+                                        ),
+                                      );
+                                    },
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                    fit: BoxFit.cover,
                                   ),
-                                );
-                              },
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                              fit: BoxFit.cover,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        )
+                      : Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          height: 480,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF052D84),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Align(
+                            child: Image.asset(
+                              "assets/banner_not_img_icon.png",
+                              width: 128,
+                              height: 128,
                             ),
                           ),
                         );
-                      }).toList(),
-                    ),
-                  );
-                  /*: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(14)),
-                            child: CachedNetworkImage(
-                              height: 480,
-                              width: screenWidth - 70,
-                              imageUrl: DefaultConfig.bannerImg,
-                              placeholder: (context, url) =>
-                                  Container(color: Colors.grey[300]),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );*/
                 },
               ),
               GestureDetector(

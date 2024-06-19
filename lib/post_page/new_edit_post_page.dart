@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 class NewEditPost extends StatefulWidget {
   const NewEditPost({super.key});
@@ -13,19 +15,40 @@ class NewEditPost extends StatefulWidget {
 }
 
 class NewEditPostState extends State<NewEditPost> {
-  final List<File?> _imageFiles = [];
+  late PostPageNotifier _readNotifier;
+  late PostPageNotifier _watchNotifier;
 
-  static const int MAX_IMAGES = 9;
+  late ScrollController scrollController;
 
+  //获得得到的图片asset
   List<Asset> _imageAssets = <Asset>[];
+  static const int maxImages = 9;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = ScrollController();
+    _readNotifier = context.read<PostPageNotifier>();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _watchNotifier = context.watch<PostPageNotifier>();
+  }
 
   Future<void> loadAssets() async {
     List<Asset> resultList = <Asset>[];
-    _imageFiles.clear();
+    bool isSelected = true; //进入到相册是否 选择了图片，默认true
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        selectedAssets: _imageAssets,
         materialOptions: const MaterialOptions(
           maxImages: 9,
           // startInAllView: true, //这个目前使用之后，没有返回数据
@@ -41,19 +64,20 @@ class NewEditPostState extends State<NewEditPost> {
       );
     } catch (e) {
       Logger().e(e);
+      isSelected = false;
     }
 
     if (!mounted) return;
+
+    //如果 没有选择图片，则不需要清理
+    if (isSelected) _readNotifier.imageFiles.clear();
 
     _imageAssets = resultList;
 
     for (var i in _imageAssets) {
       File file = await getImageFileFromAsset(i);
-      _imageFiles.add(file);
-      Logger().w(_imageFiles);
+      _readNotifier.setImageFiles(file);
     }
-
-    setState(() {});
   }
 
   Future<File> getImageFileFromAsset(Asset asset) async {
@@ -67,19 +91,19 @@ class NewEditPostState extends State<NewEditPost> {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return Column(
-            children: [
-              _buildImageList(),
-              _widget(),
-              const SizedBox(height: 30),
-            ],
-          );
-        },
-        childCount: 1,
-      ),
+    return ListView.builder(
+      controller: scrollController,
+      padding: EdgeInsets.zero,
+      itemCount: 1,
+      itemBuilder: (BuildContext context, int index) {
+        return Column(
+          children: [
+            _buildImageList(),
+            _widget(),
+            const SizedBox(height: 30),
+          ],
+        );
+      },
     );
   }
 
@@ -87,6 +111,7 @@ class NewEditPostState extends State<NewEditPost> {
     return Container(
       margin: const EdgeInsets.only(top: 15, left: 16, right: 10),
       child: TextField(
+        controller: _watchNotifier.controller,
         textAlign: TextAlign.justify,
         decoration: InputDecoration(
           hintText: "把你所遇分享给陌生人吧～",
@@ -106,9 +131,7 @@ class NewEditPostState extends State<NewEditPost> {
         ),
         cursorWidth: 2,
         cursorRadius: const Radius.circular(5),
-        onChanged: (text) {
-          setState(() {});
-        },
+        onChanged: (text) => _readNotifier.setSubmitText(text),
       ),
     );
   }
@@ -120,11 +143,11 @@ class NewEditPostState extends State<NewEditPost> {
       width: double.infinity,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _imageFiles.length < MAX_IMAGES
-            ? _imageFiles.length + 1
-            : MAX_IMAGES,
+        itemCount: _watchNotifier.imageFiles.length < maxImages
+            ? _watchNotifier.imageFiles.length + 1
+            : maxImages,
         itemBuilder: (context, index) {
-          if (index == _imageFiles.length) {
+          if (index == _watchNotifier.imageFiles.length) {
             return _buildAddImageButton();
           } else {
             return _buildImageItem(index);
@@ -139,7 +162,7 @@ class NewEditPostState extends State<NewEditPost> {
       onTap: loadAssets,
       child: Container(
         margin: EdgeInsets.only(
-          left: _imageFiles.isEmpty ? 20 : 0,
+          left: _watchNotifier.imageFiles.isEmpty ? 20 : 0,
           right: 20,
         ),
         child: Stack(
@@ -181,7 +204,7 @@ class NewEditPostState extends State<NewEditPost> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.file(
-                File(_imageFiles[index]!.path),
+                File(_watchNotifier.imageFiles[index]),
                 fit: BoxFit.cover,
               ),
             ),
@@ -191,9 +214,7 @@ class NewEditPostState extends State<NewEditPost> {
             top: 4,
             child: GestureDetector(
               onTap: () {
-                setState(() {
-                  _imageFiles.removeAt(index);
-                });
+                _readNotifier.removeIndexFiles(index);
               },
               child: Image.asset(
                 "assets/image_delete_icon.png",

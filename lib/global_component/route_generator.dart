@@ -2,7 +2,6 @@ import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
 import 'package:ci_dong/routes_widgets/chat_list_page.dart';
-import 'package:ci_dong/routes_widgets/edit_post_page.dart';
 import 'package:ci_dong/routes_widgets/gallery_photo_view.dart';
 import 'package:ci_dong/routes_widgets/home.dart';
 import 'package:ci_dong/routes_widgets/login_page.dart';
@@ -14,8 +13,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/home':
         return const HomePage();
-      case '/editPostPage':
-        return const EditPostPage();
       case '/loginScreen':
         return const LoginScreen();
       case '/appLaunchPage':

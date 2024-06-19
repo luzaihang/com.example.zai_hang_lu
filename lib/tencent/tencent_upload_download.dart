@@ -11,7 +11,6 @@ import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
 import 'package:ci_dong/app_data/post_content_data.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 class TencentUpLoadAndDownload {
@@ -65,7 +64,7 @@ class TencentUpLoadAndDownload {
         filePath: imagePath, postContentData: postContentData);
   }
 
-  static Future<void> postTextUpLoad(BuildContext context, Map map) async {
+  static Future<void> postTextUpLoad(Map map) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "${PostContentData.postID}.txt";
     String jsonString = json.encode(map);
@@ -76,7 +75,6 @@ class TencentUpLoadAndDownload {
         byteArr: byte);
     if (success) {
       Loading().hide();
-      if (context.mounted) Navigator.pop(context);
       Logger().i("txt 文件上传成功");
     } else {
       Logger().e("txt 文件上传失败");
