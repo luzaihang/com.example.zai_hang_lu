@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:ci_dong/lean_cloud/client_manager.dart';
+import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
@@ -8,7 +8,7 @@ import 'package:ci_dong/factory_list/chat_detail_factory.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:ci_dong/widget_element/message_bubble_item.dart';
-import 'package:ci_dong/widget_element/preferredSize_item.dart';
+import 'package:provider/provider.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String taUserName;
@@ -31,20 +31,42 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Client client = ClientManager().client;
+  late ChatNotifier _chatReadNotifier;
+  late ChatNotifier _chatWatchNotifier;
 
   List<ChatDetailSender> newMessages = []; // 新增列表用于保存新消息
 
   @override
   void initState() {
     super.initState();
-    _setupClientMessageListener();
+    _chatReadNotifier = context.read<ChatNotifier>();
+    _chatReadNotifier.messageText = ""; //进入页面时重定为空，避免其他人的聊天介入
+    _chatReadNotifier.isDetail = true; //消息监听设置为聊天详情
     _loadChattingRecords(); // 加载聊天记录
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    _chatWatchNotifier = context.watch<ChatNotifier>();
+    if (mounted && _chatWatchNotifier.messageText.isNotEmpty) {
+      await _addMessage(
+        senderName: widget.taUserName,
+        senderAvatar: widget.taUserAvatar,
+        text: _chatWatchNotifier.messageText,
+        isMe: false,
+        timestamp: DateTime.now(),
+      );
+
+      //接收到消息时，上传数据到云端
+      _uploadChatDetails();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _chatReadNotifier.isDetail = false; //取消聊天详情监听
     super.dispose();
   }
 
@@ -74,26 +96,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   Future<List<ChatDetailSender>> chattingRecords() async {
     var chatDetails = await TencentCloudTxtDownload.chatTxt(widget.taUserID);
     return chatDetails;
-  }
-
-  void _setupClientMessageListener() {
-    client.onMessage = ({
-      required Client client,
-      required Conversation conversation,
-      required Message message,
-    }) async {
-      String? text = message is TextMessage ? message.text : '消息内容为空';
-      await _addMessage(
-        senderName: widget.taUserName,
-        senderAvatar: widget.taUserAvatar,
-        text: text ?? "",
-        isMe: false,
-        timestamp: DateTime.now(),
-      );
-
-      //接收到消息时，上传数据到云端
-      _uploadChatDetails();
-    };
   }
 
   Future<void> _addMessage({
@@ -146,7 +148,8 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   Future<void> sendMessage(String text) async {
     if (text.isEmpty) return;
 
-    Conversation conversation = await client.createConversation(
+    Conversation conversation =
+        await _chatReadNotifier.client.createConversation(
       members: {widget.taUserID},
     );
 
@@ -175,9 +178,39 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
       child: Scaffold(
         key: _scaffoldKey,
-        appBar: _buildAppBar(),
+        backgroundColor: const Color(0xFFF2F3F5),
         body: Column(
           children: <Widget>[
+            Container(
+              margin: const EdgeInsets.only(
+                left: 24,
+                top: 45,
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Image.asset(
+                      "assets/back_icon.png",
+                      width: 24,
+                      height: 24,
+                      color: const Color(0xFF1E3A8A),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.taUserName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E3A8A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: ListView.builder(
                 reverse: true,
@@ -193,25 +226,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
               child: _buildTextComposer(),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  PreferredSize _buildAppBar() {
-    return preferredSizeWidget(
-      AppBar(
-        title: Text(
-          widget.taUserName,
-          style: const TextStyle(fontSize: 15),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blueGrey,
-        leading: IconButton(
-          icon: const ImageIcon(AssetImage("assets/back_icon.png")),
-          onPressed: () {
-            Navigator.pop(context);
-          },
         ),
       ),
     );

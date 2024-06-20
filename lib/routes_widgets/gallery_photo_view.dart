@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
 class GalleryPhotoView extends StatefulWidget {
@@ -29,26 +30,43 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
     super.dispose();
   }
 
+  void systemChromeColor(Color color) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: color, // 状态栏背景色
+        statusBarIconBrightness: Brightness.light, // 状态栏图标亮度
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
-        },
-        child: PhotoViewGallery.builder(
-          pageController: _pageController,
-          itemCount: widget.imageUrls.length,
-          loadingBuilder: (context, event) {
-            return CustomLoadingIndicator(event: event);
+    systemChromeColor(Colors.black);
+    return WillPopScope(
+      onWillPop: ()async{
+        systemChromeColor(const Color(0xFFF2F3F5));
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: GestureDetector(
+          onTap: () {
+            systemChromeColor(const Color(0xFFF2F3F5));
+            Navigator.pop(context);
           },
-          builder: (context, index) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider:
-                  CachedNetworkImageProvider(widget.imageUrls[index]),
-            );
-          },
+          child: PhotoViewGallery.builder(
+            pageController: _pageController,
+            itemCount: widget.imageUrls.length,
+            loadingBuilder: (context, event) {
+              return CustomLoadingIndicator(event: event);
+            },
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider:
+                    CachedNetworkImageProvider(widget.imageUrls[index]),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -9,6 +9,7 @@ import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PostPageNotifier with ChangeNotifier {
   TencentUpLoadAndDownload tencentUpLoadAndDownload =
@@ -16,6 +17,8 @@ class PostPageNotifier with ChangeNotifier {
   PostContentData postContentData = PostContentData();
   TextEditingController postUploadController = TextEditingController();
   TencentCloudListData tencentCloudListData = TencentCloudListData();
+  RefreshController allRefreshController = RefreshController(initialRefresh: false);
+  RefreshController userRefreshController = RefreshController(initialRefresh: false);
 
   int selectedIndex = 0; //tab下标
 
@@ -30,6 +33,7 @@ class PostPageNotifier with ChangeNotifier {
 
   Future<void> onAllRefresh() async {
     allTabList = await tencentCloudListData.getAllFirstContentsList() ?? [];
+    allRefreshController.refreshCompleted();
     notifyListeners();
   }
 
@@ -37,12 +41,14 @@ class PostPageNotifier with ChangeNotifier {
     List<UserPost>? result = await tencentCloudListData.getAllNextContentsList();
     if (result != null) {
       allTabList.addAll(result);
+      allRefreshController.loadComplete();
       notifyListeners();
     }
   }
 
   Future<void> onUserRefresh() async {
     userTabList = await tencentCloudListData.getUserPostFirstContentsList() ?? [];
+    userRefreshController.refreshCompleted();
     notifyListeners();
   }
 
@@ -50,6 +56,7 @@ class PostPageNotifier with ChangeNotifier {
     List<UserPost>? result = await tencentCloudListData.getUserPostNextContentsList();
     if (result != null) {
       userTabList.addAll(result);
+      userRefreshController.loadComplete();
       notifyListeners();
     }
   }

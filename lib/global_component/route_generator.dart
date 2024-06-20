@@ -1,4 +1,5 @@
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
 import 'package:ci_dong/routes_widgets/chat_list_page.dart';
@@ -42,20 +43,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     }
   }
 
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => getPage(),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0);
-      const end = Offset.zero;
-      const curve = Curves.easeInOut;
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-      var offsetAnimation = animation.drive(tween);
-
-      return SlideTransition(
-        position: offsetAnimation,
-        child: child,
-      );
-    },
+  return CupertinoPageRoute(
+    builder: (context) => getPage(),
     settings: settings,
   );
 }

@@ -1,62 +1,56 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class RefreshListView extends StatefulWidget {
-  final Future<void> Function() onRefresh;
-  final Future<void> Function() onLoadingMore;
-  final List<Widget> children;
-  final ScrollController controller;
-  final bool isLoading;
-
-  const RefreshListView({
-    super.key,
-    required this.onRefresh,
-    required this.onLoadingMore,
-    required this.children,
-    required this.controller,
-    required this.isLoading,
-  });
-
-  @override
-  _RefreshListViewState createState() => _RefreshListViewState();
+Widget headerRefresh() {
+  return const WaterDropHeader(
+    idleIcon: Icon(
+      Icons.circle,
+      color: Colors.white,
+      size: 10,
+    ),
+    waterDropColor: Color(0xFF052D84),
+    complete: Text(
+      "刷新完成",
+      style: TextStyle(
+        fontSize: 12,
+        color: Color(0xFF052D84),
+      ),
+    ),
+    failed: Text(
+      "刷新失败",
+      style: TextStyle(
+        fontSize: 12,
+        color: Color(0xFF052D84),
+      ),
+    ),
+    refresh: SpinKitFoldingCube(
+      color: Color(0xFF052D84),
+      size: 20.0,
+      duration: Duration(milliseconds: 800),
+    ),
+  );
 }
 
-class _RefreshListViewState extends State<RefreshListView> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(() async {
-      if (widget.isLoading) return;
-      if (widget.controller.position.pixels ==
-          widget.controller.position.maxScrollExtent) {
-        await widget.onLoadingMore();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: widget.onRefresh,
-      child: ListView.builder(
-        itemCount: widget.children.length + (widget.isLoading ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == widget.children.length && widget.isLoading) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: SpinKitCircle(
-                  color: Colors.blue,
-                ),
-              ),
-            );
-          }
-          return widget.children[index];
-        },
-        controller: widget.controller,
-      ),
-    );
-  }
+Widget footerLoad() {
+  return const ClassicFooter(
+    textStyle: TextStyle(
+      fontSize: 12,
+      color: Color(0xFF052D84),
+    ),
+    loadingText: "",
+    loadingIcon: SpinKitThreeBounce(
+      color: Color(0xFF052D84),
+      size: 13.0,
+      duration: Duration(milliseconds: 800),
+    ),
+    failedText: "加载失败",
+    failedIcon: null,
+    noDataText: "",
+    noMoreIcon: null,
+    idleText: "- 已经到底了 -",
+    canLoadingIcon: null,
+    canLoadingText: "",
+    idleIcon: null,
+  );
 }

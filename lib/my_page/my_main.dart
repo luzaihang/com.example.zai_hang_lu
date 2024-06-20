@@ -3,6 +3,7 @@ import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
 class MyMain extends StatefulWidget {
@@ -91,13 +92,11 @@ class _MyMainState extends State<MyMain> {
                                     width: screenWidth - 70,
                                     imageUrl: provider.bannerImgList[e],
                                     placeholder: (context, url) {
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white.withOpacity(0.7),
-                                          backgroundColor:
-                                              const Color(0xFF052D84),
-                                          strokeWidth: 2.5,
-                                          strokeCap: StrokeCap.round,
+                                      return const Center(
+                                        child: SpinKitFoldingCube(
+                                          color: Color(0xFF052D84),
+                                          size: 20.0,
+                                          duration: Duration(milliseconds: 800),
                                         ),
                                       );
                                     },
@@ -205,50 +204,53 @@ class _MyMainState extends State<MyMain> {
                   ),
                 ),
               ),
-              Container(
-                height: 80,
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                    // color: const Color(0xFF052D84), //0xFF0645B6 0xFF000822
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16)),
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                child: Row(
-                  children: [
-                    Image.asset(
-                      "assets/chat_icon.png",
-                      height: 26,
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "聊天记录",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF052D84),
+              GestureDetector(
+                onTap: ()=> Navigator.pushNamed(context, '/chatListPage'),
+                child: Container(
+                  height: 80,
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                      // color: const Color(0xFF052D84), //0xFF0645B6 0xFF000822
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        "assets/chat_icon.png",
+                        height: 26,
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "聊天记录",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF052D84),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 2,
-                        ),
-                        Text(
-                          "快快畅所欲言吧～",
-                          style: TextStyle(
-                            fontSize: 13,
-                            // fontWeight: FontWeight.bold,
-                            color: const Color(0xFF052D84).withOpacity(0.5),
+                          const SizedBox(
+                            height: 2,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          Text(
+                            "快快畅所欲言吧～",
+                            style: TextStyle(
+                              fontSize: 13,
+                              // fontWeight: FontWeight.bold,
+                              color: const Color(0xFF052D84).withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

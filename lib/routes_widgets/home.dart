@@ -1,18 +1,11 @@
 import 'package:ci_dong/lean_cloud/client_manager.dart';
 import 'package:ci_dong/my_page/my_main.dart';
 import 'package:ci_dong/post_page/post_main.dart';
+import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/setting_page/setting_main.dart';
 import 'package:flutter/material.dart';
-import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/factory_list/home_list_data.dart';
-import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
-import 'package:ci_dong/widget_element/home_panel_item.dart';
-import 'package:ci_dong/widget_element/home_post_item.dart';
-import 'package:ci_dong/widget_element/preferredSize_item.dart';
-import 'package:flutter/rendering.dart';
-import 'package:leancloud_official_plugin/leancloud_plugin.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
@@ -29,24 +22,18 @@ class _HomePageState extends State<HomePage>
   List<UserPost> directories = [];
   TencentCloudListData tencentCloudListData = TencentCloudListData();
 
-  bool newMessage = false;
-  bool _isActive = true;
   late VisibilityNotifier _visibilityNotifier;
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
+  late ChatNotifier _chatReadNotifier;
 
   @override
   void initState() {
     super.initState();
-    _initializeResources();
+    _leanCloudInit();
     _initializeAnimations();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback(_initializeVisibilityNotifier);
-  }
-
-  void _initializeResources() {
-    _onRefresh();
-    _leanCloudInit();
   }
 
   void _initializeAnimations() {
@@ -68,6 +55,8 @@ class _HomePageState extends State<HomePage>
     _visibilityNotifier.addListener(_toggleBottomNavigationBar);
     _visibilityNotifier.updateVisibility(true);
     _controller.forward();
+    _chatReadNotifier = context.read<ChatNotifier>();
+    _chatReadNotifier.setupClientMessageListener(); //准备监听消息记录
   }
 
   @override
@@ -78,11 +67,6 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _isActive = state == AppLifecycleState.resumed;
-  }
-
   void _toggleBottomNavigationBar() {
     _visibilityNotifier.isVisible
         ? _controller.forward()
@@ -91,26 +75,6 @@ class _HomePageState extends State<HomePage>
 
   Future<void> _leanCloudInit() async {
     await ClientManager().initialize();
-    Client client = ClientManager().client;
-    client.onUnreadMessageCountUpdated = ({
-      required Client client,
-      required Conversation conversation,
-    }) {
-      Logger().i(conversation.id);
-    };
-  }
-
-  Future<void> _onRefresh() async {
-    directories = await tencentCloudListData.getAllFirstContentsList() ?? [];
-    setState(() {});
-  }
-
-  Future<void> _onLoadMore() async {
-    List<UserPost>? result = await tencentCloudListData.getAllNextContentsList();
-    if (result != null) {
-      directories.addAll(result);
-      setState(() {});
-    }
   }
 
   int _currentIndex = 0;

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
@@ -50,6 +51,7 @@ class MyPageNotifier with ChangeNotifier {
 
     _imageAssets = resultList;
     if (_imageAssets.isNotEmpty) {
+      Loading().show(context);
       for (var item in bannerImgList) {
         String filename = item.split('/').last;
         //只能单个删除
@@ -62,8 +64,9 @@ class MyPageNotifier with ChangeNotifier {
       _imageFilesPath.add(path);
 
       await bannerImageUpLoad(path);
-      bannerImgFun();
     }
+    Loading().hide();
+    bannerImgFun();
     notifyListeners();
   }
 
