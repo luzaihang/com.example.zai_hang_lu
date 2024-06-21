@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
-import 'package:ci_dong/app_data/post_content_data.dart';
+import 'package:ci_dong/app_data/post_content_config.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
@@ -32,8 +32,7 @@ class TencentUpLoadAndDownload {
       Logger().i("文件上传成功");
       if (filePath != null && filePath.isNotEmpty && postContentData != null) {
         //只有 帖子上传到时候才需要这个操作
-        String path =
-            "${DefaultConfig.postImagePrefix}/$cosPath";
+        String path = "${DefaultConfig.postImagePrefix}/$cosPath";
         postContentData.addToPostImagePaths(path);
       }
       completer.complete(true);
@@ -56,15 +55,15 @@ class TencentUpLoadAndDownload {
     return completer.future;
   }
 
-  Future<bool> imageUpLoad(String imagePath,
+  Future<bool> imageUpLoad(String imagePath, String postId,
       {PostContentConfig? postContentData}) async {
     String filename = imagePath.split('/').last;
-    String cosPath = "${PostContentConfig.postID}/$filename";
+    String cosPath = "$postId/$filename";
     return uploadFile(DefaultConfig.postImageBucket, cosPath,
         filePath: imagePath, postContentData: postContentData);
   }
 
-  static Future<void> postTextUpLoad(Map map) async {
+  static Future<void> postTextUpLoad(Map map, String postId) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String jsonString = json.encode(map);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
@@ -72,19 +71,20 @@ class TencentUpLoadAndDownload {
     //发送到全部列表
     bool success = await uploader.uploadFile(
       DefaultConfig.postTextBucket,
-      "${PostContentConfig.postID}.txt",
+      "$postId.txt",
       byteArr: byte,
     );
     //发送到发帖人的列表
     await uploader.uploadFile(
       DefaultConfig.avatarAndPostBucket,
-      "${UserInfoConfig.uniqueID}/post/${PostContentConfig.postID}.txt",
+      "${UserInfoConfig.uniqueID}/post/$postId.txt",
       byteArr: byte,
     );
     if (success) {
       Loading().hide();
       Logger().i("txt 文件上传成功");
     } else {
+      Loading().hide();
       Logger().e("txt 文件上传失败");
     }
   }

@@ -1,4 +1,3 @@
-
 ///这是要上传到服务端的帖子内容
 class PostDetailFromMap {
   String userName;
@@ -9,6 +8,7 @@ class PostDetailFromMap {
   List<String> postImages;
   String postCreationTime;
   String upvote; //点赞的人,包含了所以点赞人的userid
+  String postId; //帖子id
 
   // 构造函数
   PostDetailFromMap({
@@ -20,6 +20,7 @@ class PostDetailFromMap {
     required this.postImages,
     required this.postCreationTime,
     required this.upvote,
+    required this.postId,
   });
 
   // 从传入的Map中初始化值
@@ -32,6 +33,7 @@ class PostDetailFromMap {
     postImages = List<String>.from(map['postImages']);
     postCreationTime = map['postCreationTime'];
     upvote = map['upvote'];
+    postId = map['postId'];
   }
 
   // 将实例转换为Map
@@ -45,6 +47,7 @@ class PostDetailFromMap {
       'postImages': postImages,
       'postCreationTime': postCreationTime,
       'upvote': upvote,
+      'postId': postId,
     };
   }
 }

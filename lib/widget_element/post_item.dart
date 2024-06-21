@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
-import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+import 'package:ci_dong/provider/post_page_notifier.dart';
+import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../app_data/format_date_time.dart';
 
@@ -22,6 +24,9 @@ class PostListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+// 计算 | 在字符串中出现的次数,因为是用 (|userid) 来区分的，知道这个的次数就可以知道多少人点赞
+    int count = '|'.allMatches(item.upvote ?? "").length;
+
     return Column(
       children: [
         Padding(
@@ -53,16 +58,43 @@ class PostListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              item.userID != UserInfoConfig.uniqueID
-                  ? GestureDetector(
-                      onTap: () {},
-                      child: Image.asset(
-                        "assets/like_icon.png",
-                        height: 28,
-                        width: 28,
-                      ),
-                    )
-                  : const SizedBox(width: 28),
+              Consumer2<PostPageNotifier, UpvoteNotifier>(
+                builder: (BuildContext context, pageNotifier, upvoteNotifier,
+                    Widget? child) {
+                  return GestureDetector(
+                    onTap: () async {
+                      PostDetailFormJson result =
+                          upvoteNotifier.postUpvote(item);
+                      pageNotifier.updatePostUpvote(item.postId ?? "", result);
+                    },
+                    child: Row(
+                      children: [
+                        count != 0
+                            ? Text(
+                                "$count",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: item.upvote!
+                                          .contains(UserInfoConfig.uniqueID)
+                                      ? Colors.red
+                                      : const Color(0xFF052D84)
+                                          .withOpacity(0.2),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                        Image.asset(
+                          "assets/like_icon.png",
+                          height: 28,
+                          width: 28,
+                          color: item.upvote!.contains(UserInfoConfig.uniqueID)
+                              ? Colors.red
+                              : const Color(0xFF052D84).withOpacity(0.2),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),

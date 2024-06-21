@@ -42,6 +42,5 @@ class RandomGenerator {
       Logger().e('Error: $e');
       return "";
     }
-    return "";
   }
 }

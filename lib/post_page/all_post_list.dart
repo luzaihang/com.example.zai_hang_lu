@@ -27,7 +27,6 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
     super.initState();
     _readNotifier = context.read<PostPageNotifier>();
     _visibilityNotifier = context.read<VisibilityNotifier>();
-    // _upvoteReadNotifier = context.read<UpvoteNotifier>();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
 
@@ -71,19 +70,28 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
         header: headerRefresh(),
         footer: footerLoad(),
         enablePullUp: true,
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          controller: _scrollController,
-          itemCount: provider.allTabList.length,
-          itemBuilder: (BuildContext context, int index) {
-            PostDetailFormJson item = provider.allTabList[index];
-            return PostListItem(
-              item: item,
-              screenWidth: screenWidth,
-              index: index,
-            );
-          },
-        ),
+        child: provider.allTabList.isNotEmpty
+            ? ListView.builder(
+                padding: EdgeInsets.zero,
+                controller: _scrollController,
+                itemCount: provider.allTabList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  PostDetailFormJson item = provider.allTabList[index];
+                  return PostListItem(
+                    item: item,
+                    screenWidth: screenWidth,
+                    index: index,
+                  );
+                },
+              )
+            : Center(
+                child: Image.asset(
+                  "assets/not_post_icon.png",
+                  width: 80,
+                  height: 80,
+                  color: const Color(0xFF052D84),
+                ),
+              ),
       );
     });
   }

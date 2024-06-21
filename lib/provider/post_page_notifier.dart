@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:ci_dong/app_data/post_content_data.dart';
+import 'package:ci_dong/app_data/post_content_config.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
@@ -17,8 +17,12 @@ class PostPageNotifier with ChangeNotifier {
   PostContentConfig postContentData = PostContentConfig();
   TextEditingController postUploadController = TextEditingController();
   TencentCloudListData tencentCloudListData = TencentCloudListData();
-  RefreshController allRefreshController = RefreshController(initialRefresh: false);
-  RefreshController userRefreshController = RefreshController(initialRefresh: false);
+  RefreshController allRefreshController =
+      RefreshController(initialRefresh: false);
+  RefreshController userRefreshController =
+      RefreshController(initialRefresh: false);
+
+  String postId = ""; //帖子id
 
   int selectedIndex = 0; //tab下标
 
@@ -38,7 +42,8 @@ class PostPageNotifier with ChangeNotifier {
   }
 
   Future<void> onAllLoadMore() async {
-    List<PostDetailFormJson>? result = await tencentCloudListData.getAllNextContentsList();
+    List<PostDetailFormJson>? result =
+        await tencentCloudListData.getAllNextContentsList();
     if (result != null) {
       allTabList.addAll(result);
       allRefreshController.loadComplete();
@@ -47,13 +52,15 @@ class PostPageNotifier with ChangeNotifier {
   }
 
   Future<void> onUserRefresh() async {
-    userTabList = await tencentCloudListData.getUserPostFirstContentsList() ?? [];
+    userTabList =
+        await tencentCloudListData.getUserPostFirstContentsList() ?? [];
     userRefreshController.refreshCompleted();
     notifyListeners();
   }
 
   Future<void> onUserLoadMore() async {
-    List<PostDetailFormJson>? result = await tencentCloudListData.getUserPostNextContentsList();
+    List<PostDetailFormJson>? result =
+        await tencentCloudListData.getUserPostNextContentsList();
     if (result != null) {
       userTabList.addAll(result);
       userRefreshController.loadComplete();
@@ -105,26 +112,46 @@ class PostPageNotifier with ChangeNotifier {
 
     Loading().show(context);
 
-    PostContentConfig.postID = RandomGenerator.getRandomCombination();
+    postId = RandomGenerator.getRandomCombination();
 
     if (imageFiles.isNotEmpty) {
       List<Future<bool>> uploadFutures = imageFiles.map((imagePath) {
+        //帖子图片上传，上传完之后将所有数据集中，再执行 postTextUpload()
         return TencentUpLoadAndDownload()
-            .imageUpLoad(imagePath, postContentData: postContentData);
+            .imageUpLoad(imagePath, postId, postContentData: postContentData);
       }).toList();
 
       List<bool> results = await Future.wait(uploadFutures);
 
       if (results.every((result) => result)) {
-        PostDetailFromMap postDetails = createPostDetails();
-        TencentUpLoadAndDownload.postTextUpLoad(postDetails.toMap());
+        postTextUpload();
       }
     } else {
-      PostDetailFromMap postDetails = createPostDetails();
-      TencentUpLoadAndDownload.postTextUpLoad(postDetails.toMap());
+      postTextUpload();
     }
 
     cleanContent();
+  }
+
+  ///帖子内容上传
+  void postTextUpload() {
+    PostDetailFromMap postDetails = createPostDetail();
+    TencentUpLoadAndDownload.postTextUpLoad(postDetails.toMap(), postId);
+  }
+
+  PostDetailFromMap createPostDetail() {
+    return PostDetailFromMap(
+      userName: UserInfoConfig.userName,
+      userID: UserInfoConfig.uniqueID,
+      userAvatar: UserInfoConfig.userAvatar,
+      //暂未接入
+      location: '',
+      postContent: submitText,
+      postImages: postContentData.uploadedImagePaths,
+      postCreationTime: DateTime.now().toIso8601String(),
+      upvote: '',
+      postId: postId,
+    );
   }
 
   void cleanContent() {
@@ -138,17 +165,19 @@ class PostPageNotifier with ChangeNotifier {
     postContentData.prepareForNewPost();
   }
 
-  PostDetailFromMap createPostDetails() {
-    return PostDetailFromMap(
-      userName: UserInfoConfig.userName,
-      userID: UserInfoConfig.uniqueID,
-      userAvatar: UserInfoConfig.userAvatar,
-      //暂未接入
-      location: '',
-      postContent: submitText,
-      postImages: postContentData.uploadedImagePaths,
-      postCreationTime: DateTime.now().toIso8601String(),
-      upvote: '',
-    );
+  ///更新帖子点赞状态
+  void updatePostUpvote(String id, PostDetailFormJson item) {
+    int indexAllTab = allTabList.indexWhere((post) => post.postId == id);
+    int indexUserTab = userTabList.indexWhere((post) => post.postId == id);
+
+    if (indexAllTab != -1) {
+      allTabList[indexAllTab] = item;
+    }
+
+    if (indexUserTab != -1) {
+      userTabList[indexUserTab] = item;
+    }
+
+    notifyListeners();
   }
 }

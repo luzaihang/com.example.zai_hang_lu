@@ -8,6 +8,7 @@ class PostDetailFormJson {
   final List<String> postImages;
   final DateTime postCreationTime;
   final String? upvote; //点赞的人,包含了所以点赞人的userid
+  final String? postId;
 
   PostDetailFormJson({
     required this.userName,
@@ -18,6 +19,7 @@ class PostDetailFormJson {
     required this.postImages,
     required this.postCreationTime,
     required this.upvote,
+    required this.postId,
   });
 
   factory PostDetailFormJson.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class PostDetailFormJson {
       postImages: List<String>.from(json['postImages']),
       postCreationTime: DateTime.parse(json['postCreationTime']),
       upvote: json['upvote'] ?? '',
+      postId: json['postId'] ?? "",
     );
   }
 
@@ -43,6 +46,7 @@ class PostDetailFormJson {
       'postImages': postImages,
       'postCreationTime': postCreationTime.toIso8601String(),
       'upvote': upvote,
+      'postId': postId,
     };
   }
 }
