@@ -5,7 +5,7 @@ import 'package:ci_dong/default_config/default_config.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
-import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:http/http.dart' as http;
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
@@ -19,9 +19,9 @@ class TencentCloudListData {
 
   final Cos cos = CosService().cos;
 
-  Future<List<UserPost>?> _fetchContentsList(bool allTab,
+  Future<List<PostDetailFormJson>?> _fetchContentsList(bool allTab,
       {String? marker}) async {
-    List<UserPost> decodedMaps = [];
+    List<PostDetailFormJson> decodedMaps = [];
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
             allTab
@@ -46,9 +46,9 @@ class TencentCloudListData {
       List<String> objectUrls =
           contentsList.where((object) => object != null).map((object) {
         if (allTab) {
-          return "https://${DefaultConfig.postTextBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
+          return "${DefaultConfig.postTextPrefix}/${object?.key}";
         } else {
-          return "https://${DefaultConfig.avatarAndPostBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}";
+          return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
         }
       }).toList();
 
@@ -60,8 +60,8 @@ class TencentCloudListData {
           String decodedJsonString = utf8.decode(response.bodyBytes);
           if (decodedJsonString.trim().isNotEmpty) {
             Map<String, dynamic> decodedMap = json.decode(decodedJsonString);
-            UserPost userPost = UserPost.fromJson(decodedMap);
-            decodedMaps.add(userPost);
+            PostDetailFormJson postJson = PostDetailFormJson.fromJson(decodedMap);
+            decodedMaps.add(postJson);
           }
         } else {
           Logger().e(
@@ -76,11 +76,11 @@ class TencentCloudListData {
     }
   }
 
-  Future<List<UserPost>?> getAllFirstContentsList() async {
+  Future<List<PostDetailFormJson>?> getAllFirstContentsList() async {
     return _fetchContentsList(true);
   }
 
-  Future<List<UserPost>?> getAllNextContentsList() async {
+  Future<List<PostDetailFormJson>?> getAllNextContentsList() async {
     if (allIsTruncated) {
       return _fetchContentsList(true, marker: allNextMarker);
     } else {
@@ -88,11 +88,11 @@ class TencentCloudListData {
     }
   }
 
-  Future<List<UserPost>?> getUserPostFirstContentsList() async {
+  Future<List<PostDetailFormJson>?> getUserPostFirstContentsList() async {
     return _fetchContentsList(false);
   }
 
-  Future<List<UserPost>?> getUserPostNextContentsList() async {
+  Future<List<PostDetailFormJson>?> getUserPostNextContentsList() async {
     if (allIsTruncated) {
       return _fetchContentsList(false, marker: allNextMarker);
     } else {

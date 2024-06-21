@@ -1,4 +1,4 @@
-import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
@@ -73,7 +73,7 @@ class _UserPostListState extends State<UserPostList> {
                 controller: _scrollController,
                 itemCount: provider.userTabList.length,
                 itemBuilder: (BuildContext context, int index) {
-                  UserPost item = provider.userTabList[index];
+                  PostDetailFormJson item = provider.userTabList[index];
                   return PostListItem(
                     item: item,
                     screenWidth: screenWidth,
@@ -84,8 +84,8 @@ class _UserPostListState extends State<UserPostList> {
             : Center(
                 child: Image.asset(
                   "assets/not_post_icon.png",
-                  width: 100,
-                  height: 100,
+                  width: 80,
+                  height: 80,
                   color: const Color(0xFF052D84),
                 ),
               ),

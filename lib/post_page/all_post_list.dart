@@ -1,6 +1,7 @@
-import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
+import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/widget_element/post_item.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
     super.initState();
     _readNotifier = context.read<PostPageNotifier>();
     _visibilityNotifier = context.read<VisibilityNotifier>();
+    // _upvoteReadNotifier = context.read<UpvoteNotifier>();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
 
@@ -74,7 +76,7 @@ class _AllPostListWidgetState extends State<AllPostListWidget> {
           controller: _scrollController,
           itemCount: provider.allTabList.length,
           itemBuilder: (BuildContext context, int index) {
-            UserPost item = provider.allTabList[index];
+            PostDetailFormJson item = provider.allTabList[index];
             return PostListItem(
               item: item,
               screenWidth: screenWidth,

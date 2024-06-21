@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
@@ -9,6 +10,7 @@ class MessageBubble extends StatelessWidget {
   final String text;
   final bool isMe;
   final DateTime timestamp;
+  final String senderID;
 
   const MessageBubble({
     super.key,
@@ -17,6 +19,7 @@ class MessageBubble extends StatelessWidget {
     required this.text,
     required this.isMe,
     required this.timestamp,
+    required this.senderID,
   });
 
   @override
@@ -26,33 +29,14 @@ class MessageBubble extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (!isMe) _buildAvatar(senderAvatar),
+          if (!isMe) AvatarWidget(userId: senderID),
           const SizedBox(width: 10),
           Expanded(child: _buildMessageContent(context, timestamp)),
           const SizedBox(width: 10),
-          if (isMe) _buildAvatar(UserInfoConfig.userAvatar),
+          if (isMe) AvatarWidget(userId: UserInfoConfig.uniqueID),
         ],
       ),
     );
-  }
-
-  Widget _buildAvatar(String avatarUrl) {
-    return avatarUrl.isNotEmpty
-        ? Container(
-            margin: const EdgeInsets.only(top: 3),
-            child: CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(avatarUrl),
-              radius: 20.0,
-            ),
-          )
-        : Container(
-            margin: const EdgeInsets.only(top: 3),
-            child: const CircleAvatar(
-              backgroundColor: Colors.blueGrey,
-              radius: 20.0,
-              child: Icon(Icons.person),
-            ),
-          );
   }
 
   Widget _buildMessageContent(BuildContext context, DateTime dateTime) {
@@ -69,7 +53,7 @@ class MessageBubble extends StatelessWidget {
               isMe ? UserInfoConfig.userName : senderName,
               style: const TextStyle(
                 fontSize: 13,
-                color: Colors.blueGrey,
+                color: Color(0xFF052D84),
               ),
             ),
             const SizedBox(width: 8.0),
@@ -77,7 +61,7 @@ class MessageBubble extends StatelessWidget {
               padding: const EdgeInsets.only(top: 1.5),
               child: Text(
                 formatDateTimeToMinutes(timestamp),
-                style: const TextStyle(color: Colors.blueGrey, fontSize: 10.0),
+                style: TextStyle(color: const Color(0xFF052D84).withOpacity(0.5), fontSize: 10.0),
               ),
             ),
           ],
@@ -97,7 +81,7 @@ class MessageBubble extends StatelessWidget {
           child: Text(
             text,
             style: TextStyle(
-              color: isMe ? Colors.white : Colors.black.withOpacity(0.7),
+              color: isMe ? Colors.white : const Color(0xFF052D84).withOpacity(0.8),
             ),
             textAlign: TextAlign.justify,
           ),

@@ -25,7 +25,7 @@ class TencentUpLoadAndDownload {
   Future<bool> uploadFile(String bucket, String cosPath,
       {String? filePath,
       Uint8List? byteArr,
-      PostContentData? postContentData}) async {
+      PostContentConfig? postContentData}) async {
     Completer<bool> completer = Completer<bool>();
 
     void successCallBack(result) {
@@ -33,7 +33,7 @@ class TencentUpLoadAndDownload {
       if (filePath != null && filePath.isNotEmpty && postContentData != null) {
         //只有 帖子上传到时候才需要这个操作
         String path =
-            "https://${DefaultConfig.postImageBucket}.cos.${DefaultConfig.region}.myqcloud.com/$cosPath";
+            "${DefaultConfig.postImagePrefix}/$cosPath";
         postContentData.addToPostImagePaths(path);
       }
       completer.complete(true);
@@ -57,9 +57,9 @@ class TencentUpLoadAndDownload {
   }
 
   Future<bool> imageUpLoad(String imagePath,
-      {PostContentData? postContentData}) async {
+      {PostContentConfig? postContentData}) async {
     String filename = imagePath.split('/').last;
-    String cosPath = "${PostContentData.postID}/$filename";
+    String cosPath = "${PostContentConfig.postID}/$filename";
     return uploadFile(DefaultConfig.postImageBucket, cosPath,
         filePath: imagePath, postContentData: postContentData);
   }
@@ -72,13 +72,13 @@ class TencentUpLoadAndDownload {
     //发送到全部列表
     bool success = await uploader.uploadFile(
       DefaultConfig.postTextBucket,
-      "${PostContentData.postID}.txt",
+      "${PostContentConfig.postID}.txt",
       byteArr: byte,
     );
     //发送到发帖人的列表
     await uploader.uploadFile(
       DefaultConfig.avatarAndPostBucket,
-      "${UserInfoConfig.uniqueID}/post/${PostContentData.postID}.txt",
+      "${UserInfoConfig.uniqueID}/post/${PostContentConfig.postID}.txt",
       byteArr: byte,
     );
     if (success) {

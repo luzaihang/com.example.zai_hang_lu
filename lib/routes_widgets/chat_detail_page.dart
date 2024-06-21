@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
-import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:ci_dong/widget_element/message_bubble_item.dart';
@@ -34,7 +34,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   late ChatNotifier _chatReadNotifier;
   late ChatNotifier _chatWatchNotifier;
 
-  List<ChatDetailSender> newMessages = []; // 新增列表用于保存新消息
+  List<ChatDetailFromMap> newMessages = []; // 新增列表用于保存新消息
 
   @override
   void initState() {
@@ -56,6 +56,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
         text: _chatWatchNotifier.messageText,
         isMe: false,
         timestamp: DateTime.now(),
+        senderID: widget.taUserID,
       );
 
       //接收到消息时，上传数据到云端
@@ -71,7 +72,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Future<void> _loadChattingRecords() async {
-    List<ChatDetailSender> list = await chattingRecords();
+    List<ChatDetailFromMap> list = await chattingRecords();
     if (list.isNotEmpty) {
       for (var detail in list) {
         // 确保消息按顺序加载，避免冲突或覆盖
@@ -82,6 +83,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
             text: detail.message,
             isMe: detail.senderID == UserInfoConfig.uniqueID,
             timestamp: DateTime.parse(detail.time),
+            senderID: detail.senderID,
           );
         } catch (e, stackTrace) {
           Logger().e("Error adding message: ${detail.message}",
@@ -93,7 +95,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     }
   }
 
-  Future<List<ChatDetailSender>> chattingRecords() async {
+  Future<List<ChatDetailFromMap>> chattingRecords() async {
     var chatDetails = await TencentCloudTxtDownload.chatTxt(widget.taUserID);
     return chatDetails;
   }
@@ -104,6 +106,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     required String text,
     required bool isMe,
     required DateTime timestamp,
+    required String senderID,
   }) async {
     MessageBubble messageBubble = MessageBubble(
       senderName: senderName,
@@ -111,6 +114,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       text: text,
       isMe: isMe,
       timestamp: timestamp,
+      senderID: senderID,
     );
     setState(() {
       _messages.insert(0, messageBubble);
@@ -124,7 +128,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
 
       if (!messageExists) {
         newMessages.add(
-          ChatDetailSender(
+          ChatDetailFromMap(
             senderName: senderName,
             senderID: isMe ? UserInfoConfig.uniqueID : widget.taUserID,
             senderAvatar: senderAvatar,
@@ -168,6 +172,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
       text: text,
       isMe: true,
       timestamp: DateTime.now(),
+      senderID: UserInfoConfig.uniqueID,
     );
     sendMessage(text);
   }
@@ -183,7 +188,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
           children: <Widget>[
             Container(
               margin: const EdgeInsets.only(
-                left: 24,
+                left: 20,
                 top: 45,
               ),
               child: Row(

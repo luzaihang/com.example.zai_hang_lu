@@ -13,19 +13,23 @@ class DefaultConfig {
   static const String chattingRecordsBucket = "chatting-records-$appid";
   static const String avatarAndPostBucket = "user-avatar-post-$appid";
 
-  ///用户没有设置banner图片时
-  static const String bannerImg =
-      'https://$userInfoBucket.cos.$region.myqcloud.com/default_picture.jpg';
-
-  ///所有用户的信息
-  static const String userNameUrl =
+  ///获取所有用户信息的完整链接
+  static const String userNameTxtUrl =
       'https://$userInfoBucket.cos.$region.myqcloud.com/user_info.txt';
 
-  ///聊天bucket
-  static const String chatText =
+  ///postTextBucket前缀
+  static const String postTextPrefix =
+      'https://$postTextBucket.cos.$region.myqcloud.com';
+
+  ///postImageBucket前缀
+  static const String postImagePrefix =
+      'https://$postImageBucket.cos.$region.myqcloud.com';
+
+  ///chattingRecordsBucket前缀
+  static const String chattingRecordsPrefix =
       'https://$chattingRecordsBucket.cos.$region.myqcloud.com';
 
-  ///获取banner的图片
-  static const String userBannerImg =
+  ///avatarAndPostBucket前缀
+  static const String avatarAndPostPrefix =
       'https://$avatarAndPostBucket.cos.$region.myqcloud.com';
 }

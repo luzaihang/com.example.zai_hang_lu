@@ -1,4 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/app_data/format_date_time.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
@@ -27,7 +28,7 @@ class ChatListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         child: Row(
           children: <Widget>[
-            _buildSenderAvatar(),
+            AvatarWidget(userId: senderID),
             const SizedBox(width: 10.0),
             Expanded(
               child: _buildChatContent(),
@@ -48,19 +49,6 @@ class ChatListItem extends StatelessWidget {
         taUserAvatar: senderAvatar,
       ),
     );
-  }
-
-  Widget _buildSenderAvatar() {
-    return senderAvatar.isNotEmpty
-        ? CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(senderAvatar),
-            radius: 20.0,
-          )
-        : const CircleAvatar(
-            backgroundColor: Colors.blueGrey,
-            radius: 20.0,
-            child: Icon(Icons.person),
-          );
   }
 
   Widget _buildChatContent() {
@@ -85,7 +73,10 @@ class ChatListItem extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
               formatDateTimeToMinutes(getTime),
-              style: const TextStyle(color: Colors.grey, fontSize: 11.0),
+              style: TextStyle(
+                color: const Color(0xFF052D84).withOpacity(0.5),
+                fontSize: 11.0,
+              ),
             ),
           ),
         ],
@@ -102,12 +93,15 @@ class ChatListItem extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13.0,
-            color: Colors.blueGrey,
+            color: Color(0xFF052D84),
           ),
         ),
         Text(
           message,
-          style: const TextStyle(color: Colors.grey, fontSize: 12.0),
+          style: TextStyle(
+            color: const Color(0xFF052D84).withOpacity(0.5),
+            fontSize: 12.0,
+          ),
           overflow: TextOverflow.ellipsis,
         ),
       ],

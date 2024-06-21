@@ -5,14 +5,13 @@ import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
-import 'package:ci_dong/factory_list/chat_detail_factory.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
+import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 class ChattingRecordsList {
-  static Future<List<ChatDetailSender>> recordsList() async {
+  static Future<List<ChatDetailFromMap>> recordsList() async {
     final Cos cos = CosService().cos;
-    List<ChatDetailSender> decodedMaps = [];
+    List<ChatDetailFromMap> decodedMaps = [];
     try {
       // 获取桶内容
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
@@ -27,7 +26,7 @@ class ChattingRecordsList {
       List<String> objectUrls = contentsList
           .where((object) => object != null)
           .map((object) =>
-              "https://${DefaultConfig.chattingRecordsBucket}.cos.${DefaultConfig.region}.myqcloud.com/${object?.key}")
+              "${DefaultConfig.chattingRecordsPrefix}/${object?.key}")
           .toList();
 
       // 并发获取请求
@@ -60,7 +59,7 @@ class ChattingRecordsList {
                 data["senderName"] = item['senderName'];
                 data['senderID'] = item['senderID'];
                 data['senderAvatar'] = item['senderAvatar'];
-                ChatDetailSender chatDetail = ChatDetailSender.fromMap(data);
+                ChatDetailFromMap chatDetail = ChatDetailFromMap.fromMap(data);
                 decodedMaps.add(chatDetail);
                 break; // 只添加第一个不匹配的记录
               }

@@ -3,13 +3,13 @@ import 'package:ci_dong/default_config/default_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
-import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 
 class TencentCloudTxtDownload {
   static final Logger _logger = Logger();
 
   static Future<String> userInfoTxt() async {
-    const url = DefaultConfig.userNameUrl;
+    const url = DefaultConfig.userNameTxtUrl;
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -25,8 +25,8 @@ class TencentCloudTxtDownload {
     }
   }
 
-  static Future<List<ChatDetailSender>> chatTxt(String id) async {
-    final url = '${DefaultConfig.chatText}/${UserInfoConfig.uniqueID}/$id.txt';
+  static Future<List<ChatDetailFromMap>> chatTxt(String id) async {
+    final url = '${DefaultConfig.chattingRecordsPrefix}/${UserInfoConfig.uniqueID}/$id.txt';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -36,7 +36,7 @@ class TencentCloudTxtDownload {
         }
         final List<dynamic> decodedJson = jsonDecode(chatDetails);
         return decodedJson
-            .map((data) => ChatDetailSender.fromMap(data))
+            .map((data) => ChatDetailFromMap.fromMap(data))
             .toList();
       } else {
         return [];

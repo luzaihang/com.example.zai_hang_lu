@@ -52,19 +52,19 @@ class _PanelWidgetState extends State<PanelWidget> {
 
   @override
   void initState() {
-    checkAvatar();
+    // checkAvatar();
     super.initState();
   }
 
-  Future<void> checkAvatar() async {
-    String url = await allAvatarUrl();
-    if (url.isNotEmpty) {
-      UserInfoConfig.userAvatar = url;
-    } else {
-      UserInfoConfig.userAvatar = "";
-    }
-    setState(() {});
-  }
+  // Future<void> checkAvatar() async {
+  //   String url = await avatarUrl();
+  //   if (url.isNotEmpty) {
+  //     UserInfoConfig.userAvatar = url;
+  //   } else {
+  //     UserInfoConfig.userAvatar = "";
+  //   }
+  //   setState(() {});
+  // }
 
   @override
   Widget build(BuildContext context) {

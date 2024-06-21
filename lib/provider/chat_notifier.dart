@@ -1,4 +1,4 @@
-import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 import 'package:ci_dong/lean_cloud/client_manager.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
@@ -15,7 +15,7 @@ class ChatNotifier with ChangeNotifier {
   bool isDetail = false;
 
   void setupClientMessageListener() {
-    List<ChatDetailSender> chatList = [];
+    List<ChatDetailFromMap> chatList = [];
     client.onMessage = ({
       required Client client,
       required Conversation conversation,
@@ -34,7 +34,7 @@ class ChatNotifier with ChangeNotifier {
       String senderName = chatList.last.senderName;
       String senderAvatar = chatList.last.senderAvatar;
 
-      ChatDetailSender detailSender = ChatDetailSender(
+      ChatDetailFromMap detailSender = ChatDetailFromMap(
         senderName: senderName,
         senderID: senderUserid,
         senderAvatar: senderAvatar,

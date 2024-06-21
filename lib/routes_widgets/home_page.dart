@@ -5,7 +5,7 @@ import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/setting_page/setting_main.dart';
 import 'package:flutter/material.dart';
-import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:provider/provider.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   /// 文件列表
-  List<UserPost> directories = [];
+  List<PostDetailFormJson> directories = [];
   TencentCloudListData tencentCloudListData = TencentCloudListData();
 
   late VisibilityNotifier _visibilityNotifier;

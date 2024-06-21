@@ -1,14 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
-import 'package:ci_dong/factory_list/home_list_data.dart';
+import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
-import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
 
+import '../app_data/format_date_time.dart';
+
 class PostListItem extends StatelessWidget {
-  final UserPost item;
+  final PostDetailFormJson item;
   final double screenWidth;
   final int index;
 
@@ -27,11 +28,7 @@ class PostListItem extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20, index == 0 ? 15 : 0, 20, 0),
           child: Row(
             children: [
-              Image.asset(
-                "assets/chat_icon.png",
-                height: 36,
-                width: 36,
-              ),
+              AvatarWidget(userId: item.userID ?? ""),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -47,7 +44,7 @@ class PostListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '累计获赞: 10000次',
+                      formatDateTimeToMinutes(item.postCreationTime),
                       style: TextStyle(
                         fontSize: 11,
                         color: const Color(0xFF052D84).withOpacity(0.5),
@@ -104,9 +101,7 @@ class PostListItem extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
                               width: screenWidth * (2 / 3),
-                              imageUrl: item.postImages.isNotEmpty
-                                  ? item.postImages[0]
-                                  : DefaultConfig.bannerImg,
+                              imageUrl: item.postImages[0],
                             ),
                           ),
                         ),

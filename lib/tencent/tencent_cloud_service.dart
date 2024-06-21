@@ -2,7 +2,6 @@ import 'package:ci_dong/default_config/default_config.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
-import 'package:ci_dong/tencent/tencent_cloud_acquiesce_data.dart';
 
 class CosService {
   // 创建单例实例

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
 import 'package:ci_dong/routes_widgets/chat_list_page.dart';
 import 'package:ci_dong/routes_widgets/gallery_photo_view.dart';
-import 'package:ci_dong/routes_widgets/home.dart';
+import 'package:ci_dong/routes_widgets/home_page.dart';
 import 'package:ci_dong/routes_widgets/login_page.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {

@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
+import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -53,22 +55,35 @@ class _MyMainState extends State<MyMain> {
         itemCount: 1,
         itemBuilder: (context, index) {
           MyPageNotifier myPageNotifier = context.read<MyPageNotifier>();
-          myPageNotifier.bannerImgFun();
+          myPageNotifier.bannerImgFun(); //获取banner图片list
 
           return Column(
             children: [
               Container(
-                padding: const EdgeInsets.fromLTRB(24, 45, 0, 20),
-                child: Container(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "个人中心",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Color(0xFF052D84),
-                      fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.fromLTRB(20, 45, 0, 20),
+                child: Row(
+                  children: [
+                    ClipOval(
+                      child: GestureDetector(
+                        onTap: () {
+                          myPageNotifier.myPageImageFile(context, true);
+                        },
+                        child: AvatarWidget(userId: UserInfoConfig.uniqueID),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        UserInfoConfig.userName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF052D84),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Consumer<MyPageNotifier>(
@@ -128,7 +143,7 @@ class _MyMainState extends State<MyMain> {
               ),
               GestureDetector(
                 onTap: () {
-                  myPageNotifier.bannerImageFile(context);
+                  myPageNotifier.myPageImageFile(context, false);
                 },
                 child: Container(
                   height: 80,
@@ -205,7 +220,7 @@ class _MyMainState extends State<MyMain> {
                 ),
               ),
               GestureDetector(
-                onTap: ()=> Navigator.pushNamed(context, '/chatListPage'),
+                onTap: () => Navigator.pushNamed(context, '/chatListPage'),
                 child: Container(
                   height: 80,
                   width: double.infinity,

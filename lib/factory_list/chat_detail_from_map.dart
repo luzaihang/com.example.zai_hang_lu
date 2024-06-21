@@ -1,11 +1,11 @@
-class ChatDetailSender {
+class ChatDetailFromMap {
   String senderName;
   String senderID;
   String senderAvatar;
   String message;
   String time;
 
-  ChatDetailSender({
+  ChatDetailFromMap({
     required this.senderName,
     required this.senderID,
     required this.senderAvatar,
@@ -13,8 +13,8 @@ class ChatDetailSender {
     required this.time,
   });
 
-  factory ChatDetailSender.fromMap(Map<String, dynamic> map) {
-    return ChatDetailSender(
+  factory ChatDetailFromMap.fromMap(Map<String, dynamic> map) {
+    return ChatDetailFromMap(
       senderName: map['senderName'] ?? '',
       senderID: map['senderID'] ?? '',
       senderAvatar: map['senderAvatar'] ?? '',

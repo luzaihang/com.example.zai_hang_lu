@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ci_dong/factory_list/chat_detail_factory.dart';
+import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 import 'package:ci_dong/tencent/tencent_cloud_chatting_records_list.dart';
 import 'package:ci_dong/widget_element/chat_list_item.dart';
 
@@ -11,7 +11,7 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
-  List<ChatDetailSender> chatList = [];
+  List<ChatDetailFromMap> chatList = [];
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _ChatListPageState extends State<ChatListPage> {
         children: [
           Container(
             margin: const EdgeInsets.only(
-              left: 24,
+              left: 20,
               top: 45,
             ),
             child: Row(
@@ -66,7 +66,7 @@ class _ChatListPageState extends State<ChatListPage> {
             child: ListView.builder(
               itemCount: chatList.length,
               itemBuilder: (context, index) {
-                ChatDetailSender item = chatList[index];
+                ChatDetailFromMap item = chatList[index];
                 return ChatListItem(
                   senderAvatar: item.senderAvatar,
                   senderName: item.senderName,

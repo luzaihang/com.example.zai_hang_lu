@@ -1,5 +1,6 @@
 import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
+import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_)=> VisibilityNotifier()),
         ChangeNotifierProvider(create: (_)=> PostPageNotifier()),
-        ChangeNotifierProvider(create: (_)=> ChatNotifier())
+        ChangeNotifierProvider(create: (_)=> ChatNotifier()),
+        ChangeNotifierProvider(create: (_)=> UpvoteNotifier())
       ],
       child: MaterialApp(
         title: "次动",
