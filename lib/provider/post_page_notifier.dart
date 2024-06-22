@@ -136,7 +136,11 @@ class PostPageNotifier with ChangeNotifier {
   ///帖子内容上传
   void postTextUpload() {
     PostDetailFromMap postDetails = createPostDetail();
-    TencentUpLoadAndDownload.postTextUpLoad(postDetails.toMap(), postId);
+    TencentUpLoadAndDownload.postTextUpLoad(
+      postDetails.toMap(),
+      postId,
+      UserInfoConfig.uniqueID, //帖子发布时是自己的id
+    );
   }
 
   PostDetailFromMap createPostDetail() {

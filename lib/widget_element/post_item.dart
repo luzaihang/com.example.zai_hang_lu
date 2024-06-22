@@ -134,6 +134,8 @@ class PostListItem extends StatelessWidget {
                             child: CachedNetworkImage(
                               width: screenWidth * (2 / 3),
                               imageUrl: item.postImages[0],
+                              maxWidthDiskCache: 500,
+                              maxHeightDiskCache: 500,
                             ),
                           ),
                         ),

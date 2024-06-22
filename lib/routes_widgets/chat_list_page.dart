@@ -44,8 +44,8 @@ class _ChatListPageState extends State<ChatListPage> {
                   },
                   child: Image.asset(
                     "assets/back_icon.png",
-                    width: 24,
-                    height: 24,
+                    width: 18,
+                    height: 18,
                     color: const Color(0xFF1E3A8A),
                   ),
                 ),

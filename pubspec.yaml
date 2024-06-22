@@ -111,6 +111,7 @@ flutter:
     - assets/third_party_icon.png
     - assets/banner_not_img_icon.png
     - assets/not_post_icon.png
+    - assets/default_avatar_icon.png
     - assets/tencentCloud.json
     - assets/fonts/
 #  fonts:

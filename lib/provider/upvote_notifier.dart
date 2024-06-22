@@ -23,7 +23,11 @@ class UpvoteNotifier with ChangeNotifier {
       getMap['upvote'] = getUp;
     }
 
-    TencentUpLoadAndDownload.postTextUpLoad(getMap, postId);
+    TencentUpLoadAndDownload.postTextUpLoad(
+      getMap,
+      postId,
+      detailFormJson.userID ?? "", //点赞帖子时，是更新到发帖人的id上
+    );
 
     return PostDetailFormJson.fromJson(getMap);
   }

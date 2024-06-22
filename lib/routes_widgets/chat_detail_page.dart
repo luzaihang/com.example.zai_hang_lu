@@ -32,7 +32,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late ChatNotifier _chatReadNotifier;
-  late ChatNotifier _chatWatchNotifier;
+  final FocusNode _focusNode = FocusNode();
 
   List<ChatDetailFromMap> newMessages = []; // 新增列表用于保存新消息
 
@@ -43,31 +43,35 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     _chatReadNotifier.messageText = ""; //进入页面时重定为空，避免其他人的聊天介入
     _chatReadNotifier.isDetail = true; //消息监听设置为聊天详情
     _loadChattingRecords(); // 加载聊天记录
+    Logger().d("----------${_chatReadNotifier.isDetail}");
   }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    _chatWatchNotifier = context.watch<ChatNotifier>();
-    if (mounted && _chatWatchNotifier.messageText.isNotEmpty) {
+    final chatWatchNotifier = context.watch<ChatNotifier>();
+    Logger().i(chatWatchNotifier.messageText);
+    if (mounted && chatWatchNotifier.messageText.isNotEmpty) {
       await _addMessage(
         senderName: widget.taUserName,
         senderAvatar: widget.taUserAvatar,
-        text: _chatWatchNotifier.messageText,
+        text: chatWatchNotifier.messageText,
         isMe: false,
         timestamp: DateTime.now(),
         senderID: widget.taUserID,
-      );
-
-      //接收到消息时，上传数据到云端
-      _uploadChatDetails();
+      ).then((value) {
+        //接收到消息时，上传数据到云端
+        _uploadChatDetails();
+      });
     }
   }
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _controller.dispose();
     _chatReadNotifier.isDetail = false; //取消聊天详情监听
+    Logger().d("----------${_chatReadNotifier.isDetail}");
     super.dispose();
   }
 
@@ -180,7 +184,9 @@ class ChatDetailPageState extends State<ChatDetailPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
+      onTap: () {
+        if (_focusNode.hasFocus) _focusNode.unfocus();
+      },
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: const Color(0xFFF2F3F5),
@@ -190,6 +196,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
               margin: const EdgeInsets.only(
                 left: 20,
                 top: 45,
+                bottom: 5,
               ),
               child: Row(
                 children: [
@@ -199,8 +206,8 @@ class ChatDetailPageState extends State<ChatDetailPage> {
                     },
                     child: Image.asset(
                       "assets/back_icon.png",
-                      width: 24,
-                      height: 24,
+                      width: 18,
+                      height: 18,
                       color: const Color(0xFF1E3A8A),
                     ),
                   ),
@@ -243,6 +250,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
         children: <Widget>[
           Flexible(
             child: TextField(
+              focusNode: _focusNode,
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 // 移除边框

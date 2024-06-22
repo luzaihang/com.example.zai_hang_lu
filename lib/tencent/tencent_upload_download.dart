@@ -63,7 +63,7 @@ class TencentUpLoadAndDownload {
         filePath: imagePath, postContentData: postContentData);
   }
 
-  static Future<void> postTextUpLoad(Map map, String postId) async {
+  static Future<void> postTextUpLoad(Map map, String postId, String userId) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String jsonString = json.encode(map);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
@@ -77,7 +77,7 @@ class TencentUpLoadAndDownload {
     //发送到发帖人的列表
     await uploader.uploadFile(
       DefaultConfig.avatarAndPostBucket,
-      "${UserInfoConfig.uniqueID}/post/$postId.txt",
+      "$userId/post/$postId.txt",
       byteArr: byte,
     );
     if (success) {

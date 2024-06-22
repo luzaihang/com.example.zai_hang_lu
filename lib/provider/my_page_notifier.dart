@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
@@ -7,6 +8,7 @@ import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,6 +30,8 @@ class MyPageNotifier with ChangeNotifier {
   ///选择用户头像，准备上传
   final List<String> _userAvatarPath = [];
   List<Asset> _userAvatarAsset = <Asset>[];
+
+  String newAvatarUrl = "";
 
   Future<void> myPageImageFile(BuildContext context, bool userAvatar) async {
     List<Asset> resultList = <Asset>[];
@@ -79,7 +83,7 @@ class MyPageNotifier with ChangeNotifier {
       _userAvatarAsset = resultList;
 
       String fileName = await getImageFileFromAsset(_userAvatarAsset.first);
-      await userAvatarUpLoad(fileName);
+      await userAvatarUpLoad(fileName, UserInfoConfig.uniqueID);
     }
 
     notifyListeners();
@@ -128,23 +132,26 @@ class MyPageNotifier with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       Logger().e("$e------------error");
-      // return null;
     }
   }
 
   ///用户头像上传
-  Future<bool> userAvatarUpLoad(String imagePath) async {
+  Future<void> userAvatarUpLoad(String? imagePath, String userId,
+      {Uint8List? uint8list}) async {
     TencentUpLoadAndDownload tencentUpLoadAndDownload =
         TencentUpLoadAndDownload();
-    String cosPath = "${UserInfoConfig.uniqueID}/userAvatar.png";
+    String cosPath = "$userId/userAvatar.png";
     bool result = await tencentUpLoadAndDownload.uploadFile(
       DefaultConfig.avatarAndPostBucket,
       cosPath,
       filePath: imagePath,
+      byteArr: uint8list,
     );
 
-    String string = "${DefaultConfig.avatarAndPostPrefix}/$cosPath";
-    if (result) CachedNetworkImage.evictFromCache(string);
-    return result;
+    if (result) {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      newAvatarUrl = "${DefaultConfig.avatarAndPostPrefix}/$cosPath?timestamp=$timestamp";
+      notifyListeners();
+    }
   }
 }

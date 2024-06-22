@@ -41,10 +41,10 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
 
   @override
   Widget build(BuildContext context) {
-    systemChromeColor(Colors.black);
+    // systemChromeColor(Colors.black);
     return WillPopScope(
       onWillPop: ()async{
-        systemChromeColor(const Color(0xFFF2F3F5));
+        // systemChromeColor(const Color(0xFFF2F3F5));
         return true;
       },
       child: Scaffold(

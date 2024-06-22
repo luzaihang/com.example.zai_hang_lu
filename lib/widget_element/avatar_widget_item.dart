@@ -1,76 +1,80 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AvatarWidget extends StatelessWidget {
+class AvatarWidget extends StatefulWidget {
   final String userId;
+  final String? meNewAvatarUrl;
 
   ///获取头像
-  const AvatarWidget({super.key, required this.userId});
+  const AvatarWidget({super.key, required this.userId, this.meNewAvatarUrl});
 
-  Future<String> avatarUrl(String userid) async {
-    try {
-      String url =
-          "${DefaultConfig.avatarAndPostPrefix}/$userid/userAvatar.png";
-      bool res = await checkUrlExists(url);
-      if (!res) {
-        return "";
+  @override
+  State<AvatarWidget> createState() => _AvatarWidgetState();
+}
+
+class _AvatarWidgetState extends State<AvatarWidget> {
+  String url = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatarUrl();
+  }
+
+  @override
+  void didUpdateWidget(covariant AvatarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateAvatarUrl();
+    Logger().w("message");
+  }
+
+  Future<void> _loadAvatarUrl() async {
+    if (widget.userId == UserInfoConfig.uniqueID) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? savedAvatarUrl = prefs.getString('cachedAvatarUrl');
+
+      if (savedAvatarUrl != null) {
+        url = savedAvatarUrl;
+        setState(() {});
       }
-      return url;
-    } catch (e) {
-      return "";
     }
   }
 
-  Future<bool> checkUrlExists(String urlString) async {
-    final url = Uri.parse(urlString);
-    final httpClient = HttpClient()
-      ..connectionTimeout = const Duration(milliseconds: 1000);
+  Future<void> _updateAvatarUrl() async {
+    if (widget.meNewAvatarUrl != null && widget.meNewAvatarUrl!.isNotEmpty) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cachedAvatarUrl', widget.meNewAvatarUrl!);
+      url = widget.meNewAvatarUrl!;
 
-    try {
-      final request = await httpClient.headUrl(url);
-      request.followRedirects = false;
-      final response = await request.close();
-      return response.statusCode == HttpStatus.ok;
-    } catch (e) {
-      return false;
-    } finally {
-      httpClient.close();
+      if (mounted) {
+        final provider = context.read<MyPageNotifier>();
+        provider.newAvatarUrl = '';
+      }
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: Container(
+      child: SizedBox(
         height: 40,
         width: 40,
-        color: const Color(0xFF052D84),
-        child: FutureBuilder<String>(
-          future: avatarUrl(userId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(color: const Color(0xFF052D84)); // 加载中的占位符
-            } else if (snapshot.hasError) {
-              return const Icon(Icons.error, color: Colors.white); // 错误时展示的占位符
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Icon(Icons.person,
-                  color: Colors.white); // 链接不存在时展示的占位符
-            } else {
-              return CachedNetworkImage(
-                imageUrl: snapshot.data!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    Container(color: const Color(0xFF052D84)),
-                errorWidget: (context, url, error) => const Icon(
-                  Icons.error,
-                  color: Colors.white,
-                ),
-              );
-            }
-          },
+        child: Image(
+          image: CachedNetworkImageProvider(
+            url.isNotEmpty
+                ? url
+                : "${DefaultConfig.avatarAndPostPrefix}/${widget.userId}/userAvatar.png",
+            maxHeight: 200,
+            maxWidth: 200,
+          ),
+          fit: BoxFit.cover,
         ),
       ),
     );

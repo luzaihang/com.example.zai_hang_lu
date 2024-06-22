@@ -1,5 +1,6 @@
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
+import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
@@ -8,6 +9,7 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:provider/provider.dart';
 
 import '../app_data/show_custom_snackBar.dart';
 
@@ -24,6 +26,7 @@ class LoginScreenState extends State<LoginScreen>
 
   late AnimationController _controller;
   late Animation<Offset> _animation;
+  late MyPageNotifier _myPageNotifier;
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -32,6 +35,7 @@ class LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     _loadLoginInfo();
+    _myPageNotifier = context.read<MyPageNotifier>();
 
     _anima();
 
@@ -91,6 +95,20 @@ class LoginScreenState extends State<LoginScreen>
       _usernameController.text = userName ?? '';
       _passwordController.text = userPassword ?? '';
     });
+  }
+
+  ///默认头像上传
+  Future<bool> getUint8(String userId) async {
+    try {
+      final ByteData data = await rootBundle.load(
+        "assets/default_avatar_icon.png",
+      );
+      Uint8List res = data.buffer.asUint8List();
+      await _myPageNotifier.userAvatarUpLoad(null, userId, uint8list: res);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -271,8 +289,8 @@ class LoginScreenState extends State<LoginScreen>
                           horizontal: 30, vertical: 15),
                       decoration: const BoxDecoration(
                         color: Color(0xFF052D84),
-                        borderRadius: BorderRadius.horizontal(
-                            left: Radius.circular(50)),
+                        borderRadius:
+                            BorderRadius.horizontal(left: Radius.circular(50)),
                       ),
                       child: const Text(
                         "进入",
@@ -334,7 +352,10 @@ class LoginScreenState extends State<LoginScreen>
         Logger().d(decryptInfo);
         String upLoadText =
             "${decryptInfo}userName=$userName,password=$password,userID=$userID|";
-        if (mounted) TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+        bool res = await getUint8(userID);
+        if (mounted && res) {
+          TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+        }
       }
 
       UserInfoConfig.uniqueID = userID;

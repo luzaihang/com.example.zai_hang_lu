@@ -1,7 +1,6 @@
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/pull_to_refresh_list_view.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
-import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/widget_element/post_item.dart';
 import 'package:flutter/material.dart';
