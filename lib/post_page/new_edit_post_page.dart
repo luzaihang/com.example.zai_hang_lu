@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class NewEditPost extends StatefulWidget {
@@ -19,6 +20,8 @@ class NewEditPostState extends State<NewEditPost> {
   late PostPageNotifier _watchNotifier;
 
   late ScrollController scrollController;
+
+  CompressImage compressImage = CompressImage();
 
   //获得得到的图片asset
   List<Asset> _imageAssets = <Asset>[];
@@ -75,18 +78,11 @@ class NewEditPostState extends State<NewEditPost> {
     _imageAssets = resultList;
 
     for (var i in _imageAssets) {
-      File file = await getImageFileFromAsset(i);
-      _readNotifier.setImageFiles(file);
-    }
-  }
+      File file = await compressImage.getImageFileFromAsset(i);
 
-  Future<File> getImageFileFromAsset(Asset asset) async {
-    final byteData = await asset.getByteData();
-    final tempFile =
-        File('${(await getTemporaryDirectory()).path}/${asset.name}');
-    final file = await tempFile.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    return file;
+      XFile compressedImage = await compressImage.compressImage(file);
+      _readNotifier.setImageFiles(compressedImage);
+    }
   }
 
   @override

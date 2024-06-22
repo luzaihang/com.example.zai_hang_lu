@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:ci_dong/app_data/post_content_config.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
@@ -9,6 +8,7 @@ import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PostPageNotifier with ChangeNotifier {
@@ -94,7 +94,7 @@ class PostPageNotifier with ChangeNotifier {
     }
   }
 
-  void setImageFiles(File image) {
+  void setImageFiles(XFile image) {
     imageFiles.add(image.path);
     notifyListeners();
   }

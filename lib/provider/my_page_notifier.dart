@@ -1,18 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
-import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 
@@ -20,6 +18,7 @@ class MyPageNotifier with ChangeNotifier {
   final Cos cos = CosService().cos;
   TencentCloudDeleteObject tencentCloudDeleteObject =
       TencentCloudDeleteObject();
+  CompressImage compressImage = CompressImage();
 
   ///选择banner图片，准备上传
   final List<String> _imageFilesPath = [];
@@ -73,30 +72,24 @@ class MyPageNotifier with ChangeNotifier {
       }
 
       for (var asset in _imageAssets) {
-        String path = await getImageFileFromAsset(asset);
-        _imageFilesPath.add(path);
+        File file = await compressImage.getImageFileFromAsset(asset);
+        XFile compressedImage = await compressImage.compressImage(file);
 
-        await bannerImageUpLoad(path);
+        await bannerImageUpLoad(compressedImage.path);
       }
       bannerImgFun();
     } else {
       _userAvatarAsset = resultList;
 
-      String fileName = await getImageFileFromAsset(_userAvatarAsset.first);
+      File file =
+          await compressImage.getImageFileFromAsset(_userAvatarAsset.first);
+      XFile compressedImage = await compressImage.compressImage(file);
+
       if (context.mounted) showCustomSnackBar(context, "正在更新头像中...");
-      await userAvatarUpLoad(fileName, UserInfoConfig.uniqueID);
+      await userAvatarUpLoad(compressedImage.path, UserInfoConfig.uniqueID);
     }
 
     notifyListeners();
-  }
-
-  Future<String> getImageFileFromAsset(Asset asset) async {
-    final byteData = await asset.getByteData();
-    final tempFile =
-        File('${(await getTemporaryDirectory()).path}/${asset.name}');
-    final file = await tempFile.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    return file.path;
   }
 
   ///用户banner图片上传
