@@ -54,6 +54,8 @@ class PostPageNotifier with ChangeNotifier {
   Future<void> onUserRefresh() async {
     userTabList =
         await tencentCloudListData.getUserPostFirstContentsList() ?? [];
+    userTabList
+        .sort((a, b) => b.postCreationTime.compareTo(a.postCreationTime));
     userRefreshController.refreshCompleted();
     notifyListeners();
   }
@@ -129,18 +131,18 @@ class PostPageNotifier with ChangeNotifier {
     } else {
       postTextUpload();
     }
-
-    cleanContent();
   }
 
   ///帖子内容上传
-  void postTextUpload() {
+  Future<void> postTextUpload() async {
     PostDetailFromMap postDetails = createPostDetail();
-    TencentUpLoadAndDownload.postTextUpLoad(
+    await TencentUpLoadAndDownload.postTextUpLoad(
       postDetails.toMap(),
       postId,
       UserInfoConfig.uniqueID, //帖子发布时是自己的id
     );
+
+    cleanContent();
   }
 
   PostDetailFromMap createPostDetail() {
@@ -167,6 +169,8 @@ class PostPageNotifier with ChangeNotifier {
     alignment = Alignment.center;
     indexPage(1);
     postContentData.prepareForNewPost();
+
+    onUserRefresh();
   }
 
   ///更新帖子点赞状态

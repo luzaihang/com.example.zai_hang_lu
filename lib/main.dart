@@ -1,3 +1,4 @@
+import 'package:ci_dong/default_config/app_system_chrome_config.dart';
 import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
@@ -5,29 +6,26 @@ import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Color(0xFFF2F3F5), // 这里设置状态栏的颜色
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    systemChromeColor(const Color(0xFFF2F3F5), Brightness.dark);
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_)=> VisibilityNotifier()),
-        ChangeNotifierProvider(create: (_)=> PostPageNotifier()),
-        ChangeNotifierProvider(create: (_)=> ChatNotifier()),
-        ChangeNotifierProvider(create: (_)=> UpvoteNotifier()),
+        ChangeNotifierProvider(create: (_) => VisibilityNotifier()),
+        ChangeNotifierProvider(create: (_) => PostPageNotifier()),
+        ChangeNotifierProvider(create: (_) => ChatNotifier()),
+        ChangeNotifierProvider(create: (_) => UpvoteNotifier()),
         ChangeNotifierProvider(create: (_) => MyPageNotifier()),
       ],
       child: MaterialApp(

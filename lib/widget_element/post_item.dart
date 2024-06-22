@@ -4,7 +4,9 @@ import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/upvote_notifier.dart';
+import 'package:ci_dong/routes_widgets/gallery_photo_view.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -126,16 +128,24 @@ class PostListItem extends StatelessWidget {
                               arguments: GalleryPhotoViewArguments(
                                 imageUrls: item.postImages,
                                 initialIndex: 0,
+                                postId: item.postId ?? "",
                               ),
                             );
+                            /*Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (BuildContext context) =>
+                                    const GalleryPhotoView(imageUrls: [],initialIndex: 0, postId: "",),
+                              ),
+                            );*/
+                            // Navigator.pushNamed(context, '/chatListPage');
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
                               width: screenWidth * (2 / 3),
                               imageUrl: item.postImages[0],
-                              maxWidthDiskCache: 500,
-                              maxHeightDiskCache: 500,
+                              maxWidthDiskCache: screenWidth.toInt(),
                             ),
                           ),
                         ),
@@ -221,5 +231,19 @@ class PostListItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class AAAA extends StatefulWidget {
+  const AAAA({super.key});
+
+  @override
+  State<AAAA> createState() => _AAAAState();
+}
+
+class _AAAAState extends State<AAAA> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
   }
 }

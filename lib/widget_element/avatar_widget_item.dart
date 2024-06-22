@@ -3,7 +3,6 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,7 +30,6 @@ class _AvatarWidgetState extends State<AvatarWidget> {
   void didUpdateWidget(covariant AvatarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateAvatarUrl();
-    Logger().w("message");
   }
 
   Future<void> _loadAvatarUrl() async {
@@ -39,7 +37,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? savedAvatarUrl = prefs.getString('cachedAvatarUrl');
 
-      if (savedAvatarUrl != null) {
+      if (mounted && savedAvatarUrl != null) {
         url = savedAvatarUrl;
         setState(() {});
       }
@@ -55,8 +53,8 @@ class _AvatarWidgetState extends State<AvatarWidget> {
       if (mounted) {
         final provider = context.read<MyPageNotifier>();
         provider.newAvatarUrl = '';
+        setState(() {});
       }
-      setState(() {});
     }
   }
 

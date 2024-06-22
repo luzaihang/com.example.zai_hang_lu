@@ -115,7 +115,7 @@ class _MyMainState extends State<MyMain> {
                                   placeholder: (context, url) {
                                     return const Center(
                                       child: SpinKitFoldingCube(
-                                        color: Color(0xFF052D84),
+                                        color: Colors.white,
                                         size: 20.0,
                                         duration: Duration(milliseconds: 800),
                                       ),

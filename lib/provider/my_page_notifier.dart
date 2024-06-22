@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
@@ -63,12 +64,12 @@ class MyPageNotifier with ChangeNotifier {
     if (!userAvatar) {
       _imageAssets = resultList;
       if (_imageAssets.isNotEmpty) {
-        Loading().show(context);
         for (var item in bannerImgList) {
           String fileName = item.split('/').last;
           //只能单个删除
           await tencentCloudDeleteObject.cloudDeleteObject(fileName);
         }
+        if (context.mounted) showCustomSnackBar(context, "正在更新图片中...");
       }
 
       for (var asset in _imageAssets) {
@@ -77,12 +78,12 @@ class MyPageNotifier with ChangeNotifier {
 
         await bannerImageUpLoad(path);
       }
-      Loading().hide();
       bannerImgFun();
     } else {
       _userAvatarAsset = resultList;
 
       String fileName = await getImageFileFromAsset(_userAvatarAsset.first);
+      if (context.mounted) showCustomSnackBar(context, "正在更新头像中...");
       await userAvatarUpLoad(fileName, UserInfoConfig.uniqueID);
     }
 
@@ -150,7 +151,8 @@ class MyPageNotifier with ChangeNotifier {
 
     if (result) {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      newAvatarUrl = "${DefaultConfig.avatarAndPostPrefix}/$cosPath?timestamp=$timestamp";
+      newAvatarUrl =
+          "${DefaultConfig.avatarAndPostPrefix}/$cosPath?timestamp=$timestamp";
       notifyListeners();
     }
   }

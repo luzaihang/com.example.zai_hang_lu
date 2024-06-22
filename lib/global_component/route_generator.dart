@@ -21,8 +21,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       case "/galleryPhotoView":
         if (arguments is GalleryPhotoViewArguments) {
           return GalleryPhotoView(
-              imageUrls: arguments.imageUrls,
-              initialIndex: arguments.initialIndex);
+            imageUrls: arguments.imageUrls,
+            initialIndex: arguments.initialIndex,
+            postId: arguments.postId,
+          );
         } else {
           return _errorRoute('No arguments provided for GalleryPhotoView');
         }
@@ -60,9 +62,13 @@ Widget _errorRoute(String message) {
 class GalleryPhotoViewArguments {
   final List<String> imageUrls;
   final int initialIndex;
+  final String postId;
 
-  GalleryPhotoViewArguments(
-      {required this.imageUrls, required this.initialIndex});
+  GalleryPhotoViewArguments({
+    required this.imageUrls,
+    required this.initialIndex,
+    required this.postId,
+  });
 }
 
 class ChatDetailPageArguments {
