@@ -30,7 +30,7 @@ class TencentCloudListData {
             // 前缀匹配，用来规定返回的对象前缀地址
             prefix: allTab ? "" : "${UserInfoConfig.uniqueID}/post",
             marker: marker,
-            maxKeys: allTab ? 3 : 1000, // 单次返回最大的条目数量，默认1000
+            maxKeys: allTab ? 20 : 1000, // 单次返回最大的条目数量，默认1000
           );
 
       if (allTab) {

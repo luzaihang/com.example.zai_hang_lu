@@ -4,6 +4,7 @@ import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/my_page/banner_images_cache_data.dart';
 import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
@@ -40,7 +41,7 @@ class MyPageNotifier with ChangeNotifier {
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        selectedAssets: userAvatar ? [] : _imageAssets,
+        // selectedAssets: userAvatar ? [] : _imageAssets,
         materialOptions: MaterialOptions(
           maxImages: userAvatar ? 1 : 5,
           // startInAllView: true, //这个目前使用之后，没有返回数据
@@ -51,7 +52,7 @@ class MyPageNotifier with ChangeNotifier {
           useDetailsView: false,
           backButtonDrawable: "@drawable/back_icon",
           selectCircleStrokeColor: Colors.white,
-          selectionLimitReachedText: userAvatar ? "只能选择一张作为头像" : "最多选择9张",
+          selectionLimitReachedText: userAvatar ? "只能选择一张作为头像" : "最多选择5张",
         ),
       );
     } catch (e) {
@@ -107,12 +108,17 @@ class MyPageNotifier with ChangeNotifier {
 
   ///用户banner图片获取
   Future<void> bannerImgFun() async {
+    List<String> list = await BannerImageCache().loadBannerImgList();
+    if (list.isNotEmpty) {
+      bannerImgList = list;
+      notifyListeners();
+    }
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
             DefaultConfig.avatarAndPostBucket,
             prefix: "${UserInfoConfig.uniqueID}/bannerImgList",
             // 前缀匹配，用来规定返回的对象前缀地址
-            maxKeys: 10, // 单次返回最大的条目数量，默认1000
+            maxKeys: 5, // 单次返回最大的条目数量，默认1000
           );
 
       List<Content?> contentsList = bucketContents.contentsList;
@@ -123,6 +129,7 @@ class MyPageNotifier with ChangeNotifier {
       }).toList();
 
       bannerImgList = objectUrls;
+      BannerImageCache().saveBannerImgList(objectUrls);
       notifyListeners();
     } catch (e) {
       Logger().e("$e------------error");

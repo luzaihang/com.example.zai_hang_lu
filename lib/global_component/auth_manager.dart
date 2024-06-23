@@ -5,7 +5,6 @@ class AuthManager {
   static const String _loginTimestampKey = 'loginTimestamp';
   static const String _userNameKey = 'userName';
   static const String _userPasswordKey = 'userPassword';
-  // static const String _userAvatarKey = 'userAvatar';
   static const String _uniqueIDKey = 'uniqueID';
   static const int _expireDuration =
       24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -13,7 +12,6 @@ class AuthManager {
   static Future<void> login(
     String userName,
     String userPassword,
-    // String userAvatar,
     String uniqueID,
   ) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -23,7 +21,6 @@ class AuthManager {
 
     await prefs.setString(_userNameKey, userName);
     await prefs.setString(_userPasswordKey, userPassword);
-    // await prefs.setString(_userAvatarKey, userAvatar);
     await prefs.setString(_uniqueIDKey, uniqueID);
   }
 
@@ -32,12 +29,6 @@ class AuthManager {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userNameKey, userName);
   }
-
-  ///单独更改头像
-  // static Future<void> setUserAvatar(String userAvatar) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   await prefs.setString(_userAvatarKey, userAvatar);
-  // }
 
   static Future<bool> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -70,7 +61,6 @@ class AuthManager {
     if (clearAll) {
       await prefs.remove(_userNameKey);
       await prefs.remove(_userPasswordKey);
-      // await prefs.remove(_userAvatarKey);
       await prefs.remove(_uniqueIDKey);
     }
   }
@@ -84,11 +74,6 @@ class AuthManager {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userPasswordKey);
   }
-
-  // static Future<String?> getUserAvatar() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   return prefs.getString(_userAvatarKey);
-  // }
 
   static Future<String?> getUniqueId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
