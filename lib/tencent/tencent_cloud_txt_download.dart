@@ -13,8 +13,8 @@ class TencentCloudTxtDownload {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final info = utf8.decode(response.bodyBytes).trim();
-        return info.isEmpty ? '' : info;
+        final info = utf8.decode(response.bodyBytes).trim(); //解码Uint8List
+        return info.isEmpty ? '' : info; //输出
       } else {
         _logger.e("-----------无txt文件，即将创建");
         return '';

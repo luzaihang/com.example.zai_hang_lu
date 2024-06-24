@@ -26,7 +26,7 @@ class UpvoteNotifier with ChangeNotifier {
     TencentUpLoadAndDownload.postTextUpLoad(
       getMap,
       postId,
-      detailFormJson.userID ?? "", //点赞帖子时，是更新到发帖人的id上
+      detailFormJson.userID ?? "", //点赞帖子时，更新到发帖人的id上
     );
 
     return PostDetailFormJson.fromJson(getMap);

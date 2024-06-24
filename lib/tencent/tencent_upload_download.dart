@@ -63,7 +63,8 @@ class TencentUpLoadAndDownload {
         filePath: imagePath, postContentData: postContentData);
   }
 
-  static Future<void> postTextUpLoad(Map map, String postId, String userId) async {
+  static Future<void> postTextUpLoad(
+      Map map, String postId, String userId) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String jsonString = json.encode(map);
     Uint8List byte = Uint8List.fromList(utf8.encode(jsonString));
@@ -96,8 +97,8 @@ class TencentUpLoadAndDownload {
   }) async {
     TencentUpLoadAndDownload uploader = TencentUpLoadAndDownload();
     String cosPath = "user_info.txt";
-    String string = EncryptionHelper.encrypt(userText);
-    Uint8List byte = Uint8List.fromList(utf8.encode(string));
+    String string = EncryptionHelper.encrypt(userText); //加密
+    Uint8List byte = Uint8List.fromList(utf8.encode(string)); //编码为Uint8List
 
     bool success = await uploader
         .uploadFile(DefaultConfig.userInfoBucket, cosPath, byteArr: byte);
@@ -106,6 +107,7 @@ class TencentUpLoadAndDownload {
       if (modified) {
         return true; //如果是修改数据，则不做跳转
       }
+
       Loading().hide();
       if (context.mounted) Navigator.pushReplacementNamed(context, "/home");
     } else {

@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
+import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/factory_list/user_info_from_json.dart';
+import 'package:ci_dong/factory_list/user_info_from_map.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
@@ -330,88 +335,72 @@ class LoginScreenState extends State<LoginScreen>
 
     Loading().show(context);
     try {
-      String info = await TencentCloudTxtDownload.userInfoTxt();
+      List userinfoMaps = [];
       String decryptInfo = "";
-      //解码
-      if (info.isNotEmpty) {
-        decryptInfo = EncryptionHelper.decrypt(info);
-      }
-      LoginGetUserID loginGetUserID = LoginGetUserID();
-      List<LoginUser> users = loginGetUserID.parseUsers(decryptInfo);
+      bool enroll = false; //是否已经注册
+      String userId = ''; //初始化唯一id，下面会赋值
 
-      String? userID = loginGetUserID.getUserID(users, userName, password);
-      if (userID != null) {
-        Logger().i('匹配的UserID是: $userID');
+      String info = await TencentCloudTxtDownload.userInfoTxt();
+      if (info.isNotEmpty) {
+        decryptInfo = EncryptionHelper.decrypt(info); //解密
+        userinfoMaps = jsonDecode(decryptInfo); //解码
+
+        for (Map<String, dynamic> item in userinfoMaps) {
+          UserInfoFromJson infoItem = UserInfoFromJson.fromJson(item);
+          if (infoItem.userName == userName &&
+              infoItem.userPassword == password) {
+            userId = infoItem.uniqueID; //赋值给它，下方需要缓存起来
+            enroll = true;
+            break;
+          }
+        }
+      }
+
+      if (enroll) {
         Loading().hide();
         if (context.mounted) {
           Navigator.pushReplacementNamed(context, "/home");
         }
       } else {
         Logger().e('没有匹配的用户');
-        userID = RandomGenerator.getRandomCombination();
-        Logger().d(decryptInfo);
-        String upLoadText =
-            "${decryptInfo}userName=$userName,password=$password,userID=$userID|";
-        bool res = await getUint8(userID);
+        userId = RandomGenerator.getRandomCombination();
+        bool res = await getUint8(userId); //先设定默认头像，发送到个人信息bucket
+        if (mounted && !res) {
+          //如果上传默认头像失败，则停止执行后面逻辑
+          showCustomSnackBar(context, "网络延迟,请稍候再试");
+          return;
+        }
+
+        UserInfoFromMap userInfoFromMap = UserInfoFromMap(
+          userName: userName,
+          uniqueID: userId,
+          userPassword: password,
+          userAvatar:
+              "${DefaultConfig.avatarAndPostPrefix}/$userId/userAvatar.png", //头像默认地址
+        );
+
+        userinfoMaps.add(userInfoFromMap.toMap());
+
+        String jsonString = jsonEncode(userinfoMaps); //编码为json,用于加密,准备上传
+        Logger().d(userinfoMaps);
+
         if (mounted && res) {
-          TencentUpLoadAndDownload.userUpLoad(context, upLoadText);
+          TencentUpLoadAndDownload.userUpLoad(context, jsonString);
         }
       }
 
-      UserInfoConfig.uniqueID = userID;
+      UserInfoConfig.uniqueID = userId;
       UserInfoConfig.userName = userName;
       UserInfoConfig.userPassword = password;
 
-      await AuthManager.login(userName, password, userID);
+      await AuthManager.login(userName, password, userId);
+      Logger().w(
+          "${UserInfoConfig.uniqueID}/${UserInfoConfig.userName}/${UserInfoConfig.userPassword}");
     } catch (e) {
       Logger().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");
     } finally {
       Loading().hide();
     }
-  }
-}
-
-class LoginUser {
-  String userName;
-  String password;
-  String userID;
-
-  LoginUser(
-      {required this.userName, required this.password, required this.userID});
-
-  factory LoginUser.fromAttributes(List<String> attributes) {
-    final Map<String, String> userData = {};
-    for (String attribute in attributes) {
-      final keyValue = attribute.split('=');
-      if (keyValue.length == 2) {
-        userData[keyValue[0]] = keyValue[1];
-      }
-    }
-    return LoginUser(
-      userName: userData['userName'] ?? '',
-      password: userData['password'] ?? '',
-      userID: userData['userID'] ?? '',
-    );
-  }
-}
-
-class LoginGetUserID {
-  List<LoginUser> parseUsers(String dataString) {
-    return dataString
-        .split('|')
-        .where((userString) => userString.isNotEmpty)
-        .map((userString) {
-      return LoginUser.fromAttributes(userString.split(','));
-    }).toList();
-  }
-
-  String? getUserID(List<LoginUser> users, String name, String password) {
-    for (LoginUser user in users) {
-      if (user.userName == name && user.password == password) {
-        return user.userID;
-      }
-    }
-    return null;
   }
 }

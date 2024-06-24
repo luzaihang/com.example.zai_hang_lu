@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/factory_list/user_info_from_json.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/global_component/user_name_modified_dialog.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
@@ -7,6 +10,7 @@ import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
 import 'package:ci_dong/tencent/tencent_upload_download.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class SettingPageMain extends StatefulWidget {
@@ -54,10 +58,21 @@ class _SettingPageMainState extends State<SettingPageMain> {
 
     if (newName != null && newName.isNotEmpty) {
       String result = await TencentCloudTxtDownload.userInfoTxt();
-      // 解密
-      String decryptResult = EncryptionHelper.decrypt(result);
+      String decryptResult = EncryptionHelper.decrypt(result); // 解密
+      List userinfoMaps = jsonDecode(decryptResult); //解码
 
-      String modifiedData = decryptResult.replaceAll(
+      for (int i = 0; i < userinfoMaps.length; i++) {
+        UserInfoFromJson infoItem = UserInfoFromJson.fromJson(userinfoMaps[i]);
+        if (infoItem.userName == UserInfoConfig.userName) {
+          UserInfoFromJson updatedInfoItem =
+              infoItem.copyWith(userName: newName);
+          userinfoMaps[i] = updatedInfoItem.toJson();
+          break;
+        }
+      }
+      Logger().d(userinfoMaps);
+
+      /*String modifiedData = decryptResult.replaceAll(
         'userName=${UserInfoConfig.userName}',
         'userName=$newName',
       );
@@ -73,7 +88,7 @@ class _SettingPageMainState extends State<SettingPageMain> {
           await AuthManager.setUserName(newName);
           setState(() {});
         }
-      }
+      }*/
     }
   }
 
