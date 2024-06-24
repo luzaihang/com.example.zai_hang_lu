@@ -51,7 +51,7 @@ class PersonalPageNotifier with ChangeNotifier {
   Future<void> personalBanner(String userId) async {
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            DefaultConfig.avatarAndPostBucket,
+            DefaultConfig.personalInfoBucket,
             prefix: "$userId/bannerImgList",
             // 前缀匹配，用来规定返回的对象前缀地址
             maxKeys: 5, // 单次返回最大的条目数量，默认1000
@@ -61,7 +61,7 @@ class PersonalPageNotifier with ChangeNotifier {
 
       List<String> objectUrls =
           contentsList.where((object) => object != null).map((object) {
-        return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
+        return "${DefaultConfig.personalInfoPrefix}/${object?.key}";
       }).toList();
 
       personalBannerImages = objectUrls;

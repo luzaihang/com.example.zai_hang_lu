@@ -57,7 +57,7 @@ class PersonalPageBodyState extends State<PersonalPageBody>
     _postScrollController = ScrollController();
 
     avatarUrl =
-        "${DefaultConfig.avatarAndPostPrefix}/${widget.userId}/userAvatar.png";
+        "${DefaultConfig.personalInfoPrefix}/${widget.userId}/userAvatar.png";
     _personalPageNotifier = context.read<PersonalPageNotifier>();
     _personalPageNotifier.getPostData(widget.userId);
     _personalPageNotifier.personalBanner(widget.userId);

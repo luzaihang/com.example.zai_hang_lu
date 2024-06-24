@@ -9,7 +9,7 @@ class TencentCloudDeleteObject {
   Future<void> cloudDeleteObject(String cosPath) async {
     try {
       await cos.getDefaultService().deleteObject(
-            DefaultConfig.avatarAndPostBucket,
+            DefaultConfig.personalInfoBucket,
             "${UserInfoConfig.uniqueID}/bannerImgList/$cosPath",
             region: DefaultConfig.region,
           );

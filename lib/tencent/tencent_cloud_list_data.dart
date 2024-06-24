@@ -28,7 +28,7 @@ class TencentCloudListData {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
             userId == null || userId.isEmpty
                 ? DefaultConfig.postTextBucket
-                : DefaultConfig.avatarAndPostBucket,
+                : DefaultConfig.personalInfoBucket,
             // 前缀匹配，用来规定返回的对象前缀地址
             prefix: userId == null || userId.isEmpty ? "" : "$userId/post",
             marker: marker,
@@ -52,7 +52,7 @@ class TencentCloudListData {
         if (userId == null || userId.isEmpty) {
           return "${DefaultConfig.postTextPrefix}/${object?.key}";
         } else {
-          return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
+          return "${DefaultConfig.personalInfoPrefix}/${object?.key}";
         }
       }).toList();
 
@@ -120,7 +120,7 @@ Future<List<String>> bannerImgFun() async {
   }
   try {
     BucketContents bucketContents = await cos.getDefaultService().getBucket(
-          DefaultConfig.avatarAndPostBucket,
+          DefaultConfig.personalInfoBucket,
           prefix: "${UserInfoConfig.uniqueID}/bannerImgList",
 // 前缀匹配，用来规定返回的对象前缀地址
           maxKeys: 5, // 单次返回最大的条目数量，默认1000
@@ -130,7 +130,7 @@ Future<List<String>> bannerImgFun() async {
 
     List<String> objectUrls =
         contentsList.where((object) => object != null).map((object) {
-      return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
+      return "${DefaultConfig.personalInfoPrefix}/${object?.key}";
     }).toList();
 
     BannerImageCache().saveBannerImgList(objectUrls);

@@ -376,7 +376,7 @@ class LoginScreenState extends State<LoginScreen>
           uniqueID: userId,
           userPassword: password,
           userAvatar:
-              "${DefaultConfig.avatarAndPostPrefix}/$userId/userAvatar.png", //头像默认地址
+              "${DefaultConfig.personalInfoPrefix}/$userId/userAvatar.png", //头像默认地址
         );
 
         userinfoMaps.add(userInfoFromMap.toMap());

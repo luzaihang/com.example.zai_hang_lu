@@ -77,7 +77,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
             image: CachedNetworkImageProvider(
               url.isNotEmpty
                   ? url
-                  : "${DefaultConfig.avatarAndPostPrefix}/${widget.userId}/userAvatar.png",
+                  : "${DefaultConfig.personalInfoPrefix}/${widget.userId}/userAvatar.png",
               maxHeight: 200,
               maxWidth: 200,
             ),

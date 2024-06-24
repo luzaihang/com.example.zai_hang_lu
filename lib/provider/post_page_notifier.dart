@@ -12,8 +12,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PostPageNotifier with ChangeNotifier {
-  TencentCloudUpLoad tencentUpLoadAndDownload =
-      TencentCloudUpLoad();
   PostContentConfig postContentData = PostContentConfig();
   TextEditingController postUploadController = TextEditingController();
   TencentCloudListData tencentCloudListData = TencentCloudListData();

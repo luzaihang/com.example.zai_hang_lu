@@ -56,6 +56,7 @@ class TencentCloudUpLoad {
   }
 }
 
+///帖子图片上传
 Future<bool> imageUpLoad(String imagePath, String postId,
     {PostContentConfig? postContentData}) async {
   TencentCloudUpLoad uploader = TencentCloudUpLoad();
@@ -65,6 +66,7 @@ Future<bool> imageUpLoad(String imagePath, String postId,
       filePath: imagePath, postContentData: postContentData);
 }
 
+///帖子内容上传，包含图片的链接
 Future<void> postTextUpLoad(Map map, String postId, String userId) async {
   TencentCloudUpLoad uploader = TencentCloudUpLoad();
   String jsonString = json.encode(map);
@@ -78,7 +80,7 @@ Future<void> postTextUpLoad(Map map, String postId, String userId) async {
   );
 //发送到发帖人的列表
   await uploader.uploadFile(
-    DefaultConfig.avatarAndPostBucket,
+    DefaultConfig.personalInfoBucket,
     "$userId/post/$postId.txt",
     byteArr: byte,
   );
@@ -91,6 +93,7 @@ Future<void> postTextUpLoad(Map map, String postId, String userId) async {
   }
 }
 
+///用户信息上传,包括全部用户
 Future<bool?> userUpLoad(
   BuildContext context,
   String userText, {
@@ -117,6 +120,7 @@ Future<bool?> userUpLoad(
   return null;
 }
 
+///聊天记录上传
 Future<void> chatUpload(
     String receivedByID, List<Map<String, dynamic>> listMap) async {
   TencentCloudUpLoad uploader = TencentCloudUpLoad();
@@ -132,23 +136,13 @@ Future<void> chatUpload(
       byteArr: byte);
 }
 
-Future<bool> avatarUpLoad(String imagePath) async {
-  TencentCloudUpLoad uploader = TencentCloudUpLoad();
-  String cosPath = "${UserInfoConfig.uniqueID}/userAvatar.png";
-  return uploader.uploadFile(
-    DefaultConfig.avatarAndPostBucket,
-    cosPath,
-    filePath: imagePath,
-  );
-}
-
 ///用户头像上传
 Future<String> userAvatarUpLoad(String? imagePath, String userId,
     {Uint8List? uint8list}) async {
   TencentCloudUpLoad tencentUpLoadAndDownload = TencentCloudUpLoad();
   String cosPath = "$userId/userAvatar.png";
   bool result = await tencentUpLoadAndDownload.uploadFile(
-    DefaultConfig.avatarAndPostBucket,
+    DefaultConfig.personalInfoBucket,
     cosPath,
     filePath: imagePath,
     byteArr: uint8list,
@@ -156,7 +150,7 @@ Future<String> userAvatarUpLoad(String? imagePath, String userId,
 
   if (result) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return "${DefaultConfig.avatarAndPostPrefix}/$cosPath?timestamp=$timestamp";
+    return "${DefaultConfig.personalInfoPrefix}/$cosPath?timestamp=$timestamp";
   }
 
   return '';
@@ -164,12 +158,11 @@ Future<String> userAvatarUpLoad(String? imagePath, String userId,
 
 ///用户banner图片上传
 Future<bool> bannerImageUpLoad(String imagePath) async {
-  TencentCloudUpLoad tencentUpLoadAndDownload =
-  TencentCloudUpLoad();
+  TencentCloudUpLoad tencentUpLoadAndDownload = TencentCloudUpLoad();
   String filename = imagePath.split('/').last;
   String cosPath = "${UserInfoConfig.uniqueID}/bannerImgList/$filename";
   return tencentUpLoadAndDownload.uploadFile(
-    DefaultConfig.avatarAndPostBucket,
+    DefaultConfig.personalInfoBucket,
     cosPath,
     filePath: imagePath,
   );
