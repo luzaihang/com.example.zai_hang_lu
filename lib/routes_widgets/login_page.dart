@@ -12,8 +12,8 @@ import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
-import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:provider/provider.dart';
 
 import '../app_data/show_custom_snackBar.dart';
@@ -109,7 +109,7 @@ class LoginScreenState extends State<LoginScreen>
         "assets/default_avatar_icon.png",
       );
       Uint8List res = data.buffer.asUint8List();
-      await _myPageNotifier.userAvatarUpLoad(null, userId, uint8list: res);
+      await userAvatarUpLoad(null, userId, uint8list: res);
       return true;
     } catch (e) {
       return false;
@@ -385,7 +385,7 @@ class LoginScreenState extends State<LoginScreen>
         Logger().d(userinfoMaps);
 
         if (mounted && res) {
-          TencentUpLoadAndDownload.userUpLoad(context, jsonString);
+          userUpLoad(context, jsonString);
         }
       }
 

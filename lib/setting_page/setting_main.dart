@@ -6,8 +6,8 @@ import 'package:ci_dong/factory_list/user_info_from_json.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:ci_dong/global_component/user_name_modified_dialog.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
-import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:logger/logger.dart';
@@ -72,15 +72,10 @@ class _SettingPageMainState extends State<SettingPageMain> {
       }
       Logger().d(userinfoMaps);
 
-      /*String modifiedData = decryptResult.replaceAll(
-        'userName=${UserInfoConfig.userName}',
-        'userName=$newName',
-      );
-
       if (mounted) {
-        bool? res = await TencentUpLoadAndDownload.userUpLoad(
+        bool? res = await userUpLoad(
           context,
-          modifiedData,
+          jsonEncode(userinfoMaps), //编码上传
           modified: true,
         );
         if (res == true) {
@@ -88,7 +83,7 @@ class _SettingPageMainState extends State<SettingPageMain> {
           await AuthManager.setUserName(newName);
           setState(() {});
         }
-      }*/
+      }
     }
   }
 

@@ -1,22 +1,16 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
-import 'package:ci_dong/default_config/default_config.dart';
-import 'package:ci_dong/my_page/banner_images_cache_data.dart';
 import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
-import 'package:ci_dong/tencent/tencent_cloud_service.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
-import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import '../tencent/tencent_cloud_list_data.dart';
 
 class MyPageNotifier with ChangeNotifier {
-  final Cos cos = CosService().cos;
   TencentCloudDeleteObject tencentCloudDeleteObject =
       TencentCloudDeleteObject();
   CompressImage compressImage = CompressImage();
@@ -78,7 +72,7 @@ class MyPageNotifier with ChangeNotifier {
 
         await bannerImageUpLoad(compressedImage.path);
       }
-      bannerImgFun();
+      bannerImgList = await bannerImgFun();
     } else {
       _userAvatarAsset = resultList;
 
@@ -87,73 +81,20 @@ class MyPageNotifier with ChangeNotifier {
       XFile compressedImage = await compressImage.compressImage(file);
 
       if (context.mounted) showCustomSnackBar(context, "正在更新头像中...");
-      await userAvatarUpLoad(compressedImage.path, UserInfoConfig.uniqueID);
+      String res =
+          await userAvatarUpLoad(compressedImage.path, UserInfoConfig.uniqueID);
+      if (res.isNotEmpty) {
+        newAvatarUrl = res;
+      } else {
+        if (context.mounted) showCustomSnackBar(context, "头像更新失败,稍候再试");
+      }
     }
 
     notifyListeners();
   }
 
-  ///用户banner图片上传
-  Future<bool> bannerImageUpLoad(String imagePath) async {
-    TencentUpLoadAndDownload tencentUpLoadAndDownload =
-        TencentUpLoadAndDownload();
-    String filename = imagePath.split('/').last;
-    String cosPath = "${UserInfoConfig.uniqueID}/bannerImgList/$filename";
-    return tencentUpLoadAndDownload.uploadFile(
-      DefaultConfig.avatarAndPostBucket,
-      cosPath,
-      filePath: imagePath,
-    );
-  }
-
-  ///用户banner图片获取
-  Future<void> bannerImgFun() async {
-    List<String> list = await BannerImageCache().loadBannerImgList();
-    if (list.isNotEmpty) {
-      bannerImgList = list;
-      notifyListeners();
-    }
-    try {
-      BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            DefaultConfig.avatarAndPostBucket,
-            prefix: "${UserInfoConfig.uniqueID}/bannerImgList",
-            // 前缀匹配，用来规定返回的对象前缀地址
-            maxKeys: 5, // 单次返回最大的条目数量，默认1000
-          );
-
-      List<Content?> contentsList = bucketContents.contentsList;
-
-      List<String> objectUrls =
-          contentsList.where((object) => object != null).map((object) {
-        return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
-      }).toList();
-
-      bannerImgList = objectUrls;
-      BannerImageCache().saveBannerImgList(objectUrls);
-      notifyListeners();
-    } catch (e) {
-      Logger().e("$e------------error");
-    }
-  }
-
-  ///用户头像上传
-  Future<void> userAvatarUpLoad(String? imagePath, String userId,
-      {Uint8List? uint8list}) async {
-    TencentUpLoadAndDownload tencentUpLoadAndDownload =
-        TencentUpLoadAndDownload();
-    String cosPath = "$userId/userAvatar.png";
-    bool result = await tencentUpLoadAndDownload.uploadFile(
-      DefaultConfig.avatarAndPostBucket,
-      cosPath,
-      filePath: imagePath,
-      byteArr: uint8list,
-    );
-
-    if (result) {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      newAvatarUrl =
-          "${DefaultConfig.avatarAndPostPrefix}/$cosPath?timestamp=$timestamp";
-      notifyListeners();
-    }
+  void getBanner() async {
+    bannerImgList = await bannerImgFun();
+    notifyListeners();
   }
 }

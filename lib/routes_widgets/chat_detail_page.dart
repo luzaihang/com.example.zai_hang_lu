@@ -5,8 +5,8 @@ import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
-import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:ci_dong/widget_element/message_bubble_item.dart';
 import 'package:provider/provider.dart';
 
@@ -148,7 +148,7 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     List<Map<String, dynamic>> listMap =
         newMessages.map((detail) => detail.toMap()).toList();
 
-    TencentUpLoadAndDownload.chatUpload(widget.taUserID, listMap);
+    chatUpload(widget.taUserID, listMap);
 
     Logger().i("上传聊天记录到云端: ${newMessages.length} 条消息");
   }

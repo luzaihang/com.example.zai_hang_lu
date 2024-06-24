@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/my_page/banner_images_cache_data.dart';
 import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -80,11 +81,13 @@ class TencentCloudListData {
     }
   }
 
-  Future<List<PostDetailFormJson>?> getAllFirstContentsList() async {
+  ///全部列表的刷新
+  Future<List<PostDetailFormJson>?> getAllPostRefresh() async {
     return _fetchContentsList(null);
   }
 
-  Future<List<PostDetailFormJson>?> getAllNextContentsList() async {
+  ///全部列表的上拉加载
+  Future<List<PostDetailFormJson>?> getAllPostGain() async {
     if (allIsTruncated) {
       return _fetchContentsList(null, marker: allNextMarker);
     } else {
@@ -92,15 +95,48 @@ class TencentCloudListData {
     }
   }
 
-  Future<List<PostDetailFormJson>?> getUserPostFirstContentsList(String userId) async {
+  ///刷新数据，获得最新数据
+  Future<List<PostDetailFormJson>?> getPersonalPostRefresh(
+      String userId) async {
     return _fetchContentsList(userId);
   }
 
-  Future<List<PostDetailFormJson>?> getUserPostNextContentsList(String userId) async {
+  ///上拉加载数据
+  Future<List<PostDetailFormJson>?> getPersonalPostGain(String userId) async {
     if (userNextMarker != null) {
       return _fetchContentsList(userId, marker: userNextMarker);
     } else {
       return [];
     }
+  }
+}
+
+///用户banner图片获取
+Future<List<String>> bannerImgFun() async {
+  final Cos cos = CosService().cos;
+  List<String> list = await BannerImageCache().loadBannerImgList();
+  if (list.isNotEmpty) {
+    return list;
+  }
+  try {
+    BucketContents bucketContents = await cos.getDefaultService().getBucket(
+          DefaultConfig.avatarAndPostBucket,
+          prefix: "${UserInfoConfig.uniqueID}/bannerImgList",
+// 前缀匹配，用来规定返回的对象前缀地址
+          maxKeys: 5, // 单次返回最大的条目数量，默认1000
+        );
+
+    List<Content?> contentsList = bucketContents.contentsList;
+
+    List<String> objectUrls =
+        contentsList.where((object) => object != null).map((object) {
+      return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
+    }).toList();
+
+    BannerImageCache().saveBannerImgList(objectUrls);
+    return objectUrls;
+  } catch (e) {
+    Logger().e("$e------------error");
+    return [];
   }
 }

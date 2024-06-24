@@ -1,7 +1,7 @@
 import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 import 'package:ci_dong/lean_cloud/client_manager.dart';
-import 'package:ci_dong/tencent/tencent_cloud_txt_download.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 import 'package:logger/logger.dart';
@@ -48,7 +48,7 @@ class ChatNotifier with ChangeNotifier {
           chatList.map((detail) => detail.toMap()).toList();
       Logger().w("==================$chatList");
 
-      TencentUpLoadAndDownload.chatUpload(senderUserid, listMap);
+      chatUpload(senderUserid, listMap);
     };
   }
 }

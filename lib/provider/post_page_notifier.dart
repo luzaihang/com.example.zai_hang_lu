@@ -6,14 +6,14 @@ import 'package:ci_dong/factory_list/post_detail_from_map.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
-import 'package:ci_dong/tencent/tencent_upload_download.dart';
+import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PostPageNotifier with ChangeNotifier {
-  TencentUpLoadAndDownload tencentUpLoadAndDownload =
-      TencentUpLoadAndDownload();
+  TencentCloudUpLoad tencentUpLoadAndDownload =
+      TencentCloudUpLoad();
   PostContentConfig postContentData = PostContentConfig();
   TextEditingController postUploadController = TextEditingController();
   TencentCloudListData tencentCloudListData = TencentCloudListData();
@@ -36,14 +36,14 @@ class PostPageNotifier with ChangeNotifier {
   Alignment alignment = Alignment.centerLeft;
 
   Future<void> onAllRefresh() async {
-    allTabList = await tencentCloudListData.getAllFirstContentsList() ?? [];
+    allTabList = await tencentCloudListData.getAllPostRefresh() ?? [];
     allRefreshController.refreshCompleted();
     notifyListeners();
   }
 
   Future<void> onAllLoadMore() async {
     List<PostDetailFormJson>? result =
-        await tencentCloudListData.getAllNextContentsList();
+        await tencentCloudListData.getAllPostGain();
     if (result != null) {
       allTabList.addAll(result);
       allRefreshController.loadComplete();
@@ -53,7 +53,7 @@ class PostPageNotifier with ChangeNotifier {
 
   Future<void> onUserRefresh() async {
     userTabList = await tencentCloudListData
-            .getUserPostFirstContentsList(UserInfoConfig.uniqueID) ??
+            .getPersonalPostRefresh(UserInfoConfig.uniqueID) ??
         [];
     userTabList
         .sort((a, b) => b.postCreationTime.compareTo(a.postCreationTime));
@@ -63,7 +63,7 @@ class PostPageNotifier with ChangeNotifier {
 
   Future<void> onUserLoadMore() async {
     List<PostDetailFormJson>? result = await tencentCloudListData
-        .getUserPostNextContentsList(UserInfoConfig.uniqueID);
+        .getPersonalPostGain(UserInfoConfig.uniqueID);
     if (result != null) {
       userTabList.addAll(result);
       userRefreshController.loadComplete();
@@ -120,8 +120,7 @@ class PostPageNotifier with ChangeNotifier {
     if (imageFiles.isNotEmpty) {
       List<Future<bool>> uploadFutures = imageFiles.map((imagePath) {
         //帖子图片上传，上传完之后将所有数据集中，再执行 postTextUpload()
-        return TencentUpLoadAndDownload()
-            .imageUpLoad(imagePath, postId, postContentData: postContentData);
+        return imageUpLoad(imagePath, postId, postContentData: postContentData);
       }).toList();
 
       List<bool> results = await Future.wait(uploadFutures);
@@ -137,7 +136,7 @@ class PostPageNotifier with ChangeNotifier {
   ///帖子内容上传
   Future<void> postTextUpload() async {
     PostDetailFromMap postDetails = createPostDetail();
-    await TencentUpLoadAndDownload.postTextUpLoad(
+    await postTextUpLoad(
       postDetails.toMap(),
       postId,
       UserInfoConfig.uniqueID, //帖子发布时是自己的id

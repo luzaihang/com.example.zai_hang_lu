@@ -8,6 +8,7 @@ import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 class TencentCloudTxtDownload {
   static final Logger _logger = Logger();
 
+  ///全部用户信息获取
   static Future<String> userInfoTxt() async {
     const url = DefaultConfig.userNameTxtUrl;
     try {
@@ -25,8 +26,10 @@ class TencentCloudTxtDownload {
     }
   }
 
+  ///聊天记录获取
   static Future<List<ChatDetailFromMap>> chatTxt(String id) async {
-    final url = '${DefaultConfig.chattingRecordsPrefix}/${UserInfoConfig.uniqueID}/$id.txt';
+    final url =
+        '${DefaultConfig.chattingRecordsPrefix}/${UserInfoConfig.uniqueID}/$id.txt';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

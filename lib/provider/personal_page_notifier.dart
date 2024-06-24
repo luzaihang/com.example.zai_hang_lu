@@ -41,7 +41,7 @@ class PersonalPageNotifier with ChangeNotifier {
   ///获取数据
   Future<void> getPostData(String userId) async {
     personalPostList =
-        await tencentCloudListData.getUserPostFirstContentsList(userId) ?? [];
+        await tencentCloudListData.getPersonalPostRefresh(userId) ?? [];
     personalPostList
         .sort((a, b) => b.postCreationTime.compareTo(a.postCreationTime));
     notifyListeners();

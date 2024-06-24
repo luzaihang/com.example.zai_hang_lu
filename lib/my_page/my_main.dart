@@ -27,7 +27,7 @@ class _MyMainState extends State<MyMain> {
     _scrollController = ScrollController();
     _myReadNotifier = context.read<MyPageNotifier>();
     _visibilityNotifier = context.read<VisibilityNotifier>();
-    _myReadNotifier.bannerImgFun(); //获取banner图片list
+    _myReadNotifier.getBanner(); //获取banner图片list
     _scrollController.addListener(_scrollListener);
   }
 
