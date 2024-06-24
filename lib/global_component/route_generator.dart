@@ -1,3 +1,4 @@
+import 'package:ci_dong/my_page/personal_page.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         } else {
           return _errorRoute('No arguments provided for ChatDetailPage');
         }
+      case "/personalPage":
+        if (arguments is PersonalPageArguments) {
+          return PersonalPage(userId: arguments.userId);
+        } else {
+          return _errorRoute('No arguments provided for PersonalPage');
+        }
       default:
         return _errorRoute('No route defined for ${settings.name}');
     }
@@ -80,5 +87,13 @@ class ChatDetailPageArguments {
     required this.taUserName,
     required this.taUserAvatar,
     required this.taUserID,
+  });
+}
+
+class PersonalPageArguments {
+  final String userId;
+
+  PersonalPageArguments({
+    required this.userId,
   });
 }

@@ -12,6 +12,7 @@ class DefaultConfig {
   static const String postImageBucket = "post-image-list-$appid";
   static const String chattingRecordsBucket = "chatting-records-$appid";
   static const String avatarAndPostBucket = "user-avatar-post-$appid";
+  static const String personalInfoBucket = "personal-info-$appid";
 
   ///获取所有用户信息的完整链接
   static const String userNameTxtUrl =
@@ -32,4 +33,8 @@ class DefaultConfig {
   ///avatarAndPostBucket前缀
   static const String avatarAndPostPrefix =
       'https://$avatarAndPostBucket.cos.$region.myqcloud.com';
+
+  ///personalInfoBucket前缀
+  static const String personalInfoPrefix =
+      'https://$personalInfoBucket.cos.$region.myqcloud.com';
 }

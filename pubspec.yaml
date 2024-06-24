@@ -115,6 +115,9 @@ flutter:
     - assets/not_post_icon.png
     - assets/default_avatar_icon.png
     - assets/transparent_background_icon.png
+    - assets/redact_icon.png
+    - assets/folder_icon.png
+    - assets/add_icon.png
     - assets/tencentCloud.json
     - assets/fonts/
 #  fonts:

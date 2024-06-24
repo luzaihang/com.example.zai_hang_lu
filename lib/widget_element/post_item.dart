@@ -131,14 +131,6 @@ class PostListItem extends StatelessWidget {
                                 postId: item.postId ?? "",
                               ),
                             );
-                            /*Navigator.push(
-                              context,
-                              CupertinoPageRoute(
-                                builder: (BuildContext context) =>
-                                    const GalleryPhotoView(imageUrls: [],initialIndex: 0, postId: "",),
-                              ),
-                            );*/
-                            // Navigator.pushNamed(context, '/chatListPage');
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -231,19 +223,5 @@ class PostListItem extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class AAAA extends StatefulWidget {
-  const AAAA({super.key});
-
-  @override
-  State<AAAA> createState() => _AAAAState();
-}
-
-class _AAAAState extends State<AAAA> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
   }
 }

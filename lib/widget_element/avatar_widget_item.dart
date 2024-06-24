@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -60,19 +61,28 @@ class _AvatarWidgetState extends State<AvatarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
-      child: SizedBox(
-        height: 40,
-        width: 40,
-        child: Image(
-          image: CachedNetworkImageProvider(
-            url.isNotEmpty
-                ? url
-                : "${DefaultConfig.avatarAndPostPrefix}/${widget.userId}/userAvatar.png",
-            maxHeight: 200,
-            maxWidth: 200,
+    return GestureDetector(
+      /*onTap: () {
+        Navigator.pushNamed(
+          context,
+          "/personalPage",
+          arguments: PersonalPageArguments(userId: widget.userId),
+        );
+      },*/
+      child: ClipOval(
+        child: SizedBox(
+          height: 40,
+          width: 40,
+          child: Image(
+            image: CachedNetworkImageProvider(
+              url.isNotEmpty
+                  ? url
+                  : "${DefaultConfig.avatarAndPostPrefix}/${widget.userId}/userAvatar.png",
+              maxHeight: 200,
+              maxWidth: 200,
+            ),
+            fit: BoxFit.cover,
           ),
-          fit: BoxFit.cover,
         ),
       ),
     );

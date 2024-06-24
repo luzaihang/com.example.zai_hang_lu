@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
@@ -213,7 +214,7 @@ class _MyMainState extends State<MyMain> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "设置墙贴",
+                  "设置墙照",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -222,7 +223,7 @@ class _MyMainState extends State<MyMain> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "图库选择靓照吧～",
+                  "图库选择靓照，给陌生人点赞吧～",
                   style: TextStyle(
                     fontSize: 13,
                     color: const Color(0xFF052D84).withOpacity(0.5),
@@ -307,7 +308,7 @@ class _MyMainState extends State<MyMain> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "相册集",
+                    "个人主页",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -316,7 +317,7 @@ class _MyMainState extends State<MyMain> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "免费有 1G 存储空间",
+                    "发布图片可赚取积分哟～",
                     style: TextStyle(
                       fontSize: 13,
                       color: const Color(0xFF052D84).withOpacity(0.5),
@@ -332,20 +333,29 @@ class _MyMainState extends State<MyMain> {
   }
 
   Widget _buildViewAllTile() {
-    return Container(
-      height: 50,
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-      ),
-      alignment: Alignment.center,
-      child: const Text(
-        "查看全部",
-        style: TextStyle(
-          fontSize: 16,
-          color: Color(0xFF1770D4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          "/personalPage",
+          arguments: PersonalPageArguments(userId: UserInfoConfig.uniqueID),
+        );
+      },
+      child: Container(
+        height: 50,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          "查看详情",
+          style: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF1770D4),
+          ),
         ),
       ),
     );

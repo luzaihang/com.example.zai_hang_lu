@@ -19,21 +19,24 @@ class TencentCloudListData {
 
   final Cos cos = CosService().cos;
 
-  Future<List<PostDetailFormJson>?> _fetchContentsList(bool allTab,
+  /// userId为null或者''时，就说明要获取所有人的帖子列表
+  Future<List<PostDetailFormJson>?> _fetchContentsList(String? userId,
       {String? marker}) async {
     List<PostDetailFormJson> decodedMaps = [];
     try {
       BucketContents bucketContents = await cos.getDefaultService().getBucket(
-            allTab
+            userId == null || userId.isEmpty
                 ? DefaultConfig.postTextBucket
                 : DefaultConfig.avatarAndPostBucket,
             // 前缀匹配，用来规定返回的对象前缀地址
-            prefix: allTab ? "" : "${UserInfoConfig.uniqueID}/post",
+            prefix: userId == null || userId.isEmpty ? "" : "$userId/post",
             marker: marker,
-            maxKeys: allTab ? 20 : 1000, // 单次返回最大的条目数量，默认1000
+            maxKeys: userId == null || userId.isEmpty
+                ? 20
+                : 1000, // 单次返回最大的条目数量，默认1000
           );
 
-      if (allTab) {
+      if (userId == null || userId.isEmpty) {
         allIsTruncated = bucketContents.isTruncated;
         allNextMarker = bucketContents.nextMarker;
       } else {
@@ -45,7 +48,7 @@ class TencentCloudListData {
 
       List<String> objectUrls =
           contentsList.where((object) => object != null).map((object) {
-        if (allTab) {
+        if (userId == null || userId.isEmpty) {
           return "${DefaultConfig.postTextPrefix}/${object?.key}";
         } else {
           return "${DefaultConfig.avatarAndPostPrefix}/${object?.key}";
@@ -60,7 +63,8 @@ class TencentCloudListData {
           String decodedJsonString = utf8.decode(response.bodyBytes);
           if (decodedJsonString.trim().isNotEmpty) {
             Map<String, dynamic> decodedMap = json.decode(decodedJsonString);
-            PostDetailFormJson postJson = PostDetailFormJson.fromJson(decodedMap);
+            PostDetailFormJson postJson =
+                PostDetailFormJson.fromJson(decodedMap);
             decodedMaps.add(postJson);
           }
         } else {
@@ -77,24 +81,24 @@ class TencentCloudListData {
   }
 
   Future<List<PostDetailFormJson>?> getAllFirstContentsList() async {
-    return _fetchContentsList(true);
+    return _fetchContentsList(null);
   }
 
   Future<List<PostDetailFormJson>?> getAllNextContentsList() async {
     if (allIsTruncated) {
-      return _fetchContentsList(true, marker: allNextMarker);
+      return _fetchContentsList(null, marker: allNextMarker);
     } else {
       return [];
     }
   }
 
-  Future<List<PostDetailFormJson>?> getUserPostFirstContentsList() async {
-    return _fetchContentsList(false);
+  Future<List<PostDetailFormJson>?> getUserPostFirstContentsList(String userId) async {
+    return _fetchContentsList(userId);
   }
 
-  Future<List<PostDetailFormJson>?> getUserPostNextContentsList() async {
-    if (allIsTruncated) {
-      return _fetchContentsList(false, marker: allNextMarker);
+  Future<List<PostDetailFormJson>?> getUserPostNextContentsList(String userId) async {
+    if (userNextMarker != null) {
+      return _fetchContentsList(userId, marker: userNextMarker);
     } else {
       return [];
     }

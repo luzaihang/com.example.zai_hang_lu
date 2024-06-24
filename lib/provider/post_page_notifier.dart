@@ -52,8 +52,9 @@ class PostPageNotifier with ChangeNotifier {
   }
 
   Future<void> onUserRefresh() async {
-    userTabList =
-        await tencentCloudListData.getUserPostFirstContentsList() ?? [];
+    userTabList = await tencentCloudListData
+            .getUserPostFirstContentsList(UserInfoConfig.uniqueID) ??
+        [];
     userTabList
         .sort((a, b) => b.postCreationTime.compareTo(a.postCreationTime));
     userRefreshController.refreshCompleted();
@@ -61,8 +62,8 @@ class PostPageNotifier with ChangeNotifier {
   }
 
   Future<void> onUserLoadMore() async {
-    List<PostDetailFormJson>? result =
-        await tencentCloudListData.getUserPostNextContentsList();
+    List<PostDetailFormJson>? result = await tencentCloudListData
+        .getUserPostNextContentsList(UserInfoConfig.uniqueID);
     if (result != null) {
       userTabList.addAll(result);
       userRefreshController.loadComplete();
