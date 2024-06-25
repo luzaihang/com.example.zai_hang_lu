@@ -5,7 +5,6 @@ import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/user_info_from_json.dart';
 import 'package:ci_dong/factory_list/user_info_from_map.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
-import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
@@ -14,7 +13,6 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
 import 'package:ci_dong/tencent/tencent_cloud_download.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
-import 'package:provider/provider.dart';
 
 import '../app_data/show_custom_snackBar.dart';
 
@@ -31,7 +29,6 @@ class LoginScreenState extends State<LoginScreen>
 
   late AnimationController _controller;
   late Animation<Offset> _animation;
-  late MyPageNotifier _myPageNotifier;
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -40,7 +37,6 @@ class LoginScreenState extends State<LoginScreen>
   void initState() {
     super.initState();
     _loadLoginInfo();
-    _myPageNotifier = context.read<MyPageNotifier>();
 
     _anima();
 
@@ -102,14 +98,15 @@ class LoginScreenState extends State<LoginScreen>
     });
   }
 
-  ///默认头像上传
-  Future<bool> getUint8(String userId) async {
+  ///默认头像上传,昵称上传到个人
+  Future<bool> uploadAvatarAndName(String userId, String userName) async {
     try {
       final ByteData data = await rootBundle.load(
         "assets/default_avatar_icon.png",
       );
       Uint8List res = data.buffer.asUint8List();
       await userAvatarUpLoad(null, userId, uint8list: res);
+      await personalNameUpload(userId, userName);
       return true;
     } catch (e) {
       return false;
@@ -324,7 +321,7 @@ class LoginScreenState extends State<LoginScreen>
       showCustomSnackBar(context, "账号不能为空");
       return;
     }
-    if (password.isEmpty && password.length > 5) {
+    if (password.isEmpty || password.length < 6) {
       showCustomSnackBar(context, "密码不能为空、或不足6位");
       return;
     }
@@ -364,10 +361,11 @@ class LoginScreenState extends State<LoginScreen>
       } else {
         Logger().e('没有匹配的用户');
         userId = RandomGenerator.getRandomCombination();
-        bool res = await getUint8(userId); //先设定默认头像，发送到个人信息bucket
-        if (mounted && !res) {
+        bool res = await uploadAvatarAndName(userId, userName); //先设定默认头像，发送到个人信息bucket
+
+        if (!res) {
           //如果上传默认头像失败，则停止执行后面逻辑
-          showCustomSnackBar(context, "网络延迟,请稍候再试");
+          if (mounted) showCustomSnackBar(context, "网络延迟,请稍候再试");
           return;
         }
 
@@ -394,8 +392,6 @@ class LoginScreenState extends State<LoginScreen>
       UserInfoConfig.userPassword = password;
 
       await AuthManager.login(userName, password, userId);
-      Logger().w(
-          "${UserInfoConfig.uniqueID}/${UserInfoConfig.userName}/${UserInfoConfig.userPassword}");
     } catch (e) {
       Logger().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");

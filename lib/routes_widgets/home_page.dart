@@ -124,35 +124,36 @@ class _HomePageState extends State<HomePage>
                   currentIndex: _currentIndex,
                   selectedItemColor: const Color(0xFF1E3A8A),
                   unselectedItemColor: Colors.grey,
+                  elevation: 1,
                   selectedLabelStyle: const TextStyle(
-                    fontSize: 14.0,
+                    fontSize: 12.0,
                     fontWeight: FontWeight.bold,
                   ),
                   unselectedLabelStyle: const TextStyle(
-                    fontSize: 12.0,
+                    fontSize: 11.0,
                   ),
-                  type: BottomNavigationBarType.shifting,
+                  type: BottomNavigationBarType.fixed,
                   items: [
                     BottomNavigationBarItem(
                       icon: _buildImageIcon(
-                          3, "assets/me_icon.png", Colors.blueGrey, 20),
+                          3, "assets/me_icon.png", Colors.blueGrey, 15),
                       label: '我的',
                       activeIcon:
-                          _buildImageIcon(3, "assets/me_icon.png", null, 20),
+                          _buildImageIcon(3, "assets/me_icon.png", null, 15),
                     ),
                     BottomNavigationBarItem(
                       icon: _buildImageIcon(
-                          0, "assets/post_icon.png", Colors.blueGrey, 30),
+                          0, "assets/post_icon.png", Colors.blueGrey, 23),
                       label: '动态',
                       activeIcon:
-                          _buildImageIcon(0, "assets/post_icon.png", null, 30),
+                          _buildImageIcon(0, "assets/post_icon.png", null, 23),
                     ),
                     BottomNavigationBarItem(
                       icon: _buildImageIcon(
-                          3, "assets/other_icon.png", Colors.blueGrey, 20),
+                          3, "assets/other_icon.png", Colors.blueGrey, 15),
                       label: '设置',
                       activeIcon:
-                          _buildImageIcon(3, "assets/other_icon.png", null, 20),
+                          _buildImageIcon(3, "assets/other_icon.png", null, 15),
                     ),
                   ],
                 ),

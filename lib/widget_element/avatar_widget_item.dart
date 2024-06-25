@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
-import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -49,4 +49,24 @@ class TencentCloudTxtDownload {
       return [];
     }
   }
+
+  ///用户昵称获取,因昵称是可变的，没有服务器，所以只能上传之后下载再更改昵称展示
+  static Future<String> personalName(String id) async {
+    final url = '${DefaultConfig.personalInfoPrefix}/$id/personal_info.txt';
+    try {
+      final response = await http.get(Uri.parse(url));
+      _logger.d("=====----${response.bodyBytes}");
+      if (response.statusCode == 200) {
+        final name = utf8.decode(response.bodyBytes).trim();
+        _logger.d("昵称是$name");
+        if (name.isNotEmpty) {
+          return name;
+        }
+      }
+    } catch (e) {
+      _logger.e("$e----------personalName-----------txt异常2");
+      return "";
+    }
+    return "";
+  }
 }

@@ -2,17 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+import 'package:ci_dong/provider/personal_name_notifier.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/upvote_notifier.dart';
-import 'package:ci_dong/routes_widgets/gallery_photo_view.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../app_data/format_date_time.dart';
 
-class PostListItem extends StatelessWidget {
+class PostListItem extends StatefulWidget {
   final PostDetailFormJson item;
   final double screenWidth;
   final int index;
@@ -25,33 +25,52 @@ class PostListItem extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-// 计算 | 在字符串中出现的次数,因为是用 (|userid) 来区分的，知道这个的次数就可以知道多少人点赞
-    int count = '|'.allMatches(item.upvote ?? "").length;
+  State<PostListItem> createState() => _PostListItemState();
+}
 
+class _PostListItemState extends State<PostListItem> {
+  @override
+  void initState() {
+    context
+        .read<PersonalNameNotifier>()
+        .fetchAndCacheUserName(widget.item.userID ?? "");
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 计算 | 在字符串中出现的次数,因为是用 (|userid) 来区分的，知道这个的次数就可以知道多少人点赞
+    int count = '|'.allMatches(widget.item.upvote ?? "").length;
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(20, index == 0 ? 15 : 0, 20, 0),
+          padding: EdgeInsets.fromLTRB(20, widget.index == 0 ? 15 : 0, 20, 0),
           child: Row(
             children: [
-              AvatarWidget(userId: item.userID ?? ""),
+              AvatarWidget(userId: widget.item.userID ?? ""),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.userName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Color(0xFF052D84),
-                      ),
+                    Consumer<PersonalNameNotifier>(
+                      builder: (BuildContext context, provider, Widget? child) {
+                        final name =
+                            provider.getCachedName(widget.item.userID ?? "");
+                        Logger().d("message==============$name");
+                        return Text(
+                          name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF052D84),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      formatDateTimeToMinutes(item.postCreationTime),
+                      formatDateTimeToMinutes(widget.item.postCreationTime),
                       style: TextStyle(
                         fontSize: 11,
                         color: const Color(0xFF052D84).withOpacity(0.5),
@@ -66,8 +85,9 @@ class PostListItem extends StatelessWidget {
                   return GestureDetector(
                     onTap: () async {
                       PostDetailFormJson result =
-                          upvoteNotifier.postUpvote(item);
-                      pageNotifier.updatePostUpvote(item.postId ?? "", result);
+                          upvoteNotifier.postUpvote(widget.item);
+                      pageNotifier.updatePostUpvote(
+                          widget.item.postId ?? "", result);
                     },
                     child: Row(
                       children: [
@@ -76,7 +96,7 @@ class PostListItem extends StatelessWidget {
                                 "$count",
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: item.upvote!
+                                  color: widget.item.upvote!
                                           .contains(UserInfoConfig.uniqueID)
                                       ? Colors.red
                                       : const Color(0xFF052D84)
@@ -88,7 +108,8 @@ class PostListItem extends StatelessWidget {
                           "assets/like_icon.png",
                           height: 28,
                           width: 28,
-                          color: item.upvote!.contains(UserInfoConfig.uniqueID)
+                          color: widget.item.upvote!
+                                  .contains(UserInfoConfig.uniqueID)
                               ? Colors.red
                               : const Color(0xFF052D84).withOpacity(0.2),
                         ),
@@ -104,7 +125,7 @@ class PostListItem extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(65, 10, 20, 0),
           alignment: Alignment.centerLeft,
           child: Text(
-            item.postContent,
+            widget.item.postContent,
             style: const TextStyle(
               fontSize: 14,
               height: 1.7,
@@ -117,7 +138,7 @@ class PostListItem extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(65, 10, 0, 0),
           child: Row(
             children: [
-              item.postImages.isNotEmpty
+              widget.item.postImages.isNotEmpty
                   ? Stack(
                       children: [
                         GestureDetector(
@@ -126,18 +147,18 @@ class PostListItem extends StatelessWidget {
                               context,
                               "/galleryPhotoView",
                               arguments: GalleryPhotoViewArguments(
-                                imageUrls: item.postImages,
+                                imageUrls: widget.item.postImages,
                                 initialIndex: 0,
-                                postId: item.postId ?? "",
+                                postId: widget.item.postId ?? "",
                               ),
                             );
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
-                              width: screenWidth * (2 / 3),
-                              imageUrl: item.postImages[0],
-                              maxWidthDiskCache: screenWidth.toInt(),
+                              width: widget.screenWidth * (2 / 3),
+                              imageUrl: widget.item.postImages[0],
+                              maxWidthDiskCache: widget.screenWidth.toInt(),
                             ),
                           ),
                         ),
@@ -153,7 +174,7 @@ class PostListItem extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                "X${item.postImages.length}",
+                                "X${widget.item.postImages.length}",
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: Colors.white,
@@ -164,11 +185,11 @@ class PostListItem extends StatelessWidget {
                         ),
                       ],
                     )
-                  : _buildPlaceholder(screenWidth),
+                  : _buildPlaceholder(widget.screenWidth),
             ],
           ),
         ),
-        item.userID != UserInfoConfig.uniqueID
+        widget.item.userID != UserInfoConfig.uniqueID
             ? Padding(
                 padding: const EdgeInsets.fromLTRB(65, 10, 10, 20),
                 child: Row(
@@ -179,14 +200,14 @@ class PostListItem extends StatelessWidget {
                           context,
                           "/chatDetailPage",
                           arguments: ChatDetailPageArguments(
-                            taUserName: item.userName,
-                            taUserAvatar: item.userAvatar,
-                            taUserID: item.userID ?? "",
+                            taUserName: widget.item.userName,
+                            taUserAvatar: widget.item.userAvatar,
+                            taUserID: widget.item.userID ?? "",
                           ),
                         );
                       },
                       child: Container(
-                        width: screenWidth * (2 / 3),
+                        width: widget.screenWidth * (2 / 3),
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         alignment: Alignment.centerLeft,
                         child: Text(

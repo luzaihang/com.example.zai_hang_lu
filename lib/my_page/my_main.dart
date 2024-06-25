@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
+import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';

@@ -2,7 +2,6 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 
 ///点赞帖子专用provider
 class UpvoteNotifier with ChangeNotifier {

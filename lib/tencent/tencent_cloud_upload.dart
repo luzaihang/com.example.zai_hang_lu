@@ -120,6 +120,30 @@ Future<bool?> userUpLoad(
   return null;
 }
 
+///单个人昵称上传,因昵称是可变的，没有服务器，所以只能上传之后下载再更改昵称展示
+Future<bool> personalNameUpload(
+  String userId,
+  String userName,
+) async {
+  TencentCloudUpLoad uploader = TencentCloudUpLoad();
+  String cosPath = "$userId/personal_info.txt";
+  Uint8List byte = Uint8List.fromList(utf8.encode(userName));
+
+  bool success = await uploader.uploadFile(
+    DefaultConfig.personalInfoBucket,
+    cosPath,
+    byteArr: byte,
+  );
+  if (success) {
+    Logger().i("txt 上传personal成功");
+    return true;
+  } else {
+    Logger().e("txt 上传personal失败");
+    return false;
+  }
+
+}
+
 ///聊天记录上传
 Future<void> chatUpload(
     String receivedByID, List<Map<String, dynamic>> listMap) async {

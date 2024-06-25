@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ci_dong/app_data/app_encryption_helper.dart';
+import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/user_info_from_json.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
@@ -61,9 +62,12 @@ class _SettingPageMainState extends State<SettingPageMain> {
       String decryptResult = EncryptionHelper.decrypt(result); // 解密
       List userinfoMaps = jsonDecode(decryptResult); //解码
 
+      String userId = '';
+
       for (int i = 0; i < userinfoMaps.length; i++) {
         UserInfoFromJson infoItem = UserInfoFromJson.fromJson(userinfoMaps[i]);
         if (infoItem.userName == UserInfoConfig.userName) {
+          userId = infoItem.uniqueID;
           UserInfoFromJson updatedInfoItem =
               infoItem.copyWith(userName: newName);
           userinfoMaps[i] = updatedInfoItem.toJson();
@@ -73,15 +77,22 @@ class _SettingPageMainState extends State<SettingPageMain> {
       Logger().d(userinfoMaps);
 
       if (mounted) {
+        if (mounted) showCustomSnackBar(context, "正在更新昵称...");
         bool? res = await userUpLoad(
           context,
           jsonEncode(userinfoMaps), //编码上传
           modified: true,
         );
         if (res == true) {
-          UserInfoConfig.userName = newName;
-          await AuthManager.setUserName(newName);
-          setState(() {});
+          bool? boo = await personalNameUpload(userId, newName);
+          if (boo == true) {
+            UserInfoConfig.userName = newName;
+            await AuthManager.setUserName(newName);
+          } else {
+            if (mounted) showCustomSnackBar(context, "昵称修改失败，稍候再试");
+          }
+        } else {
+          if (mounted) showCustomSnackBar(context, "昵称修改失败，稍候再试");
         }
       }
     }

@@ -19,15 +19,17 @@ class ModifiedNameDialog extends StatelessWidget {
           TextField(
             controller: _controller,
             decoration: const InputDecoration(
-              border: InputBorder.none, // 移除边框
-              isDense: true, // 减少内边距
-              contentPadding: EdgeInsets.zero, // 设置内边距为0
-              hintText: '请输入新昵称',
-              hintStyle: TextStyle(
-                fontSize: 13,
-                color: Colors.blueGrey,
-              )
-            ),
+                border: InputBorder.none,
+                // 移除边框
+                isDense: true,
+                // 减少内边距
+                contentPadding: EdgeInsets.zero,
+                // 设置内边距为0
+                hintText: '请输入新昵称',
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: Colors.blueGrey,
+                )),
           ),
           const Divider(
             color: Colors.blueGrey, // 分割线颜色

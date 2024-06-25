@@ -4,6 +4,7 @@ import 'package:ci_dong/default_config/app_system_chrome_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+import 'package:ci_dong/provider/personal_name_notifier.dart';
 import 'package:ci_dong/provider/personal_page_notifier.dart';
 import 'package:ci_dong/widget_element/post_item.dart';
 import 'package:flutter/material.dart';
@@ -163,13 +164,19 @@ class PersonalPageBodyState extends State<PersonalPageBody>
             children: [
               Row(
                 children: [
-                  const Text(
-                    "暗夜公爵",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Consumer<PersonalNameNotifier>(
+                    builder: (BuildContext context, PersonalNameNotifier value,
+                        Widget? child) {
+                      String name = value.getCachedName(widget.userId);
+                      return Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 10),
                   Image.asset(

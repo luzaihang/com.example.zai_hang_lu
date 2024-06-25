@@ -1,6 +1,7 @@
 import 'package:ci_dong/default_config/app_system_chrome_config.dart';
 import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
+import 'package:ci_dong/provider/personal_name_notifier.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatNotifier()),
         ChangeNotifierProvider(create: (_) => UpvoteNotifier()),
         ChangeNotifierProvider(create: (_) => MyPageNotifier()),
+        ChangeNotifierProvider(create: (_)=> PersonalNameNotifier()),
       ],
       child: MaterialApp(
         title: "次动",

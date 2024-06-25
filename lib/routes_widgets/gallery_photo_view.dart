@@ -39,8 +39,6 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
     return WillPopScope(
       onWillPop: () async {
         systemChromeColor(const Color(0xFFF2F3F5), Brightness.dark);
@@ -53,28 +51,20 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
             systemChromeColor(const Color(0xFFF2F3F5), Brightness.dark);
             Navigator.pop(context);
           },
-          child: PageView.builder(
-            controller: _pageController,
+          child: PhotoViewGallery.builder(
+            pageController: _pageController,
             itemCount: widget.imageUrls.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const CustomLoadingIndicator(),
-                    FadeInImage(
-                      placeholder: const AssetImage(
-                        "assets/transparent_background_icon.png",
-                      ),
-                      image: CachedNetworkImageProvider(
-                        widget.imageUrls[index],
-                        // maxWidth: 500,
-                      ),
-                      fadeInDuration: const Duration(milliseconds: 800),
-                      fit: BoxFit.cover,
-                    ),
-                  ],
+            loadingBuilder: (context, event) {
+              return CustomLoadingIndicator(event: event);
+            },
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: CachedNetworkImageProvider(
+                  widget.imageUrls[index],
                 ),
+                // heroAttributes: PhotoViewHeroAttributes(
+                //   tag: "post_item${widget.postId}",
+                // ),
               );
             },
           ),
@@ -113,22 +103,3 @@ class CustomLoadingIndicator extends StatelessWidget {
     );
   }
 }
-
-
-/*child: PhotoViewGallery.builder(
-            pageController: _pageController,
-            itemCount: widget.imageUrls.length,
-            loadingBuilder: (context, event) {
-              return CustomLoadingIndicator(event: event);
-            },
-            builder: (context, index) {
-              return PhotoViewGalleryPageOptions(
-                imageProvider: CachedNetworkImageProvider(
-                  widget.imageUrls[index],
-                ),
-                // heroAttributes: PhotoViewHeroAttributes(
-                //   tag: "post_item${widget.postId}",
-                // ),
-              );
-            },
-          ),*/
