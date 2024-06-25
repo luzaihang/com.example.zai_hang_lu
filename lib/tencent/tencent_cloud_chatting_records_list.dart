@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
@@ -38,7 +37,7 @@ class ChattingRecordsList {
           String decodedJsonString = utf8.decode(response.bodyBytes);
           if (decodedJsonString.trim().isNotEmpty) {
             List<dynamic> decodedMap = json.decode(decodedJsonString);
-            Logger().d(decodedMap);
+            //().d(decodedMap);
 
             Map<String, dynamic> data = {
               "senderName": "",
@@ -66,14 +65,12 @@ class ChattingRecordsList {
             }
           }
         } else {
-          Logger().e(
-              "Failed to fetch data from ${response.request?.url}: ${response.statusCode}");
         }
       }
 
       return decodedMaps;
     } catch (e) {
-      Logger().e("$e------------error");
+      //().e("$e------------error");
       return [];
     }
   }

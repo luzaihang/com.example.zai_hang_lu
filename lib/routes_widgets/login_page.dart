@@ -7,7 +7,6 @@ import 'package:ci_dong/factory_list/user_info_from_map.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
@@ -359,7 +358,6 @@ class LoginScreenState extends State<LoginScreen>
           Navigator.pushReplacementNamed(context, "/home");
         }
       } else {
-        Logger().e('没有匹配的用户');
         userId = RandomGenerator.getRandomCombination();
         bool res = await uploadAvatarAndName(userId, userName); //先设定默认头像，发送到个人信息bucket
 
@@ -380,7 +378,7 @@ class LoginScreenState extends State<LoginScreen>
         userinfoMaps.add(userInfoFromMap.toMap());
 
         String jsonString = jsonEncode(userinfoMaps); //编码为json,用于加密,准备上传
-        Logger().d(userinfoMaps);
+        //().d(userinfoMaps);
 
         if (mounted && res) {
           userUpLoad(context, jsonString);
@@ -393,7 +391,7 @@ class LoginScreenState extends State<LoginScreen>
 
       await AuthManager.login(userName, password, userId);
     } catch (e) {
-      Logger().e('登录失败：', error: e);
+      //().e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");
     } finally {
       Loading().hide();

@@ -4,7 +4,6 @@ import 'package:ci_dong/tencent/tencent_cloud_download.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
-import 'package:logger/logger.dart';
 
 class ChatNotifier with ChangeNotifier {
   Client client = ClientManager().client;
@@ -24,7 +23,6 @@ class ChatNotifier with ChangeNotifier {
       String? text = message is TextMessage ? message.text : '消息内容为空';
       messageText = text ?? "";
       if (text != null && text.isNotEmpty) notifyListeners();
-      Logger().e(isDetail);
 
       if (isDetail) return; //如果是聊天详情页面，则不走以下的逻辑。
 
@@ -46,7 +44,6 @@ class ChatNotifier with ChangeNotifier {
 
       List<Map<String, dynamic>> listMap =
           chatList.map((detail) => detail.toMap()).toList();
-      Logger().w("==================$chatList");
 
       chatUpload(senderUserid, listMap);
     };

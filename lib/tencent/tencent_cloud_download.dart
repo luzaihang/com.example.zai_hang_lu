@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/factory_list/personal_folder_from_map.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
 
 class TencentCloudTxtDownload {
-  static final Logger _logger = Logger();
 
   ///全部用户信息获取
   static Future<String> userInfoTxt() async {
@@ -17,11 +16,9 @@ class TencentCloudTxtDownload {
         final info = utf8.decode(response.bodyBytes).trim(); //解码Uint8List
         return info.isEmpty ? '' : info; //输出
       } else {
-        _logger.e("-----------无txt文件，即将创建");
         return '';
       }
     } catch (e) {
-      _logger.e("$e-----------txt异常2");
       return '';
     }
   }
@@ -45,7 +42,6 @@ class TencentCloudTxtDownload {
         return [];
       }
     } catch (e) {
-      _logger.e("$e----------chat-----------txt异常2");
       return [];
     }
   }
@@ -55,18 +51,38 @@ class TencentCloudTxtDownload {
     final url = '${DefaultConfig.personalInfoPrefix}/$id/personal_info.txt';
     try {
       final response = await http.get(Uri.parse(url));
-      _logger.d("=====----${response.bodyBytes}");
       if (response.statusCode == 200) {
         final name = utf8.decode(response.bodyBytes).trim();
-        _logger.d("昵称是$name");
         if (name.isNotEmpty) {
           return name;
         }
       }
     } catch (e) {
-      _logger.e("$e----------personalName-----------txt异常2");
       return "";
     }
     return "";
+  }
+
+  ///personal文件夹的txt文件，里面包含所有的文件夹信息详情，
+  ///得到这个，就等于得到了个人图册文件夹的所有信息
+  static Future<List<PersonalFolderFromMap>> personalFolderImages(
+      String id) async {
+    final url = '${DefaultConfig.personalInfoPrefix}/$id/folderList/folder.txt';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final result = utf8.decode(response.bodyBytes).trim();
+        List<dynamic> decodedList = jsonDecode(result);
+        List<Map<String, dynamic>> listMap =
+            List<Map<String, dynamic>>.from(decodedList);
+        List<PersonalFolderFromMap> listPersonalFolder =
+            listMap.map((map) => PersonalFolderFromMap.fromMap(map)).toList();
+        return listPersonalFolder;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
   }
 }

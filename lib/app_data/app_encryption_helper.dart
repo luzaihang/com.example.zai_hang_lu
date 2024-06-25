@@ -1,5 +1,4 @@
 import 'package:encrypt/encrypt.dart';
-import 'package:logger/logger.dart';
 
 class EncryptionHelper {
   static final Key key =
@@ -11,14 +10,12 @@ class EncryptionHelper {
   // 加密方法
   static String encrypt(String plainText) {
     final encrypted = _encrypter.encrypt(plainText, iv: iv);
-    Logger().i("secretKey=${encrypted.base64}");
     return encrypted.base64;
   }
 
   // 解密方法
   static String decrypt(String encryptedText) {
     final decrypted = _encrypter.decrypt64(encryptedText, iv: iv);
-    Logger().i(decrypted);
     return decrypted;
   }
 }

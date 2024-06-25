@@ -2,8 +2,10 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ci_dong/default_config/app_system_chrome_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/factory_list/personal_folder_from_map.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+import 'package:ci_dong/my_page/personal_page_dialogs.dart';
 import 'package:ci_dong/provider/personal_name_notifier.dart';
 import 'package:ci_dong/provider/personal_page_notifier.dart';
 import 'package:ci_dong/widget_element/post_item.dart';
@@ -62,6 +64,8 @@ class PersonalPageBodyState extends State<PersonalPageBody>
     _personalPageNotifier = context.read<PersonalPageNotifier>();
     _personalPageNotifier.getPostData(widget.userId);
     _personalPageNotifier.personalBanner(widget.userId);
+
+    _personalPageNotifier.personalFolder(widget.userId);
   }
 
   @override
@@ -69,6 +73,38 @@ class PersonalPageBodyState extends State<PersonalPageBody>
     _postScrollController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  late OverlayEntry _overlayEntry;
+
+  void _showPreview(BuildContext context) {
+    _overlayEntry = _createOverlayEntry(context);
+    Overlay.of(context).insert(_overlayEntry);
+  }
+
+  void _hidePreview() {
+    if (_overlayEntry.mounted) {
+      _overlayEntry.remove();
+    }
+  }
+
+  OverlayEntry _createOverlayEntry(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        top: 0.0,
+        left: 0.0,
+        right: 0.0,
+        bottom: 0.0,
+        child: Material(
+          color: Colors.black54,
+          child: Center(
+            child: Image.network(
+              'https://post-image-list-1322814250.cos.ap-shanghai.myqcloud.com/772LzC53y5%2F1719222132114_tempIMG_20240609_161829.jpg',
+            ), // 大图地址
+          ),
+        ),
+      ),
+    );
   }
 
   TextStyle _getTabTextStyle(BuildContext context, int index) {
@@ -269,50 +305,70 @@ class PersonalPageBodyState extends State<PersonalPageBody>
                         ),
                         const SizedBox(height: 10),
                         Expanded(
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: provider.personalBannerImages.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Container(
-                                width: 200,
-                                height: 200,
-                                margin: EdgeInsets.fromLTRB(
-                                  index == 0 ? 20 : 10,
-                                  0,
-                                  index ==
-                                          (provider
-                                                  .personalBannerImages.length -
-                                              1)
-                                      ? 20
-                                      : 0,
-                                  0,
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        "/galleryPhotoView",
-                                        arguments: GalleryPhotoViewArguments(
-                                          imageUrls:
-                                              provider.personalBannerImages,
-                                          initialIndex: index,
-                                          postId: "",
+                          child: provider.personalBannerImages.isNotEmpty
+                              ? ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount:
+                                      provider.personalBannerImages.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Container(
+                                      width: 200,
+                                      height: 200,
+                                      margin: EdgeInsets.fromLTRB(
+                                        index == 0 ? 20 : 10,
+                                        0,
+                                        index ==
+                                                (provider.personalBannerImages
+                                                        .length -
+                                                    1)
+                                            ? 20
+                                            : 0,
+                                        0,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              "/galleryPhotoView",
+                                              arguments:
+                                                  GalleryPhotoViewArguments(
+                                                imageUrls: provider
+                                                    .personalBannerImages,
+                                                initialIndex: index,
+                                                postId: "",
+                                              ),
+                                            );
+                                          },
+                                          child: CachedNetworkImage(
+                                            imageUrl: provider
+                                                .personalBannerImages[index],
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    child: CachedNetworkImage(
-                                      imageUrl:
-                                          provider.personalBannerImages[index],
-                                      fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  // height: 480,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF052D84),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Align(
+                                    child: Image.asset(
+                                      "assets/banner_not_img_icon.png",
+                                      width: 90,
+                                      height: 90,
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
                         ),
                       ],
                     );
@@ -327,9 +383,9 @@ class PersonalPageBodyState extends State<PersonalPageBody>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Text(
+                            const Text(
                               "TA的图册",
                               style: TextStyle(
                                 color: Color(0xFF052D84),
@@ -337,22 +393,45 @@ class PersonalPageBodyState extends State<PersonalPageBody>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              "（长按文件夹可预览）",
-                              style: TextStyle(
-                                color: Color(0xFF052D84),
-                                fontSize: 11,
+                            const Padding(
+                              padding: EdgeInsets.only(top: 2),
+                              child: Text(
+                                "（长按文件夹可预览）",
+                                style: TextStyle(
+                                  color: Color(0xFF052D84),
+                                  fontSize: 11,
+                                ),
                               ),
+                            ),
+                            Image.asset(
+                              "assets/question_mark_icon.png",
+                              width: 14,
+                              height: 14,
                             ),
                           ],
                         ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Image.asset(
-                            "assets/add_icon.png",
-                            width: 20,
-                            height: 20,
-                          ),
+                        Consumer<PersonalPageNotifier>(
+                          builder: (BuildContext context,
+                              PersonalPageNotifier value, Widget? child) {
+                            return GestureDetector(
+                              onTap: () async {
+                                PersonalFolderFromMap folderFromMap =
+                                    await showFolderAddDialog(context);
+                                if (folderFromMap.folderName.isNotEmpty) {
+                                  if (mounted) {
+                                    value.personalPageImageFile(
+                                        context, folderFromMap);
+                                  }
+                                }
+                                //().d(folderFromMap.toMap());
+                              },
+                              child: Image.asset(
+                                "assets/add_icon.png",
+                                width: 20,
+                                height: 20,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -376,9 +455,9 @@ class PersonalPageBodyState extends State<PersonalPageBody>
                           return Column(
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  // 添加点击事件的回调
-                                },
+                                onLongPress: () => _showPreview(context),
+                                onLongPressUp: _hidePreview,
+                                onTap: () => showActionDialog(context),
                                 child: Align(
                                   child: Image.asset(
                                     "assets/folder_icon.png",

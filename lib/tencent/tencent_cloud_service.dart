@@ -1,5 +1,4 @@
 import 'package:ci_dong/default_config/default_config.dart';
-import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 
@@ -24,7 +23,6 @@ class CosService {
   /// 初始化腾讯云cos
   void initCloud(String secretId, String secretKey) {
     cos.initWithPlainSecret(secretId, secretKey);
-    Logger().i("腾讯云cos初始化成功");
     _configureCosXmlService();
   }
 
@@ -46,6 +44,5 @@ class CosService {
     );
 
     cos.registerDefaultTransferManger(serviceConfig, transferConfig);
-    Logger().i("注册腾讯云COS服务成功");
   }
 }

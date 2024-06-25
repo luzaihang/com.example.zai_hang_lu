@@ -4,7 +4,6 @@ import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +65,7 @@ class NewEditPostState extends State<NewEditPost> {
         ),
       );
     } catch (e) {
-      Logger().e(e);
+      //().e(e);
       isSelected = false;
     }
 

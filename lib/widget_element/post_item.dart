@@ -7,7 +7,6 @@ import 'package:ci_dong/provider/post_page_notifier.dart';
 import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../app_data/format_date_time.dart';
@@ -57,7 +56,7 @@ class _PostListItemState extends State<PostListItem> {
                       builder: (BuildContext context, provider, Widget? child) {
                         final name =
                             provider.getCachedName(widget.item.userID ?? "");
-                        Logger().d("message==============$name");
+                        //().d("message==============$name");
                         return Text(
                           name,
                           style: const TextStyle(

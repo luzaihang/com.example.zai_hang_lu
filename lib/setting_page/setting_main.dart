@@ -11,7 +11,6 @@ import 'package:ci_dong/tencent/tencent_cloud_download.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 class SettingPageMain extends StatefulWidget {
@@ -74,7 +73,7 @@ class _SettingPageMainState extends State<SettingPageMain> {
           break;
         }
       }
-      Logger().d(userinfoMaps);
+      //().d(userinfoMaps);
 
       if (mounted) {
         if (mounted) showCustomSnackBar(context, "正在更新昵称...");

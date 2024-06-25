@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 
 class HttpConfig {
   /// get请求
@@ -11,7 +10,6 @@ class HttpConfig {
     if (response.statusCode == 200) {
       // 如果服务器返回 200 OK 的响应, 使用 utf8.decode() 函数转码, 防止中文乱码
       var responseData = json.decode(utf8.decode(response.bodyBytes));
-      Logger().i(response);
       return responseData;
     } else {
       throw Exception('Failed to load data');
@@ -34,7 +32,6 @@ class HttpConfig {
 
     if (response.statusCode == 200) {
       var responseData = json.decode(utf8.decode(response.bodyBytes));
-      Logger().i(responseData);
       return responseData;
     } else {
       throw Exception('Failed to send data');

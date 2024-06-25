@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 
 class RandomGenerator {
   static final Random _rnd = Random();
@@ -39,7 +38,7 @@ class RandomGenerator {
         return "";
       }
     } catch (e) {
-      Logger().e('Error: $e');
+      //().e('Error: $e');
       return "";
     }
   }

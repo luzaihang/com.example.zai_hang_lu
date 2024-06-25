@@ -6,7 +6,6 @@ import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:logger/logger.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import '../tencent/tencent_cloud_list_data.dart';
 
@@ -50,7 +49,7 @@ class MyPageNotifier with ChangeNotifier {
         ),
       );
     } catch (e) {
-      Logger().e(e);
+      //().e(e);
     }
 
     if (!context.mounted) return;

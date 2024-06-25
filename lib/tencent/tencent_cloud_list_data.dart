@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/my_page/banner_images_cache_data.dart';
-import 'package:logger/logger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
@@ -69,14 +68,11 @@ class TencentCloudListData {
             decodedMaps.add(postJson);
           }
         } else {
-          Logger().e(
-              "Failed to fetch data from ${response.request?.url}: ${response.statusCode}");
         }
       }
 
       return decodedMaps;
     } catch (e) {
-      Logger().e("$e------------error");
       return null;
     }
   }
@@ -136,7 +132,6 @@ Future<List<String>> bannerImgFun() async {
     BannerImageCache().saveBannerImgList(objectUrls);
     return objectUrls;
   } catch (e) {
-    Logger().e("$e------------error");
     return [];
   }
 }
