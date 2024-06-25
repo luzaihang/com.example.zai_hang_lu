@@ -56,7 +56,6 @@ class _PostListItemState extends State<PostListItem> {
                       builder: (BuildContext context, provider, Widget? child) {
                         final name =
                             provider.getCachedName(widget.item.userID ?? "");
-                        //().d("message==============$name");
                         return Text(
                           name,
                           style: const TextStyle(
@@ -86,7 +85,10 @@ class _PostListItemState extends State<PostListItem> {
                       PostDetailFormJson result =
                           upvoteNotifier.postUpvote(widget.item);
                       pageNotifier.updatePostUpvote(
-                          widget.item.postId ?? "", result);
+                        widget.item.postId ?? "",
+                        result,
+                        context,
+                      );
                     },
                     child: Row(
                       children: [
@@ -148,7 +150,6 @@ class _PostListItemState extends State<PostListItem> {
                               arguments: GalleryPhotoViewArguments(
                                 imageUrls: widget.item.postImages,
                                 initialIndex: 0,
-                                postId: widget.item.postId ?? "",
                               ),
                             );
                           },

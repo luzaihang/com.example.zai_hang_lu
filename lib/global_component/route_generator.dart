@@ -24,7 +24,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           return GalleryPhotoView(
             imageUrls: arguments.imageUrls,
             initialIndex: arguments.initialIndex,
-            postId: arguments.postId,
+            // postId: arguments.postId,
           );
         } else {
           return _errorRoute('No arguments provided for GalleryPhotoView');
@@ -69,12 +69,12 @@ Widget _errorRoute(String message) {
 class GalleryPhotoViewArguments {
   final List<String> imageUrls;
   final int initialIndex;
-  final String postId;
+  // final String postId;
 
   GalleryPhotoViewArguments({
     required this.imageUrls,
     required this.initialIndex,
-    required this.postId,
+    // required this.postId,
   });
 }
 

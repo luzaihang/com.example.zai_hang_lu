@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 ///点击文件夹时的弹窗
-void showActionDialog(BuildContext context) {
-  showDialog(
+Future<bool?> showActionDialog(BuildContext context) {
+  return showDialog(
     context: context,
     builder: (BuildContext context) {
       return Container(
@@ -55,23 +55,33 @@ void showActionDialog(BuildContext context) {
                   color: const Color(0xFF052D84).withOpacity(0.1),
                 ),
                 const SizedBox(height: 8),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text(
-                      "20次豆进入",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF052D84),
-                        fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context, true);
+                      },
+                      child: const Text(
+                        "20次豆进入",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF052D84),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    Text(
-                      "密码进入",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context, true);
+                      },
+                      child: const Text(
+                        "密码进入",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

@@ -219,7 +219,6 @@ Future<bool> personalFolderImageUpLoad(
 ///个人创建文件夹内的，txt上传
 Future<bool> personalFolderTxtUpLoad(
   List<Map> txtMap,
-  String folderId,
   String userId,
 ) async {
   TencentCloudUpLoad uploader = TencentCloudUpLoad();

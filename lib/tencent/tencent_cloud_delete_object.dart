@@ -1,5 +1,6 @@
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/main.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
 
 class TencentCloudDeleteObject {
@@ -13,10 +14,9 @@ class TencentCloudDeleteObject {
             region: DefaultConfig.region,
           );
 
-      //().i("--------------message");
     } catch (e) {
       // 失败后会抛异常 根据异常进行业务处理
-      //().e("删除有误---------$e");
+      appLogger.e("删除有误---------$e");
     }
   }
 }

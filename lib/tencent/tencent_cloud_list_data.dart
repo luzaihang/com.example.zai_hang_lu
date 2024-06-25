@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/main.dart';
 import 'package:ci_dong/my_page/banner_images_cache_data.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -73,6 +74,7 @@ class TencentCloudListData {
 
       return decodedMaps;
     } catch (e) {
+      appLogger.e(e);
       return null;
     }
   }
@@ -132,6 +134,7 @@ Future<List<String>> bannerImgFun() async {
     BannerImageCache().saveBannerImgList(objectUrls);
     return objectUrls;
   } catch (e) {
+    appLogger.e(e);
     return [];
   }
 }

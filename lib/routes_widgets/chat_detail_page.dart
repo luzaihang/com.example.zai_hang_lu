@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ci_dong/main.dart';
 import 'package:ci_dong/provider/chat_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
@@ -42,14 +43,12 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     _chatReadNotifier.messageText = ""; //进入页面时重定为空，避免其他人的聊天介入
     _chatReadNotifier.isDetail = true; //消息监听设置为聊天详情
     _loadChattingRecords(); // 加载聊天记录
-    //().d("----------${_chatReadNotifier.isDetail}");
   }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
     final chatWatchNotifier = context.watch<ChatNotifier>();
-    //().i(chatWatchNotifier.messageText);
     if (mounted && chatWatchNotifier.messageText.isNotEmpty) {
       await _addMessage(
         senderName: widget.taUserName,
@@ -70,7 +69,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
     _focusNode.dispose();
     _controller.dispose();
     _chatReadNotifier.isDetail = false; //取消聊天详情监听
-    //().d("----------${_chatReadNotifier.isDetail}");
     super.dispose();
   }
 
@@ -89,9 +87,9 @@ class ChatDetailPageState extends State<ChatDetailPage> {
             senderID: detail.senderID,
           );
         } catch (e, stackTrace) {
+          appLogger.e(e);
         }
       }
-    } else {
     }
   }
 
@@ -145,8 +143,6 @@ class ChatDetailPageState extends State<ChatDetailPage> {
         newMessages.map((detail) => detail.toMap()).toList();
 
     chatUpload(widget.taUserID, listMap);
-
-    //().i("上传聊天记录到云端: ${newMessages.length} 条消息");
   }
 
   Future<void> sendMessage(String text) async {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ci_dong/default_config/default_config.dart';
+import 'package:ci_dong/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -70,7 +71,7 @@ class ChattingRecordsList {
 
       return decodedMaps;
     } catch (e) {
-      //().e("$e------------error");
+      appLogger.e("$e------------error");
       return [];
     }
   }

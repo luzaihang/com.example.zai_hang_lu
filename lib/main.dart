@@ -7,8 +7,11 @@ import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+
+final appLogger = Logger();
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatNotifier()),
         ChangeNotifierProvider(create: (_) => UpvoteNotifier()),
         ChangeNotifierProvider(create: (_) => MyPageNotifier()),
-        ChangeNotifierProvider(create: (_)=> PersonalNameNotifier()),
+        ChangeNotifierProvider(create: (_) => PersonalNameNotifier()),
       ],
       child: MaterialApp(
         title: "次动",

@@ -1,4 +1,5 @@
 import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/main.dart';
 import 'package:leancloud_official_plugin/leancloud_plugin.dart';
 
 class ClientManager {
@@ -21,7 +22,7 @@ class ClientManager {
     try {
       await _client.open();
     } catch (e) {
-      //().e(e);
+      appLogger.e("initialize----------$e");
     }
   }
 

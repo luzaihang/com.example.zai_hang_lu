@@ -4,7 +4,7 @@ class PersonalFolderFromMap {
   String folderId;
   String fondNameList;
   String creationTime;
-  List<dynamic> images;
+  List<String> images;
   int folderIntegral;
 
   PersonalFolderFromMap({
@@ -25,7 +25,7 @@ class PersonalFolderFromMap {
       folderId: data['folderId'] as String,
       fondNameList: data['fondNameList'] as String,
       creationTime: data['creationTime'] as String,
-      images: data['images'] as List<dynamic>,
+      images: List<String>.from(data['images'] ?? []),
       folderIntegral: data['folderIntegral'] as int,
     );
   }

@@ -1,10 +1,12 @@
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/app_system_chrome_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/personal_folder_from_map.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/global_component/route_generator.dart';
+import 'package:ci_dong/my_page/personal_tab_bar.dart';
+import 'package:ci_dong/my_page/personal_top_section.dart';
 import 'package:ci_dong/my_page/personal_page_dialogs.dart';
 import 'package:ci_dong/provider/personal_name_notifier.dart';
 import 'package:ci_dong/provider/personal_page_notifier.dart';
@@ -47,25 +49,24 @@ class PersonalPageBodyState extends State<PersonalPageBody>
   late final ScrollController _postScrollController;
   late final TabController _tabController;
   late final String avatarUrl;
-  late final PersonalPageNotifier _personalPageNotifier;
+  late final PersonalPageNotifier _personalPageReadNotifier;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this)
       ..addListener(() {
-        _personalPageNotifier.setSelectedIndex(_tabController.index);
+        _personalPageReadNotifier.setSelectedIndex(_tabController.index);
       });
 
     _postScrollController = ScrollController();
 
     avatarUrl =
         "${DefaultConfig.personalInfoPrefix}/${widget.userId}/userAvatar.png";
-    _personalPageNotifier = context.read<PersonalPageNotifier>();
-    _personalPageNotifier.getPostData(widget.userId);
-    _personalPageNotifier.personalBanner(widget.userId);
-
-    _personalPageNotifier.personalFolder(widget.userId);
+    _personalPageReadNotifier = context.read<PersonalPageNotifier>();
+    _personalPageReadNotifier.getPostData(widget.userId);
+    _personalPageReadNotifier.personalBanner(widget.userId);
+    _personalPageReadNotifier.personalFolder(widget.userId);
   }
 
   @override
@@ -77,8 +78,8 @@ class PersonalPageBodyState extends State<PersonalPageBody>
 
   late OverlayEntry _overlayEntry;
 
-  void _showPreview(BuildContext context) {
-    _overlayEntry = _createOverlayEntry(context);
+  void _showPreview(BuildContext context, String url) {
+    _overlayEntry = _createOverlayEntry(context, url);
     Overlay.of(context).insert(_overlayEntry);
   }
 
@@ -88,7 +89,7 @@ class PersonalPageBodyState extends State<PersonalPageBody>
     }
   }
 
-  OverlayEntry _createOverlayEntry(BuildContext context) {
+  OverlayEntry _createOverlayEntry(BuildContext context, String url) {
     return OverlayEntry(
       builder: (context) => Positioned(
         top: 0.0,
@@ -98,21 +99,12 @@ class PersonalPageBodyState extends State<PersonalPageBody>
         child: Material(
           color: Colors.black54,
           child: Center(
-            child: Image.network(
-              'https://post-image-list-1322814250.cos.ap-shanghai.myqcloud.com/772LzC53y5%2F1719222132114_tempIMG_20240609_161829.jpg',
-            ), // 大图地址
+            child: CachedNetworkImage(
+              imageUrl: url,
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  TextStyle _getTabTextStyle(BuildContext context, int index) {
-    final selectedIndex = context.watch<PersonalPageNotifier>().selectedIndex;
-    return TextStyle(
-      fontSize: selectedIndex == index ? 18 : 16,
-      fontWeight: selectedIndex == index ? FontWeight.bold : FontWeight.normal,
-      color: const Color(0xFF052D84),
     );
   }
 
@@ -122,431 +114,347 @@ class PersonalPageBodyState extends State<PersonalPageBody>
       children: [
         SizedBox(
           height: 200.0,
-          child: _buildTopSection(),
+          child: PersonalTopSection(
+            avatarUrl: avatarUrl,
+            userId: widget.userId,
+            onBackButtonPressed: () => Navigator.pop(context),
+            onChatButtonPressed: () {
+              String name = context
+                  .read<PersonalNameNotifier>()
+                  .getCachedName(widget.userId);
+              Navigator.pushNamed(
+                context,
+                "/chatDetailPage",
+                arguments: ChatDetailPageArguments(
+                  taUserName: name,
+                  taUserAvatar: avatarUrl,
+                  taUserID: widget.userId,
+                ),
+              );
+            },
+          ),
         ),
-        _buildTabBar(),
+        PersonalTabBar(tabController: _tabController),
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: _buildTabViews(),
+            children: [
+              _buildGalleryTab(),
+              _buildPostTab(),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTopSection() {
-    return Stack(
+  Widget _buildGalleryTab() {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: 1,
+      itemBuilder: (BuildContext context, int index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 15),
+            _buildBannerSection(context),
+            _buildAlbumSection(context),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBannerSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      height: 230,
+      child: Consumer<PersonalPageNotifier>(
+        builder: (BuildContext context, provider, Widget? child) {
+          return _buildBannerImages(provider);
+        },
+      ),
+    );
+  }
+
+  Widget _buildBannerImages(PersonalPageNotifier provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Positioned.fill(
-          child: Image.network(
-            "$avatarUrl?${DateTime.now().millisecondsSinceEpoch}",
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
+          child: Text(
+            "TA的墙照",
+            style: TextStyle(
+              color: Color(0xFF052D84),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: provider.personalBannerImages.isNotEmpty
+              ? ListView.builder(
+                  padding: EdgeInsets.zero,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: provider.personalBannerImages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return _buildBannerImageItem(
+                        provider.personalBannerImages, index);
+                  },
+                )
+              : _buildEmptyBannerPlaceholder(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBannerImageItem(List<String> images, int index) {
+    return Container(
+      width: 200,
+      height: 200,
+      margin: EdgeInsets.fromLTRB(
+          index == 0 ? 20 : 10, 0, index == (images.length - 1) ? 20 : 0, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              "/galleryPhotoView",
+              arguments: GalleryPhotoViewArguments(
+                imageUrls: images,
+                initialIndex: index,
+              ),
+            );
+          },
+          child: CachedNetworkImage(
+            imageUrl: images[index],
             fit: BoxFit.cover,
           ),
         ),
-        Positioned.fill(
-          child: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
-              child: Container(
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 40,
-          left: 20,
-          child: _buildAvatarAndInfo(),
-        ),
-        Positioned(
-          top: 45,
-          right: 20,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Text(
-              "返回",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildAvatarAndInfo() {
-    return SizedBox(
-      height: 80,
-      child: Row(
+  Widget _buildEmptyBannerPlaceholder() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF052D84),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Align(
+        child: Image.asset(
+          "assets/banner_not_img_icon.png",
+          width: 90,
+          height: 90,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlbumSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipOval(
-            child: SizedBox(
-              width: 80,
-              height: 80,
-              child: Image.network(
-                "$avatarUrl?${DateTime.now().millisecondsSinceEpoch}",
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Consumer<PersonalNameNotifier>(
-                    builder: (BuildContext context, PersonalNameNotifier value,
-                        Widget? child) {
-                      String name = value.getCachedName(widget.userId);
-                      return Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  Image.asset(
-                    "assets/redact_icon.png",
-                    width: 20,
-                    height: 20,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 3),
-              const SizedBox(
-                width: 200,
-                child: Text(
-                  "点击设置个性签名吧～",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    height: 1.5,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
+          _buildAlbumHeader(context),
+          const SizedBox(height: 10),
+          _buildAlbumGrid(),
         ],
       ),
     );
   }
 
-  Widget _buildTabBar() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+  Widget _buildAlbumHeader(BuildContext context) {
+    return Consumer<PersonalPageNotifier>(
+      builder: (context, provider, _) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  "TA的图册",
+                  style: TextStyle(
+                    color: Color(0xFF052D84),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    "（长按文件夹可预览）",
+                    style: TextStyle(
+                      color: Color(0xFF052D84),
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+                Image.asset(
+                  "assets/question_mark_icon.png",
+                  width: 14,
+                  height: 14,
+                ),
+              ],
+            ),
+            GestureDetector(
+              onTap: () async {
+                PersonalFolderFromMap folderFromMap =
+                    await showFolderAddDialog(context);
+                if (folderFromMap.folderName.isNotEmpty) {
+                  if (mounted) {
+                    _personalPageReadNotifier.personalPageImageFile(
+                        context, folderFromMap);
+                  }
+                }
+              },
+              child: Image.asset(
+                "assets/add_icon.png",
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAlbumGrid() {
+    return SingleChildScrollView(
+      child: Consumer<PersonalPageNotifier>(
+        builder: (context, provider, _) {
+          return provider.folderList.isNotEmpty
+              ? GridView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                  ),
+                  itemCount: provider.folderList.length,
+                  itemBuilder: (context, index) {
+                    return _buildFolderItem(provider.folderList[index]);
+                  },
+                )
+              : _buildEmptyFolderPlaceholder();
+        },
+      ),
+    );
+  }
+
+  Widget _buildFolderItem(PersonalFolderFromMap item) {
+    return Column(
       children: [
-        SizedBox(
-          width: 150,
-          height: 40,
-          child: TabBar(
-            controller: _tabController,
-            indicator: CustomTabIndicator(),
-            tabs: [
-              Consumer<PersonalPageNotifier>(
-                builder: (context, provider, _) => Text(
-                  "图集",
-                  style: _getTabTextStyle(context, 0),
-                ),
-              ),
-              Consumer<PersonalPageNotifier>(
-                builder: (context, provider, _) => Text(
-                  "帖子",
-                  style: _getTabTextStyle(context, 1),
-                ),
-              ),
-            ],
+        GestureDetector(
+          onLongPress: () => _showPreview(context, item.images.first),
+          onLongPressUp: _hidePreview,
+          onTap: item.fondNameList.contains(UserInfoConfig.uniqueID)
+              ? () {
+                  if (context.mounted) {
+                    Navigator.pushNamed(
+                      context,
+                      "/galleryPhotoView",
+                      arguments: GalleryPhotoViewArguments(
+                        imageUrls: item.images,
+                        initialIndex: 0,
+                      ),
+                    );
+                  }
+                }
+              : () async {
+                  bool? res = await showActionDialog(context);
+                  if (res == true) {
+                    if (context.mounted) {
+                      context
+                          .read<PersonalPageNotifier>()
+                          .updateFolderPermission(
+                            item,
+                            widget.userId,
+                          );
+                    }
+                    if (context.mounted) {
+                      Navigator.pushNamed(
+                        context,
+                        "/galleryPhotoView",
+                        arguments: GalleryPhotoViewArguments(
+                          imageUrls: item.images,
+                          initialIndex: 0,
+                        ),
+                      );
+                    }
+                  }
+                },
+          child: Align(
+            child: Image.asset(
+              "assets/folder_icon.png",
+              width: 90,
+              height: 90,
+            ),
+          ),
+        ),
+        Text(
+          item.folderName,
+          style: const TextStyle(
+            color: Color(0xFF052D84),
+            fontSize: 12,
           ),
         ),
       ],
     );
   }
 
-  List<Widget> _buildTabViews() {
-    return [
-      ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: 1,
-        itemBuilder: (BuildContext context, int index) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 15),
-              Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                height: 230,
-                child: Consumer<PersonalPageNotifier>(
-                  builder: (BuildContext context, provider, Widget? child) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 20),
-                          child: Text(
-                            "TA的墙照",
-                            style: TextStyle(
-                              color: Color(0xFF052D84),
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Expanded(
-                          child: provider.personalBannerImages.isNotEmpty
-                              ? ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount:
-                                      provider.personalBannerImages.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Container(
-                                      width: 200,
-                                      height: 200,
-                                      margin: EdgeInsets.fromLTRB(
-                                        index == 0 ? 20 : 10,
-                                        0,
-                                        index ==
-                                                (provider.personalBannerImages
-                                                        .length -
-                                                    1)
-                                            ? 20
-                                            : 0,
-                                        0,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pushNamed(
-                                              context,
-                                              "/galleryPhotoView",
-                                              arguments:
-                                                  GalleryPhotoViewArguments(
-                                                imageUrls: provider
-                                                    .personalBannerImages,
-                                                initialIndex: index,
-                                                postId: "",
-                                              ),
-                                            );
-                                          },
-                                          child: CachedNetworkImage(
-                                            imageUrl: provider
-                                                .personalBannerImages[index],
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  // height: 480,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF052D84),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: Align(
-                                    child: Image.asset(
-                                      "assets/banner_not_img_icon.png",
-                                      width: 90,
-                                      height: 90,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 20, right: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Text(
-                              "TA的图册",
-                              style: TextStyle(
-                                color: Color(0xFF052D84),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(top: 2),
-                              child: Text(
-                                "（长按文件夹可预览）",
-                                style: TextStyle(
-                                  color: Color(0xFF052D84),
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                            Image.asset(
-                              "assets/question_mark_icon.png",
-                              width: 14,
-                              height: 14,
-                            ),
-                          ],
-                        ),
-                        Consumer<PersonalPageNotifier>(
-                          builder: (BuildContext context,
-                              PersonalPageNotifier value, Widget? child) {
-                            return GestureDetector(
-                              onTap: () async {
-                                PersonalFolderFromMap folderFromMap =
-                                    await showFolderAddDialog(context);
-                                if (folderFromMap.folderName.isNotEmpty) {
-                                  if (mounted) {
-                                    value.personalPageImageFile(
-                                        context, folderFromMap);
-                                  }
-                                }
-                                //().d(folderFromMap.toMap());
-                              },
-                              child: Image.asset(
-                                "assets/add_icon.png",
-                                width: 20,
-                                height: 20,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    SingleChildScrollView(
-                      child: GridView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        // 非常重要，确保GridView的高度根据其内容来确定
-                        physics: const NeverScrollableScrollPhysics(),
-                        // 禁用GridView的滚动，使用SingleChildScrollView的滚动
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3, // 每行3个图标
-                          crossAxisSpacing: 10.0, // 设置列间距
-                          mainAxisSpacing: 10.0, // 设置行间距
-                        ),
-                        itemCount: 10,
-                        // 测试数据，根据实际数量更改
-                        itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              GestureDetector(
-                                onLongPress: () => _showPreview(context),
-                                onLongPressUp: _hidePreview,
-                                onTap: () => showActionDialog(context),
-                                child: Align(
-                                  child: Image.asset(
-                                    "assets/folder_icon.png",
-                                    width: 90,
-                                    height: 90,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                "文件夹命名$index",
-                                style: const TextStyle(
-                                  color: Color(0xFF052D84),
-                                  fontSize: 12,
-                                  // fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+  Widget _buildEmptyFolderPlaceholder() {
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        color: const Color(0xFF052D84),
+        borderRadius: BorderRadius.circular(14),
       ),
-
-      ///帖子tab
-      Consumer<PersonalPageNotifier>(
-        builder: (BuildContext context, provider, Widget? child) {
-          double screenWidth = MediaQuery.of(context).size.width;
-          return provider.personalPostList.isNotEmpty
-              ? ListView.builder(
-                  padding: EdgeInsets.zero,
-                  controller: _postScrollController,
-                  itemCount: provider.personalPostList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    PostDetailFormJson item = provider.personalPostList[index];
-                    return PostListItem(
-                      item: item,
-                      screenWidth: screenWidth,
-                      index: index,
-                    );
-                  },
-                )
-              : Center(
-                  child: Image.asset(
-                    "assets/not_post_icon.png",
-                    width: 80,
-                    height: 80,
-                    color: const Color(0xFF052D84),
-                  ),
-                );
-        },
-      )
-    ];
+      child: Align(
+        child: Image.asset(
+          "assets/banner_not_img_icon.png",
+          width: 90,
+          height: 90,
+        ),
+      ),
+    );
   }
-}
 
-class CustomTabIndicator extends Decoration {
-  @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) =>
-      _CustomPainter(this, onChanged!);
-}
-
-class _CustomPainter extends BoxPainter {
-  static const double _indicatorHeight = 3.0;
-  static const double _indicatorWidth = 20.0;
-  static const Color _indicatorColor = Color(0xFF052D84);
-  static const Radius _indicatorRadius = Radius.circular(4.0);
-
-  _CustomPainter(this.decoration, VoidCallback onChanged) : super(onChanged);
-
-  final CustomTabIndicator decoration;
-
-  @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    final Paint paint = Paint()..color = _indicatorColor;
-    final double startX =
-        offset.dx + (configuration.size!.width - _indicatorWidth) / 2;
-    final double endX =
-        offset.dx + (configuration.size!.width + _indicatorWidth) / 2;
-    final double bottomY = configuration.size!.height - _indicatorHeight;
-    final double topY = configuration.size!.height;
-    canvas.drawRRect(
-      RRect.fromLTRBR(startX, bottomY, endX, topY, _indicatorRadius),
-      paint,
+  Widget _buildPostTab() {
+    return Consumer<PersonalPageNotifier>(
+      builder: (BuildContext context, provider, Widget? child) {
+        double screenWidth = MediaQuery.of(context).size.width;
+        return provider.personalPostList.isNotEmpty
+            ? ListView.builder(
+                padding: EdgeInsets.zero,
+                controller: _postScrollController,
+                itemCount: provider.personalPostList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  PostDetailFormJson item = provider.personalPostList[index];
+                  return PostListItem(
+                    item: item,
+                    screenWidth: screenWidth,
+                    index: index,
+                  );
+                },
+              )
+            : Center(
+                child: Image.asset(
+                  "assets/not_post_icon.png",
+                  width: 80,
+                  height: 80,
+                  color: const Color(0xFF052D84),
+                ),
+              );
+      },
     );
   }
 }

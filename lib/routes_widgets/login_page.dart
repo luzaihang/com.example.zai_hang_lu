@@ -5,6 +5,7 @@ import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/user_info_from_json.dart';
 import 'package:ci_dong/factory_list/user_info_from_map.dart';
 import 'package:ci_dong/global_component/auth_manager.dart';
+import 'package:ci_dong/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ci_dong/app_data/random_generator.dart';
@@ -108,6 +109,7 @@ class LoginScreenState extends State<LoginScreen>
       await personalNameUpload(userId, userName);
       return true;
     } catch (e) {
+      appLogger.e("uploadAvatarAndName--------$e");
       return false;
     }
   }
@@ -391,7 +393,7 @@ class LoginScreenState extends State<LoginScreen>
 
       await AuthManager.login(userName, password, userId);
     } catch (e) {
-      //().e('登录失败：', error: e);
+      appLogger.e('登录失败：', error: e);
       if (mounted) showCustomSnackBar(context, "登录失败，请稍后重试");
     } finally {
       Loading().hide();

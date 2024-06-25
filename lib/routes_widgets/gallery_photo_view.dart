@@ -7,14 +7,14 @@ import 'package:photo_view/photo_view_gallery.dart';
 class GalleryPhotoView extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
-  final String postId;
+  // final String postId;
 
   ///查看大图
   const GalleryPhotoView({
     super.key,
     required this.imageUrls,
     required this.initialIndex,
-    required this.postId,
+    // required this.postId,
   });
 
   @override
@@ -55,7 +55,13 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
             pageController: _pageController,
             itemCount: widget.imageUrls.length,
             loadingBuilder: (context, event) {
-              return CustomLoadingIndicator(event: event);
+              return const Center(
+                child: SpinKitFoldingCube(
+                  color: Colors.white,
+                  size: 20.0,
+                  duration: Duration(milliseconds: 800),
+                ),
+              );
             },
             builder: (context, index) {
               return PhotoViewGalleryPageOptions(
@@ -69,36 +75,6 @@ class GalleryPhotoViewState extends State<GalleryPhotoView> {
             },
           ),
         ),
-      ),
-    );
-  }
-}
-
-class CustomLoadingIndicator extends StatelessWidget {
-  final dynamic event;
-
-  const CustomLoadingIndicator({Key? key, this.event}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    if (event == null) {
-      return const Center(
-        child: SpinKitFoldingCube(
-          color: Colors.white,
-          size: 20.0,
-          duration: Duration(milliseconds: 800),
-        ),
-      );
-    }
-
-    final value = event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 1);
-    return Center(
-      child: CircularProgressIndicator(
-        value: value,
-        color: Colors.white.withOpacity(0.7),
-        backgroundColor: Colors.blueGrey,
-        strokeWidth: 2.5,
-        strokeCap: StrokeCap.round,
       ),
     );
   }

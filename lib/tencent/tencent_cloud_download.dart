@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/personal_folder_from_map.dart';
+import 'package:ci_dong/main.dart';
 import 'package:http/http.dart' as http;
 import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/chat_detail_from_map.dart';
@@ -19,6 +20,7 @@ class TencentCloudTxtDownload {
         return '';
       }
     } catch (e) {
+      appLogger.e(e);
       return '';
     }
   }
@@ -42,6 +44,7 @@ class TencentCloudTxtDownload {
         return [];
       }
     } catch (e) {
+      appLogger.e(e);
       return [];
     }
   }
@@ -58,6 +61,7 @@ class TencentCloudTxtDownload {
         }
       }
     } catch (e) {
+      appLogger.e(e);
       return "";
     }
     return "";
@@ -75,6 +79,7 @@ class TencentCloudTxtDownload {
         List<dynamic> decodedList = jsonDecode(result);
         List<Map<String, dynamic>> listMap =
             List<Map<String, dynamic>>.from(decodedList);
+        appLogger.d(listMap);
         List<PersonalFolderFromMap> listPersonalFolder =
             listMap.map((map) => PersonalFolderFromMap.fromMap(map)).toList();
         return listPersonalFolder;
@@ -82,6 +87,7 @@ class TencentCloudTxtDownload {
         return [];
       }
     } catch (e) {
+      appLogger.e(e);
       return [];
     }
   }

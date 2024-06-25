@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:ci_dong/main.dart';
 import 'package:http/http.dart' as http;
 
 class RandomGenerator {
@@ -38,7 +39,7 @@ class RandomGenerator {
         return "";
       }
     } catch (e) {
-      //().e('Error: $e');
+      appLogger.e("fetchNetworkTime----------$e");
       return "";
     }
   }

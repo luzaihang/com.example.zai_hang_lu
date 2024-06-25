@@ -4,11 +4,13 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
 import 'package:ci_dong/factory_list/post_detail_from_map.dart';
 import 'package:ci_dong/global_component/loading_page.dart';
+import 'package:ci_dong/provider/personal_page_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
 import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class PostPageNotifier with ChangeNotifier {
@@ -172,7 +174,7 @@ class PostPageNotifier with ChangeNotifier {
   }
 
   ///更新帖子点赞状态
-  void updatePostUpvote(String id, PostDetailFormJson item) {
+  void updatePostUpvote(String id, PostDetailFormJson item,BuildContext context) {
     int indexAllTab = allTabList.indexWhere((post) => post.postId == id);
     int indexUserTab = userTabList.indexWhere((post) => post.postId == id);
 
@@ -185,5 +187,7 @@ class PostPageNotifier with ChangeNotifier {
     }
 
     notifyListeners();
+
+    context.read<PersonalPageNotifier>().updatePostUpvote(id, item);
   }
 }

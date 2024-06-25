@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:ci_dong/app_data/compress_image.dart';
 import 'package:ci_dong/app_data/show_custom_snackBar.dart';
 import 'package:ci_dong/app_data/user_info_config.dart';
+import 'package:ci_dong/main.dart';
 import 'package:ci_dong/tencent/tencent_cloud_delete_object.dart';
 import 'package:ci_dong/tencent/tencent_cloud_upload.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class MyPageNotifier with ChangeNotifier {
         ),
       );
     } catch (e) {
-      //().e(e);
+      appLogger.e(e);
     }
 
     if (!context.mounted) return;

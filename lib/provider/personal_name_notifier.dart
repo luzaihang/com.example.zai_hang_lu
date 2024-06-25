@@ -15,6 +15,6 @@ class PersonalNameNotifier with ChangeNotifier {
   }
 
   String getCachedName(String userId) {
-    return _userNames[userId] ?? '次动 app';
+    return _userNames[userId] ?? '次动';
   }
 }

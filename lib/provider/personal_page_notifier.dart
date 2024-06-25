@@ -6,6 +6,7 @@ import 'package:ci_dong/app_data/user_info_config.dart';
 import 'package:ci_dong/default_config/default_config.dart';
 import 'package:ci_dong/factory_list/personal_folder_from_map.dart';
 import 'package:ci_dong/factory_list/post_detail_from_json.dart';
+import 'package:ci_dong/main.dart';
 import 'package:ci_dong/tencent/tencent_cloud_download.dart';
 import 'package:ci_dong/tencent/tencent_cloud_list_data.dart';
 import 'package:ci_dong/tencent/tencent_cloud_service.dart';
@@ -58,6 +59,17 @@ class PersonalPageNotifier with ChangeNotifier {
     notifyListeners();
   }
 
+  ///更新帖子点赞状态
+  void updatePostUpvote(String id, PostDetailFormJson item) {
+    int indexAllTab = personalPostList.indexWhere((post) => post.postId == id);
+
+    if (indexAllTab != -1) {
+      personalPostList[indexAllTab] = item;
+    }
+
+    notifyListeners();
+  }
+
   ///用户banner images
   Future<void> personalBanner(String userId) async {
     try {
@@ -78,9 +90,11 @@ class PersonalPageNotifier with ChangeNotifier {
       personalBannerImages = objectUrls;
       notifyListeners();
     } catch (e) {
+      appLogger.e("personalBanner----------$e");
     }
   }
 
+  ///图片文件夹列表
   List<PersonalFolderFromMap> folderList = [];
 
   ///获取个人全部文件夹数据
@@ -115,11 +129,10 @@ class PersonalPageNotifier with ChangeNotifier {
         ),
       );
     } catch (e) {
-      //().e(e);
+      appLogger.e("personalPageImageFile--------$e");
     }
 
     _imageAssets = resultList;
-    //().d(_imageAssets.length);
 
     if (_imageAssets.isEmpty) {
       return;
@@ -148,12 +161,54 @@ class PersonalPageNotifier with ChangeNotifier {
         List<Map> listOfMaps =
             folderList.map((folder) => folder.toMap()).toList();
 
-        personalFolderTxtUpLoad(
-            listOfMaps, getMap.folderId, UserInfoConfig.uniqueID);
-        //().d(getMap.toMap());
+        bool res =
+            await personalFolderTxtUpLoad(listOfMaps, UserInfoConfig.uniqueID);
+        if (res) {
+          //上传结束后更新列表
+          personalFolder(UserInfoConfig.uniqueID);
+        }
       }
     }
 
     notifyListeners();
+  }
+
+  ///当支付、或者输入密码，即获得了文件夹当权限，可随时查看
+  Future<void> updateFolderPermission(
+    PersonalFolderFromMap folder,
+    String userId, //上传到创建人的txt
+  ) async {
+    String nameList = folder.fondNameList;
+    String getNameList = nameList += "|${UserInfoConfig.uniqueID}";
+    PersonalFolderFromMap newMap = folder.copyWith(fondNameList: getNameList);
+
+    for (int i = 0; i < folderList.length; i++) {
+      if (folderList[i].folderId == newMap.folderId) {
+        // 找到对应的id，进行更新
+        folderList[i] = newMap;
+        notifyListeners();
+        break;
+      }
+    }
+
+    List<Map> listOfMaps = folderList.map((folder) => folder.toMap()).toList();
+
+    bool res = await personalFolderTxtUpLoad(listOfMaps, userId);
+
+    // 定义一个最多重试次数
+    const int maxRetries = 10;
+    int attempt = 1;
+
+    while (!res && attempt <= maxRetries) {
+      appLogger.e('Upload failed, attempt $attempt');
+      res = await personalFolderTxtUpLoad(listOfMaps, UserInfoConfig.uniqueID);
+      attempt++;
+    }
+
+    if (!res) {
+      appLogger.e('Upload failed after $maxRetries attempts.');
+    } else {
+      appLogger.d('Upload succeeded.');
+    }
   }
 }

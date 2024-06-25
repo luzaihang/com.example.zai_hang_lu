@@ -195,6 +195,7 @@ class _MyMainState extends State<MyMain> {
                           Color(0xFF052D84)),
                       backgroundColor: const Color(0xFF052D84).withOpacity(0.2),
                       strokeWidth: 4.0,
+                      strokeCap: StrokeCap.round,
                     ),
                     Text(
                       "${provider.bannerImgList.length}/5",
