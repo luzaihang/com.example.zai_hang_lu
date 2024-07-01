@@ -4,6 +4,7 @@ import 'package:ci_dong/global_component/route_generator.dart';
 import 'package:ci_dong/provider/my_page_notifier.dart';
 import 'package:ci_dong/provider/upvote_notifier.dart';
 import 'package:ci_dong/provider/visibility_notifier.dart';
+import 'package:ci_dong/routes_widgets/vip_page.dart';
 import 'package:ci_dong/widget_element/avatar_widget_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -62,6 +63,7 @@ class _MyMainState extends State<MyMain> {
             _buildBannerList(screenWidth),
             _buildSettingImage(context),
             _buildChatHistoryTile(context),
+            _buildVipTile(context),
             const SizedBox(height: 20),
             _buildAlbumTile(context),
             const SizedBox(height: 3),
@@ -273,6 +275,54 @@ class _MyMainState extends State<MyMain> {
                 const SizedBox(height: 2),
                 Text(
                   "快快畅所欲言吧～",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: const Color(0xFF052D84).withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVipTile(BuildContext context) {
+    return GestureDetector(
+      // onTap: () => Navigator.pushNamed(context, '/vipPage'),
+      onTap: ()=> showVipModal(context),
+      child: Container(
+        height: 80,
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+        child: Row(
+          children: [
+            Image.asset(
+              "assets/chat_icon.png",
+              height: 26,
+            ),
+            const SizedBox(width: 20),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "尊贵VIP",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF052D84),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "开启个人文件夹功能～",
                   style: TextStyle(
                     fontSize: 13,
                     color: const Color(0xFF052D84).withOpacity(0.5),

@@ -1,5 +1,6 @@
 import 'package:ci_dong/my_page/personal_page.dart';
 import 'package:ci_dong/routes_widgets/app_launch_page.dart';
+import 'package:ci_dong/routes_widgets/vip_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ci_dong/routes_widgets/chat_detail_page.dart';
@@ -47,6 +48,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         } else {
           return _errorRoute('No arguments provided for PersonalPage');
         }
+      case "/vipPage":
+        return const VipPage();
       default:
         return _errorRoute('No route defined for ${settings.name}');
     }
